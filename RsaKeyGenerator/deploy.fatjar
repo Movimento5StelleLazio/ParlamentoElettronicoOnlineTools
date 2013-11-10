@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Sun Sep 15 09:31:10 CEST 2013
+onejar.license.required=true
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=false
+jarname=rsaKeyGen.jar
+manifest.mergeall=true
+manifest.mainclass=com.dicarlo.MainWindow
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=
+includes=
