@@ -399,7 +399,10 @@ public class MainWindow extends JFrame {
 								labelWaiting.setText(rb.getString("msg.creationwaiting"));
 								//Thread.sleep(500);
 								repaint();
+								
 								SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+								byte[]b=random.generateSeed(4096);
+								random.setSeed(b);
 								KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
 						        keyGen.initialize(4096, random);
 						        KeyPair keyPair=keyGen.genKeyPair();
