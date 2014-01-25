@@ -31,7 +31,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
+//import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
@@ -85,7 +85,7 @@ public class MainWindow extends JFrame {
 	private JSeparator separatorPane;
 	private JLabel labelWaiting;
 	private JLabel labelExport;
-	private JMenuItem jMenuItem0;
+	//private JMenuItem jMenuItem0;
 	private JMenu menuAbout;
 	private JMenuBar menuBar;
 	private static final String PREFERRED_LOOK_AND_FEEL = "javax.swing.plaf.metal.MetalLookAndFeel";

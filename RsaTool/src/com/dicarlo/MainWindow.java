@@ -7,37 +7,39 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -59,11 +61,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
+
 
 import org.apache.log4j.Logger;
 import org.dyno.visual.swing.layouts.Bilateral;
@@ -73,12 +71,11 @@ import org.dyno.visual.swing.layouts.Leading;
 import org.jdamico.pskcbuilder.dataobjects.AlgorithmParameters;
 import org.jdamico.pskcbuilder.dataobjects.Data;
 import org.jdamico.pskcbuilder.dataobjects.DeviceInfo;
-import org.jdamico.pskcbuilder.dataobjects.KeyContainer;
 import org.jdamico.pskcbuilder.dataobjects.KeyPackage;
 import org.jdamico.pskcbuilder.dataobjects.ResponseFormat;
 import org.jdamico.pskcbuilder.dataobjects.Secret;
 import org.jdamico.pskcbuilder.utils.Constants;
-import org.xml.sax.SAXException;
+
 
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
@@ -1280,6 +1277,7 @@ public class MainWindow extends JFrame {
 			BufferedReader in=null;
 			FileOutputStream outputWriter=null;
 			InputStream inputReader = null;	
+			CipherOutputStream cos=null;
 
 	        try{
 	          outputWriter = new FileOutputStream(srcFileName+dateFormatted+".xml");
@@ -1348,15 +1346,6 @@ public class MainWindow extends JFrame {
 			  progressBar.setValue(100);
 			  labelProgress.setText(rb.getString("msg.formattingkeys")+"100%");
 		      repaint();
-	        
-
-		  
-		  
-		  
-		  
-		  
-		  
-		  
 		  
 		  progressBar.setMaximum(0);
 		  progressBar.setMaximum(100);
@@ -1380,34 +1369,60 @@ public class MainWindow extends JFrame {
 		  //System.out.println("destFileName ----- "+destFileName);	
 		  
 			Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-			cipher.init(Cipher.ENCRYPT_MODE, publicKey);		    
+			
+			cipher.init(Cipher.ENCRYPT_MODE, publicKey);	
+			
+			SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+			byte[]b=random.generateSeed(128);
+			random.setSeed(b);
+			KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+	        keyGen.init(128, random);
+	        SecretKey secretAesKey = keyGen.generateKey();
+
+	        byte[]aesKey=secretAesKey.getEncoded();
+
+			
+	        byte[] iv = new byte[16];
+	        SecureRandom.getInstance("SHA1PRNG").nextBytes(iv); 
+			
+			
+			
             counter=0;
             progressValue=0;
             prevProgressValue=0;
             
-		    //byte[] buf = new byte[100];
-            byte[] buf = new byte[100];
-		    int bufl;
-		    outputWriter = new FileOutputStream(srcFileName+dateFormatted+".xml.ciphered");
+		    outputWriter = new FileOutputStream(srcFileName+dateFormatted+".xml.ciphered.bin");
 		    inputReader = new FileInputStream(srcFileName+dateFormatted+".xml");
-		    while ( (bufl = inputReader.read(buf)) != -1){
-		      counter+=bufl;
-		      byte[] cipherText = null;
-		      cipherText = cipher.doFinal(copyBytes(buf,bufl));
-		      
-		      outputWriter.write(cipherText);
-		      outputWriter.flush();
-		      progressValue=(int)((counter*100)/fileLen);
-		      if(progressValue!=prevProgressValue){
-		        progressBar.setValue(progressValue);
-		        labelProgress.setText(rb.getString("msg.ciphering")+" "+progressValue+ "%");
-		        prevProgressValue=progressValue;		        
-		        //System.out.println(prevProgressValue+"%");
-		        repaint();
-		      }
-
-		    }
+		    byte[] cipherText = null;
+		    cipherText = cipher.doFinal(aesKey);
+		    outputWriter.write(cipherText);
+		    outputWriter.flush();	
+		    
+		    outputWriter.write(END_OF_KEY.getBytes("UTF-8"));
 		    outputWriter.flush();
+		    
+		    cipherText = null;
+		    cipherText = cipher.doFinal(iv);
+		    outputWriter.write(cipherText);
+		    outputWriter.flush();
+		    
+		    
+		    
+		    
+		    //outputWriter.write(iv);
+		    //outputWriter.flush();		    
+		    outputWriter.write(END_OF_KEY.getBytes("UTF-8"));
+		    outputWriter.flush();
+		    
+		    
+		    
+		    cipher = Cipher.getInstance("AES");
+		    
+		    	        
+	        AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
+
+	        encryptAES(secretAesKey, paramSpec, inputReader, outputWriter,fileLen);
+
 		    outputWriter.close();
 		    inputReader.close();
 		    outputWriter=null;
@@ -1419,7 +1434,7 @@ public class MainWindow extends JFrame {
 			  JOptionPane.showMessageDialog(parent,
 						rb.getString("msg.cipherok"), rb.getString("title.ok") ,
 						JOptionPane.INFORMATION_MESSAGE);
-              new File(srcFileName+".xml").delete();
+              
 		  }catch (Exception e){
 		    e.printStackTrace();
 		    logger.debug("Error: file("+srcFileName+")",e);
@@ -1429,6 +1444,8 @@ public class MainWindow extends JFrame {
 		  }
 		  finally{
 		    try{
+		    	if(cos!=null)
+		    		cos.close();
 		    	if(in!=null)
 		        	  in.close();
 		          if(fr!=null)
@@ -1453,7 +1470,7 @@ public class MainWindow extends JFrame {
 	        menuFile.setEnabled(true);
 	        menuAbout.setEnabled(true);
 	        menuLanguage.setEnabled(true);
-
+	        new File(srcFileName+dateFormatted+".xml").delete();
 			
 		  }
 		}
@@ -1464,6 +1481,9 @@ public class MainWindow extends JFrame {
 				@Override public void run () {
 				  String srcFileName = textFileInD.getText();
 				  String destFileName = textFileOutD.getText();
+				  
+				  //String destFile = textFileOutD.getText()+".bin";
+				  
 				  progressBar.setVisible(true);
 				  progressBar.setMaximum(0);
 				  progressBar.setMaximum(100);
@@ -1481,125 +1501,89 @@ public class MainWindow extends JFrame {
 		          menuAbout.setEnabled(false);
 		          menuLanguage.setEnabled(false);
 				  repaint();
-				  
-				  LinkedBlockingQueue<String> semaphore = new LinkedBlockingQueue<String>();
-				  long fileLen=new File(srcFileName).length();
-				  int numberThreads=(int)(fileLen/512);
+
 				  OutputStream outputWriter = null;
-				  InputStream inputReader = null;	
-				  //System.out.println("srcFileName ----- "+srcFileName);	
-				  //System.out.println("destFileName ----- "+destFileName);	
+				  InputStream inputReader = null;
+
+				  byte[] arrayByte=new byte[0];
+				  byte[] arrayByte1=new byte[0];
 				  try{
-					int index=0;
-		            int counter=0;
-		            int progressValue=0;
-		            int prevProgressValue=0;
-		            int maxThread=0;
 
-		            List<Object> objList = Collections.synchronizedList(new ArrayList<Object>());
-		            List<byte[]> byteCipheredList = Collections.synchronizedList(new ArrayList<byte[]>());
-		            Cipher[] cipherArray = new Cipher[51];
-		            for(int i=0;i<51;i++){
-						Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-						cipher.init(Cipher.DECRYPT_MODE, privateKey);	
-						cipherArray[i]=cipher;
-		            }
-		            
-		            
-		            if(numberThreads<50){
-		            	maxThread=numberThreads;
-		            }
-		            else{
-		            	maxThread=50;
-		            }
-		            
-				    byte[] buf = new byte[512];
-				    int bufl;
+					outputWriter = new FileOutputStream(destFileName);
+				    inputReader = new FileInputStream(srcFileName);	
 				    
-				    outputWriter = new FileOutputStream(destFileName);
-				    inputReader = new FileInputStream(srcFileName);				    
-		            while ( (bufl = inputReader.read(buf)) != -1){
-		            	counter+=bufl;
-		            	byteCipheredList.add(null);
-		            	objList.add((byteCipheredList.size()-1)+".");
-		            	
-		            	ChunkDecoder chunkDecoder = new ChunkDecoder();
-		            	chunkDecoder.setByteCipheredList(byteCipheredList);
-		            	chunkDecoder.setObjList(objList);
-		            	//chunkDecoder.setPrivateKey(privateKey);
-		            	chunkDecoder.setSemaphore(semaphore);		            	
-		            	chunkDecoder.setCipher(cipherArray[byteCipheredList.size()-1]);
-		            	chunkDecoder.setIndex(byteCipheredList.size()-1);
-		            	chunkDecoder.setBuf(copyBytes(buf,bufl));
-
-		            	
-		            	
-		            	chunkDecoder.start();
-		            	//System.out.println(index);
-		            	buf = new byte[512];
-		            	index++;
-		            	if(index>maxThread){
-		            		
-		            		semaphore.take();
-		 		            	for(int i=0;i<byteCipheredList.size();i++){
-		 		            		byte[]decipherText=byteCipheredList.get(i);
-		 		            		
-		 						    outputWriter.write(decipherText);
-		 						    outputWriter.flush();
-
-		 		            	}
-		 					      progressValue=(int)((counter*100)/fileLen);
-		 					      if(progressValue!=prevProgressValue){
-		 					        progressBar.setValue(progressValue);
-		 					        labelProgress.setText(rb.getString("msg.deciphering")+" "+progressValue+ "%");
-		 					        prevProgressValue=progressValue;		        
-		 					        //System.out.println(prevProgressValue+"%");
-		 					        repaint();
-		 					      }
-		 					     byteCipheredList.clear();
-				            	  index=0;
-		 		            
-		            		
-		            		
-			            }
-		            }
-		            
-            		while(byteCipheredList.size()>0){
-            		if(objList.size()==0){
- 		            	for(int i=0;i<byteCipheredList.size();i++){
- 		            		byte[]decipherText=byteCipheredList.get(i);
- 		            		
- 						    outputWriter.write(decipherText);
- 						    outputWriter.flush();
-
- 		            	}
- 					     byteCipheredList.clear();
- 		            }
-            		else{
-            			Thread.sleep(200);
-            		}
-            		}
-				      progressValue=(int)((counter*100)/fileLen);
-				      if(progressValue!=prevProgressValue){
-				        progressBar.setValue(progressValue);
-				        labelProgress.setText(rb.getString("msg.deciphering")+" "+progressValue+ "%");
-				        prevProgressValue=progressValue;		        
-				        //System.out.println(prevProgressValue+"%");
-				        repaint();
-				      }
+				    boolean loop=true;
+				    int b;
+				    while ( (b = inputReader.read()) != -1&&loop){
+				    	arrayByte=appendByteArray(arrayByte,(byte)b);
+				    	loop=!checkSeq(arrayByte);
+				    	if(!loop)
+				    		break;
+				    }
 				    
-				    outputWriter.flush();
-				    outputWriter.close();
-				    inputReader.close();
-				    outputWriter=null;
-				    inputReader=null;
+
+				    int keylen=arrayByte.length-seq.length;
+				    byte[]aesKeyEncoded=new byte[keylen];
+                    for(int i=0;i<aesKeyEncoded.length;i++){
+                    	aesKeyEncoded[i]=arrayByte[i];
+                    }
+                    
+                    
+					Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+					cipher.init(Cipher.DECRYPT_MODE, privateKey);	
+					byte[]aesKey=cipher.doFinal(aesKeyEncoded);
 					
-				    
 					
+					
+					SecretKey secretAesKey = new SecretKeySpec(aesKey, 0, aesKey.length, "AES");
+
+					
+					loop=true;
+				    while ( (b = inputReader.read()) != -1&&loop){
+				    	arrayByte1=appendByteArray(arrayByte1,(byte)b);
+				    	loop=!checkSeq(arrayByte1);
+				    	if(!loop)
+				    		break;
+				    }
+				    
+
+				    keylen=arrayByte1.length-seq.length;
+				    byte[]ivEncoded=new byte[keylen];
+                    for(int i=0;i<aesKeyEncoded.length;i++){
+                    	ivEncoded[i]=arrayByte1[i];
+                    }
+					
+	
+					byte[]iv=cipher.doFinal(ivEncoded);
+                    
+					/*
+			        byte[] iv = new byte[16];
+
+	                for(int i=0;i<16;i++){
+	                   iv[i]=arrayByte[i+keylen];
+	                }
+			        */
+
+			        
+			        AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
+			        long fileLen=new File(srcFileName).length()-arrayByte.length-arrayByte1.length;
+			        decryptAES(secretAesKey, paramSpec, inputReader, outputWriter,fileLen);
+
+
+					 outputWriter.close();
+					 inputReader.close();
+					 //bos.close();
+					 outputWriter=null;
+					 inputReader=null;
+						
+					    
+						
 					JOptionPane.showMessageDialog(parent,
-							rb.getString("msg.decipherok"), rb.getString("title.ok") ,
-							JOptionPane.INFORMATION_MESSAGE);
-					
+								rb.getString("msg.decipherok"), rb.getString("title.ok") ,
+								JOptionPane.INFORMATION_MESSAGE);
+
+				  
+				  
 					
 				  }catch (Exception e){
 				    e.printStackTrace();
@@ -1609,6 +1593,8 @@ public class MainWindow extends JFrame {
 				  }
 				  finally{
 				    try{			
+					  //if (bos != null)
+					  //	bos.close();			
 				      if (outputWriter != null)
 				        outputWriter.close();			
 				      if (inputReader != null)
@@ -1632,9 +1618,84 @@ public class MainWindow extends JFrame {
 
 					
 				  }
+				  
 				}
+				
 			  }.start();
 	}
+	
+	
+	private synchronized void encryptAES(SecretKey key, AlgorithmParameterSpec paramSpec, InputStream in, OutputStream out,long fileLen)
+			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+			InvalidAlgorithmParameterException, IOException {
+		Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		c.init(Cipher.ENCRYPT_MODE, key, paramSpec);
+		CipherOutputStream cos = null;
+		try{
+		  cos = new CipherOutputStream(out, c);
+		  int count = 0;
+		  byte[] buffer = new byte[1024];
+		  long counter=0;
+		  int progressValue=0;
+		  int prevProgressValue=0;
+		  while ((count = in.read(buffer)) >= 0) {
+		    counter=counter+count;
+		    cos.write(buffer, 0, count);
+	        progressValue=(int)((counter*100)/fileLen);
+	        if(progressValue!=prevProgressValue){
+	          progressBar.setValue(progressValue);
+	          labelProgress.setText(rb.getString("msg.ciphering")+" "+progressValue+ "%");
+	          prevProgressValue=progressValue;		        
+	          repaint();
+	        }
+		  }
+		  cos.flush();
+		}
+		finally{
+			if(cos!=null)
+				cos.close();
+		}
+		
+	}
+
+
+	private synchronized void decryptAES(SecretKey key, AlgorithmParameterSpec paramSpec, InputStream in, OutputStream out,long fileLen)
+			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+			InvalidAlgorithmParameterException, IOException {
+		Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		c.init(Cipher.DECRYPT_MODE, key, paramSpec);
+		CipherOutputStream cos = null;
+		try{
+		  cos = new CipherOutputStream(out, c);
+		  int count = 0;
+		  byte[] buffer = new byte[1024];
+		  long counter=0;
+		  int progressValue=0;
+		  int prevProgressValue=0;
+		  while ((count = in.read(buffer)) >= 0) {
+			counter=counter+count;
+			cos.write(buffer, 0, count);
+		      progressValue=(int)((counter*100)/fileLen);
+		      if(progressValue!=prevProgressValue){
+		        progressBar.setValue(progressValue);
+		        labelProgress.setText(rb.getString("msg.deciphering")+" "+progressValue+ "%");
+		        prevProgressValue=progressValue;		        
+		        repaint();
+		      }
+
+		  }
+		  cos.flush();
+		}
+		finally{
+			if(cos!=null)
+				cos.close();
+		}
+		
+	}
+
+	
+	
+	
 	
 	private byte[] keyGetByteCiphered(String value){
 		try {
@@ -1767,21 +1828,6 @@ public class MainWindow extends JFrame {
 		return sb.toString();
 	}
     
-	private synchronized byte[] copyBytes(byte[] arr, int length)
-	{
-		byte[] newArr = null;
-		if (arr.length == length)
-			newArr = arr;
-		else
-		{
-			newArr = new byte[length];
-			for (int i = 0; i < length; i++)
-			{
-				newArr[i] = (byte) arr[i];
-			}
-		}
-		return newArr;
-	}
 	
 	/**
 	 * Main entry of the class. Note: This class is only created so that you can
@@ -1789,6 +1835,12 @@ public class MainWindow extends JFrame {
 	 * the designer. You can modify it as you like.
 	 */
 	public static void main(String[] args) {
+		try{
+			seq=END_OF_KEY.getBytes("UTF-8");
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 		installLnF();
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -1803,70 +1855,35 @@ public class MainWindow extends JFrame {
 			}
 		});
 	}
+	public static String END_OF_KEY="=,uytnnnnnnnnnneereee,c------";
+	public static byte[] seq=null;
+		
+	public byte[] appendByteArray(byte[]array,byte b){
+		byte [] c= new byte[array.length+1];
+		for(int i=0;i<array.length;i++){ 
+			c[i]=array[i];
+		}
+		c[array.length]=b;
+		return c;
+	}
+	
+	public boolean checkSeq(byte[] data) {
+		boolean found = true;
+		if (seq.length < data.length && data.length > 0) {
+		  int indexData=data.length-seq.length;
+		  for (int i = 0; i < seq.length; i++) {
+				if (seq[i] != data[indexData]) {
+					found = false;
+					break;
+				}
+				indexData++;
+		  }
+		}
+		else{
+			found=false;
+		}
+		return found;
+	}
 
 }
 
-class ChunkDecoder extends Thread{
-	Cipher cipher = null;
-	List<byte[]> byteCipheredList=null;
-	List<Object> objList=null;
-	Integer index;
-	//PrivateKey privateKey = null;
-	LinkedBlockingQueue<String> semaphore=null;
-    byte[] buf = new byte[512];
-    int bufl;
-
-	public void setObjList(List<Object> objList){
-		this.objList=objList;
-	}
-	public void setByteCipheredList(List<byte[]> byteCipheredList){
-		this.byteCipheredList=byteCipheredList;
-		
-	}
-	public void setIndex(Integer index){
-		this.index=index;
-	}
-	
-	public void setCipher(Cipher cipher){
-		this.cipher=cipher;
-	}
-	/*
-	public void setPrivateKey(PrivateKey privateKey){
-		//this.privateKey=privateKey;
-		
-		try {
-			cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-			cipher.init(Cipher.DECRYPT_MODE, privateKey);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	*/
-	public void setSemaphore(LinkedBlockingQueue<String> semaphore){
-		this.semaphore=semaphore;
-	}
-	public void setBuf(byte[] buf){
-		this.buf=buf;
-	}
-
-	
-	@Override 
-	public void run () {
-		try {
-			//cipher.init(Cipher.DECRYPT_MODE, privateKey);
-		    byteCipheredList.set(index,cipher.doFinal(buf));
-		    
-		    
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		finally{
-			objList.remove(index+".");
-			if(objList.size()==0){
-				semaphore.add("green");
-			}
-		}
-	}
-	
-}
