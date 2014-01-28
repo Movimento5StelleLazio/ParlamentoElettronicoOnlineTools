@@ -401,10 +401,10 @@ public class MainWindow extends JFrame {
 								repaint();
 								
 								SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-								byte[]b=random.generateSeed(4096);
+								byte[]b=random.generateSeed(RSA_KEY_LENGTH);
 								random.setSeed(b);
 								KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-						        keyGen.initialize(4096, random);
+						        keyGen.initialize(RSA_KEY_LENGTH, random);
 						        KeyPair keyPair=keyGen.genKeyPair();
 						        publicKey = keyPair.getPublic().getEncoded();
 						        privateKey = keyPair.getPrivate().getEncoded();
@@ -658,6 +658,7 @@ public class MainWindow extends JFrame {
 		repaint();
 		parent=this;
 	}
+	private static final int RSA_KEY_LENGTH=4096;
 	
 	/**
 	 * Main entry of the class. Note: This class is only created so that you can

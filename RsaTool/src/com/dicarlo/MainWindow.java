@@ -1373,10 +1373,10 @@ public class MainWindow extends JFrame {
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);	
 			
 			SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-			byte[]b=random.generateSeed(128);
+			byte[]b=random.generateSeed(AES_KEY_LENGTH);
 			random.setSeed(b);
 			KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-	        keyGen.init(128, random);
+	        keyGen.init(AES_KEY_LENGTH, random);
 	        SecretKey secretAesKey = keyGen.generateKey();
 
 	        byte[]aesKey=secretAesKey.getEncoded();
@@ -1827,7 +1827,7 @@ public class MainWindow extends JFrame {
 		
 		return sb.toString();
 	}
-    
+	private static final int AES_KEY_LENGTH=128;
 	
 	/**
 	 * Main entry of the class. Note: This class is only created so that you can
