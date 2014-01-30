@@ -251,10 +251,10 @@ public class MainWindow extends JFrame {
 								fis = new FileInputStream(file);
 								publicKeyBytes = new byte[(int)file.length()];
 								fis.read(publicKeyBytes);
-							    publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(publicKeyBytes));
+							    publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.decode(publicKeyBytes)));
 							    fis.close();
 							    fis=null;
-							    base64PublicKey=Base64.encode(publicKeyBytes);
+							    base64PublicKey=new String(publicKeyBytes);
 							  }
 							  catch(Exception e){
 								e.printStackTrace();
@@ -466,13 +466,17 @@ public class MainWindow extends JFrame {
 									halfkey2 = new byte[(int)new File(filePK2).length()];
 									fis1.read(halfkey1);
 									fis2.read(halfkey2);
+									byte[] b1=Base64.decode(halfkey1);
+									byte[] b2=Base64.decode(halfkey2);
+									
 							        privateKeyBytes = new byte[halfkey1.length+halfkey2.length];
-								    for(int i=0;i<halfkey1.length;i++){
-								    	privateKeyBytes[i]=halfkey1[i];
+								    for(int i=0;i<b1.length;i++){
+								    	privateKeyBytes[i]=b1[i];
 								    }
-								    for(int i=0;i<halfkey2.length;i++){
-								    	privateKeyBytes[i+halfkey1.length]=halfkey2[i];
+								    for(int i=0;i<b2.length;i++){
+								    	privateKeyBytes[i+b1.length]=b2[i];
 								    }
+								    
 								    privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
 								    fis1.close();
 								    fis2.close();
@@ -615,6 +619,17 @@ public class MainWindow extends JFrame {
 									halfkey2 = new byte[(int)new File(filePK2).length()];
 									fis1.read(halfkey1);
 									fis2.read(halfkey2);
+									byte[] b1=Base64.decode(halfkey1);
+									byte[] b2=Base64.decode(halfkey2);
+									
+							        privateKeyBytes = new byte[halfkey1.length+halfkey2.length];
+								    for(int i=0;i<b1.length;i++){
+								    	privateKeyBytes[i]=b1[i];
+								    }
+								    for(int i=0;i<b2.length;i++){
+								    	privateKeyBytes[i+b1.length]=b2[i];
+								    }
+                                    /*
 							        privateKeyBytes = new byte[halfkey1.length+halfkey2.length];
 								    for(int i=0;i<halfkey1.length;i++){
 								    	privateKeyBytes[i]=halfkey1[i];
@@ -622,6 +637,7 @@ public class MainWindow extends JFrame {
 								    for(int i=0;i<halfkey2.length;i++){
 								    	privateKeyBytes[i+halfkey1.length]=halfkey2[i];
 								    }
+								    */
 								    privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
 								    fis1.close();
 								    fis2.close();

@@ -15,11 +15,12 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
+//import java.security.SecureRandom;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 import javax.crypto.Cipher;
 import javax.imageio.ImageIO;
@@ -191,7 +192,7 @@ public class MainWindow extends JFrame {
 				          try {
 				        	fos =  new FileOutputStream(fileToSave.getAbsolutePath());
 				            output = new BufferedOutputStream(fos);
-				            output.write(publicKey);
+				            output.write(Base64.encode(publicKey).getBytes("UTF-8"));
 				            output.flush();
 				            output.close();
 				            fos.close();
@@ -258,7 +259,7 @@ public class MainWindow extends JFrame {
 				          try {
 				        	fos =  new FileOutputStream(fileToSave.getAbsolutePath());
 				            output = new BufferedOutputStream(fos);
-				            output.write(halfkey2);
+				            output.write(Base64.encode(halfkey2).getBytes("UTF-8"));
 				            output.flush();
 				            output.close();
 				            fos.close();
@@ -328,7 +329,7 @@ public class MainWindow extends JFrame {
 				          try {
 				        	fos =  new FileOutputStream(fileToSave.getAbsolutePath());
 				            output = new BufferedOutputStream(fos);
-				            output.write(halfkey1);
+				            output.write(Base64.encode(halfkey1).getBytes("UTF-8"));
 				            output.flush();
 				            output.close();
 				            fos.close();
@@ -399,9 +400,13 @@ public class MainWindow extends JFrame {
 								labelWaiting.setText(rb.getString("msg.creationwaiting"));
 								//Thread.sleep(500);
 								repaint();
-								
+								/*
 								SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
 								byte[]b=random.generateSeed(RSA_KEY_LENGTH);
+								random.setSeed(b);
+								*/
+								BlumBlumShub random = new BlumBlumShub(4096);
+								byte b[] = random.randBytes(1024*1024);
 								random.setSeed(b);
 								KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
 						        keyGen.initialize(RSA_KEY_LENGTH, random);
