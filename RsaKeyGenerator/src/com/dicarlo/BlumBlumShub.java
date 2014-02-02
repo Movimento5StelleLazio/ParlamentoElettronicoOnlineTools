@@ -27,6 +27,10 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+import com.adamtaft.eb.EventBusService;
 
 public class BlumBlumShub extends SecureRandom
 {
@@ -41,7 +45,9 @@ public class BlumBlumShub extends SecureRandom
     public int key_bitlen;
     public boolean improved;
     public BigInteger n, x;
-
+	ResourceBundle rb = ResourceBundle.getBundle("MyResources",
+			Locale.getDefault());
+    MainWindow mainWindow=null;
 
     public void gen_blumint()
     {
@@ -116,7 +122,8 @@ public class BlumBlumShub extends SecureRandom
 				Math.log(2.0) ).intValue();
 
 		int byt=0, bit=0, b=0, i;
-
+        int perc=0;
+		int prevperc=-1;
 		for (;;)
 		    {
 			/* x[n+1] = x[n]^2 (mod blumint) */
@@ -135,6 +142,14 @@ public class BlumBlumShub extends SecureRandom
 				    {
 					alist.write(b);
 					byt++;
+					perc=(int)(byt*100)/nbytes;
+					if(perc!=prevperc){
+					  //mainWindow.updateCreateKeyLabel(perc);
+					  EventBusService.publish(new Integer(perc));
+					  prevperc=perc;
+					}
+					
+					
 					b=0;
 					bit=0;
 				    }

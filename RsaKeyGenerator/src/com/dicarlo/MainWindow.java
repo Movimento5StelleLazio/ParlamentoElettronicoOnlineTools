@@ -20,6 +20,9 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Locale;
 import java.util.ResourceBundle;
+
+import com.adamtaft.eb.EventBusService;
+import com.adamtaft.eb.EventHandler;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 import javax.crypto.Cipher;
@@ -379,7 +382,22 @@ public class MainWindow extends JFrame {
 		}
 		return labelWait;
 	}
-
+    /*
+	public static synchronized void updateCreateKeyLabel(int percentage){
+		labelWaiting.setText(rb.getString("msg.creationwaiting")+" "+percentage+"%");
+		repaint();
+	}
+	*/
+	@EventHandler
+	public void receiveMessage(Integer percentage) {
+		if(percentage==0){
+		  labelWaiting.setText(rb.getString("msg.generatingkey"));
+		}
+		else{
+		  labelWaiting.setText(rb.getString("msg.generating")+" "+percentage+"%");
+		}
+		repaint();
+	}
 	private JButton getButtonCreate() {
 		if (buttonCreate == null) {
 			buttonCreate = new JButton();
@@ -389,7 +407,6 @@ public class MainWindow extends JFrame {
 			buttonCreate.setHorizontalAlignment(SwingConstants.CENTER);
 			buttonCreate.addActionListener((new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
-					
 					new Thread() {
 					    @Override public void run () {
 							try{
@@ -397,7 +414,7 @@ public class MainWindow extends JFrame {
 								buttonCreate.setEnabled(false);
 								buttonClose.setEnabled(false);
 								labelWaiting.setVisible(true);
-								labelWaiting.setText(rb.getString("msg.creationwaiting"));
+								labelWaiting.setText(rb.getString("msg.initializationkey"));
 								//Thread.sleep(500);
 								repaint();
 								/*
@@ -406,8 +423,14 @@ public class MainWindow extends JFrame {
 								random.setSeed(b);
 								*/
 								BlumBlumShub random = new BlumBlumShub(4096);
-								byte b[] = random.randBytes(1024*1024);
+								// return 1 GIGA of bytes?
+								//byte b[] = random.randBytes(1024*1024);
+								// return 131072 bytes I think it can be enough
+								byte b[] = random.randBytes(128*1024);
 								random.setSeed(b);
+								
+								labelWaiting.setText(rb.getString("msg.creationwaiting"));
+								
 								KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
 						        keyGen.initialize(RSA_KEY_LENGTH, random);
 						        KeyPair keyPair=keyGen.genKeyPair();
@@ -661,7 +684,11 @@ public class MainWindow extends JFrame {
 		labelWaiting.setVisible(false);
 		labelExport.setVisible(false);
 		repaint();
+		
 		parent=this;
+	}
+	public void subscribeMessageListener(){
+		EventBusService.subscribe(this);
 	}
 	private static final int RSA_KEY_LENGTH=4096;
 	
@@ -682,6 +709,7 @@ public class MainWindow extends JFrame {
 				frame.setLocationRelativeTo(null);
 				frame.setVisible(true);
 				frame.setIcon();
+				frame.subscribeMessageListener();
 			}
 		});
 	}
