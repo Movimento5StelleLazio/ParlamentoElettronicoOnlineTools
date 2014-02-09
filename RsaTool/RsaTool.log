@@ -1,0 +1,4 @@
+[09 feb 2014 20:32:59,452] ERROR [Thread-4] (MainWindow.java:encrypt:1578) - Error: element(2) file(C:\Users\Marco\Documents\keyvalue.csv) serial(2600215704919) duplicate
+[09 feb 2014 20:32:59,468] ERROR [Thread-4] (MainWindow.java:encrypt:1578) - Error: element(3) file(C:\Users\Marco\Documents\keyvalue.csv) serial(2600215704919) duplicate
+[09 feb 2014 20:32:59,468] ERROR [Thread-4] (MainWindow.java:encrypt:1578) - Error: element(4) file(C:\Users\Marco\Documents\keyvalue.csv) serial(2600215704919) duplicate
+[09 feb 2014 20:32:59,468] ERROR [Thread-4] (MainWindow.java:encrypt:1578) - Error: element(5) file(C:\Users\Marco\Documents\keyvalue.csv) serial(2600215704919) duplicate
