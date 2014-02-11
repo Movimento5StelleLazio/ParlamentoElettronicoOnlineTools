@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pskc:KeyContainer Version="" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:pskc="urn:ietf:params:xml:ns:keyprov:pskc" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:ietf:params:xml:ns:keyprov:pskc pskc.xsd ">
+  <pskc:KeyPackage/>
+</pskc:KeyContainer>
