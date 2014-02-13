@@ -12,6 +12,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -46,10 +47,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
-
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -60,7 +61,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
@@ -76,7 +76,13 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
 import org.dyno.visual.swing.layouts.Bilateral;
@@ -155,6 +161,8 @@ public class MainWindow extends JFrame {
 	private JProgressBar progressBar;
 
 	private boolean encryptMode = true;
+	private boolean testMode = false;
+
 	private boolean statusFileIn = false;
 	private boolean statusFileOut = false;
 	private boolean statusPublicKey = false;
@@ -177,6 +185,7 @@ public class MainWindow extends JFrame {
 	private JLabel labelStatusFileIn;
 	// private JLabel labelStatusFileOut;
 	private JLabel labelStatusPublicKey;
+	private JCheckBox checkBoxTest;
 	// END COMPONENT FOR ENCRYPTION
 
 	// START COMPONENT FOR DECRYPTION
@@ -202,7 +211,7 @@ public class MainWindow extends JFrame {
 	private JButton buttonFileInT;
 	private JLabel labelFileInT;
 	// END COMPONENT FOR TEST
-	
+
 	private JButton buttonExecute;
 	private JLabel labelPrivateKey2;
 	private JTextField textPrivateKey2;
@@ -210,6 +219,7 @@ public class MainWindow extends JFrame {
 	private JLabel labelStatusPrivateKey2;
 	private JLabel labelWait;
 	private JLabel labelProgress;
+
 	public MainWindow() {
 		initComponents();
 	}
@@ -229,6 +239,14 @@ public class MainWindow extends JFrame {
 		setSize(608, 324);
 	}
 
+	private JCheckBox getCheckBoxTest() {
+		if (checkBoxTest == null) {
+			checkBoxTest = new JCheckBox();
+			checkBoxTest.setText(rb.getString("title.testBefore"));
+			checkBoxTest.setSelected(true);
+		}
+		return checkBoxTest;
+	}
 
 	// START COMPONENT FOR ENCRYPTION
 	private JLabel getLabelPublicKey() {
@@ -459,15 +477,28 @@ public class MainWindow extends JFrame {
 	private JPanel getPanelEncrypt() {
 		if (panelEncrypt == null) {
 			panelEncrypt = new JPanel();
-			panelEncrypt.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+			panelEncrypt.setBorder(BorderFactory.createBevelBorder(
+					BevelBorder.LOWERED, null, null, null, null));
 			panelEncrypt.setLayout(new GroupLayout());
-			panelEncrypt.add(getTextFileIn(), new Constraints(new Leading(91, 319, 10, 10), new Leading(5, 24, 10, 10)));
-			panelEncrypt.add(getTextPublicKey(), new Constraints(new Leading(91, 319, 12, 12), new Leading(65, 24, 12, 12)));
-			panelEncrypt.add(getButtonPublicKey(), new Constraints(new Leading(413, 12, 12), new Leading(65, 12, 12)));
-			panelEncrypt.add(getLabelStatusFileIn(), new Constraints(new Leading(465, 12, 12), new Leading(5, 12, 12)));
-			panelEncrypt.add(getLabelStatusPublicKey(), new Constraints(new Leading(465, 12, 12), new Leading(65, 12, 12)));
-			panelEncrypt.add(getLabelPublicKey(), new Constraints(new Leading(4, 80, 12, 12), new Leading(69, 12, 12)));
-			panelEncrypt.add(getLabelFileIn(), new Constraints(new Leading(4, 73, 10, 10), new Leading(12, 12, 12)));
+			panelEncrypt.add(getTextFileIn(), new Constraints(new Leading(91,
+					319, 10, 10), new Leading(5, 24, 10, 10)));
+			panelEncrypt.add(getButtonFileIn(), new Constraints(new Leading(
+					413, 12, 12), new Leading(3, 12, 12)));
+
+			panelEncrypt.add(getLabelStatusFileIn(), new Constraints(
+					new Leading(465, 12, 12), new Leading(5, 12, 12)));
+			panelEncrypt.add(getLabelFileIn(), new Constraints(new Leading(4,
+					73, 10, 10), new Leading(12, 12, 12)));
+			panelEncrypt.add(getTextPublicKey(), new Constraints(new Leading(
+					91, 319, 12, 12), new Leading(44, 24, 10, 10)));
+			panelEncrypt.add(getButtonPublicKey(), new Constraints(new Leading(
+					414, 10, 10), new Leading(44, 10, 10)));
+			panelEncrypt.add(getLabelStatusPublicKey(), new Constraints(
+					new Leading(465, 12, 12), new Leading(44, 10, 10)));
+			panelEncrypt.add(getLabelPublicKey(), new Constraints(new Leading(
+					4, 80, 12, 12), new Leading(47, 12, 12)));
+			panelEncrypt.add(getCheckBoxTest(), new Constraints(new Leading(4,
+					12, 12), new Leading(81, 12, 12)));
 		}
 		return panelEncrypt;
 	}
@@ -1094,8 +1125,6 @@ public class MainWindow extends JFrame {
 		return panelDecrypt;
 	}
 
-	
-	
 	// START COMPONENT FOR TEST
 	private JLabel getLabelFileInT() {
 		if (labelFileInT == null) {
@@ -1151,15 +1180,14 @@ public class MainWindow extends JFrame {
 																iconOk)));
 										textFileInT.setText(file
 												.getAbsolutePath());
-										
+
 										labelStatusFileIn
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
 																iconOk)));
-								        textFileIn.setText(file
-								        		.getAbsolutePath());
-										
-										
+										textFileIn.setText(file
+												.getAbsolutePath());
+
 										buttonExecute.setEnabled(true);
 									} else {
 										labelStatusFileInT
@@ -1193,7 +1221,7 @@ public class MainWindow extends JFrame {
 		}
 		return labelStatusFileInT;
 	}
-	
+
 	private JScrollPane getJScrollPane0() {
 		if (jScrollPane0 == null) {
 			jScrollPane0 = new JScrollPane();
@@ -1219,24 +1247,19 @@ public class MainWindow extends JFrame {
 			panelTest.setLayout(new GroupLayout());
 			panelTest.add(getTextFileInT(), new Constraints(new Leading(91,
 					319, 10, 10), new Leading(5, 24, 10, 10)));
-			panelTest.add(getButtonFileInT(), new Constraints(new Leading(
-					413, 10, 10), new Leading(4, 12, 12)));
-			panelTest.add(getLabelStatusFileInT(), new Constraints(
-					new Leading(465, 12, 12), new Leading(5, 12, 12)));
-			panelTest.add(getLabelFileInT(), new Constraints(new Leading(4,
-					73, 10, 10), new Leading(12, 12, 12)));
-			panelTest.add(getJScrollPane0(), new Constraints(new Leading(5, 484, 12, 12), new Leading(36, 80, 10, 10)));
+			panelTest.add(getButtonFileInT(), new Constraints(new Leading(413,
+					10, 10), new Leading(4, 12, 12)));
+			panelTest.add(getLabelStatusFileInT(), new Constraints(new Leading(
+					465, 12, 12), new Leading(5, 12, 12)));
+			panelTest.add(getLabelFileInT(), new Constraints(new Leading(4, 73,
+					10, 10), new Leading(12, 12, 12)));
+			panelTest.add(getJScrollPane0(), new Constraints(new Leading(5,
+					484, 12, 12), new Leading(36, 80, 10, 10)));
 
 		}
 		return panelTest;
 	}
 
-	
-	
-	
-	
-	
-	
 	private JProgressBar getProgressBar() {
 		if (progressBar == null) {
 			progressBar = new JProgressBar(0, 100);
@@ -1331,6 +1354,7 @@ public class MainWindow extends JFrame {
 		menuLanguage.setText(rb.getString("title.language"));
 		menuEncrypt.setText(rb.getString("title.encrypt"));
 		menuDecrypt.setText(rb.getString("title.decrypt"));
+		menuTest.setText(rb.getString("title.test"));
 		menuAbout.setText(rb.getString("title.about"));
 		menuVersion.setText(rb.getString("title.version"));
 		buttonClose.setText(rb.getString("button.close"));
@@ -1339,15 +1363,16 @@ public class MainWindow extends JFrame {
 		labelPublicKey.setText(rb.getString("title.publickey"));
 		// labelFileOut.setText(rb.getString("title.fileout"));
 		labelFileIn.setText(rb.getString("title.filein"));
+		checkBoxTest.setText(rb.getString("title.testBefore"));
+
 		labelFileInT.setText(rb.getString("title.filein"));
-		
-		if(test){
+
+		if (testMode) {
 			parent.setTitle(rb.getString("title") + " - ["
 					+ rb.getString("title.test") + "]");
 			buttonExecute.setText(rb.getString("title.test"));
 			buttonExecute.setMnemonic('T');
-		}
-		else{
+		} else {
 			if (encryptMode) {
 				parent.setTitle(rb.getString("title") + " - ["
 						+ rb.getString("title.encrypt") + "]");
@@ -1370,7 +1395,9 @@ public class MainWindow extends JFrame {
 			menuEncrypt.setMnemonic('C');
 			menuEncrypt.addActionListener((new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
+					clearPane(jTextResults);
 					encryptMode = true;
+					testMode = false;
 					parent.setTitle(rb.getString("title") + " - ["
 							+ rb.getString("title.encrypt") + "]");
 					panelEncrypt.setVisible(true);
@@ -1394,7 +1421,7 @@ public class MainWindow extends JFrame {
 					publicKey = null;
 					publicKeyBytes = null;
 					base64PublicKey = "";
-					test=false;
+					test = false;
 				}
 			}));
 		}
@@ -1408,7 +1435,9 @@ public class MainWindow extends JFrame {
 			menuDecrypt.setMnemonic('D');
 			menuDecrypt.addActionListener((new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
+					clearPane(jTextResults);
 					encryptMode = false;
+					testMode = false;
 					parent.setTitle(rb.getString("title") + " - ["
 							+ rb.getString("title.decrypt") + "]");
 					panelEncrypt.setVisible(false);
@@ -1437,19 +1466,21 @@ public class MainWindow extends JFrame {
 					privateKeyBytes = null;
 					halfkey1 = null;
 					halfkey2 = null;
-					test=false;
+					test = false;
 				}
 			}));
 		}
 		return menuDecrypt;
 	}
-	private JMenuItem getMenuTest(){
+
+	private JMenuItem getMenuTest() {
 		if (menuTest == null) {
-			menuTest = new javax.swing.JMenuItem(
-					rb.getString("title.test"));
+			menuTest = new javax.swing.JMenuItem(rb.getString("title.test"));
 			menuTest.setMnemonic('T');
 			menuTest.addActionListener((new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
+					clearPane(jTextResults);
+					testMode = true;
 					encryptMode = false;
 					parent.setTitle(rb.getString("title") + " - ["
 							+ rb.getString("title.test") + "]");
@@ -1469,13 +1500,14 @@ public class MainWindow extends JFrame {
 					privateKeyBytes = null;
 					halfkey1 = null;
 					halfkey2 = null;
-					test=true;
+					test = true;
 
 				}
 			}));
 		}
 		return menuTest;
 	}
+
 	private JMenu getMenuAbout() {
 		if (menuAbout == null) {
 			menuAbout = new JMenu();
@@ -1532,31 +1564,65 @@ public class MainWindow extends JFrame {
 					.addActionListener((new java.awt.event.ActionListener() {
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
-							if(test){
-								mapSerialSeed.clear();
-								jTextResults.setText("");
-								testFile();
-							}
-							else{
-								mapSerialSeed.clear();
-								jTextResults.setText("");
-								if (encryptMode) {
-									// if(statusFileIn&&statusFileOut&&statusPublicKey){
-									if (statusFileIn && statusPublicKey) {
-										encryptFile();
-									} else {
 
-									}
-								} else {
-									if (statusFileInD && statusFileOutD
-											&& statusPrivateKey1
-											&& statusPrivateKey2) {
-										decryptFile();
-									} else {
+							new Thread() {
+								@Override
+								public void run() {
 
+									if (testMode) {
+										mapSerialSeed.clear();
+										clearPane(jTextResults);
+										// jTextResults.setText("");
+										testFile();
+									} else {
+										mapSerialSeed.clear();
+										clearPane(jTextResults);
+										// jTextResults.setText("");
+										if (encryptMode) {
+											// if(statusFileIn&&statusFileOut&&statusPublicKey){
+											if (statusFileIn && statusPublicKey) {
+												if (checkBoxTest.isSelected()) {
+													test = true;
+													panelEncrypt
+															.setVisible(false);
+													panelTest.setVisible(true);
+													textFileInT
+															.setText(textFileIn
+																	.getText());
+													repaint();
+													testFile();
+													repaint();
+													if (serialDuplicated == true
+															|| errorReadingLine == true
+															|| errorVerifying == true) {
+														return;
+													} else {
+														panelEncrypt.setVisible(true);
+												        panelTest.setVisible(false);
+														reloadPublicKey();
+														test = false;
+														encryptFile();
+													}
+												} else {
+													test = false;
+													encryptFile();
+												}
+											} else {
+
+											}
+										} else {
+											if (statusFileInD && statusFileOutD
+													&& statusPrivateKey1
+													&& statusPrivateKey2) {
+												decryptFile();
+											} else {
+
+											}
+										}
 									}
+
 								}
-							}
+							}.start();
 						}
 					}));
 
@@ -1623,9 +1689,9 @@ public class MainWindow extends JFrame {
 					67, 12, 0), new Leading(5, 126, 10, 10)));
 			panelAction.add(getPanelDecrypt(), new Constraints(new Bilateral(
 					67, 12, 0), new Leading(5, 126, 10, 10)));
-			panelAction.add(getPanelTest(), new Constraints(new Bilateral(
-					67, 12, 0), new Leading(5, 126, 10, 10)));
-			
+			panelAction.add(getPanelTest(), new Constraints(new Bilateral(67,
+					12, 0), new Leading(5, 126, 10, 10)));
+
 		}
 		return panelAction;
 	}
@@ -1696,42 +1762,53 @@ public class MainWindow extends JFrame {
 		repaint();
 		parent = this;
 	}
-	
-	private void appendToPane(JTextPane tp, String msg, Color c)
-    {
-		if(tp!=null){
-          StyleContext sc = StyleContext.getDefaultStyleContext();
-          AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
 
-          aset = sc.addAttribute(aset, StyleConstants.FontFamily, "Lucida Console");
-          aset = sc.addAttribute(aset, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
+	private void appendToPane(JTextPane tp, String msg, Color c) {
+		if (tp != null) {
+			StyleContext sc = StyleContext.getDefaultStyleContext();
+			AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY,
+					StyleConstants.Foreground, c);
 
-          int len = tp.getDocument().getLength();
-          tp.setCaretPosition(len);
-          tp.setCharacterAttributes(aset, false);
-          tp.replaceSelection(msg);
-          try {
-			tp.getStyledDocument().insertString(len,msg,aset);
-		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			aset = sc.addAttribute(aset, StyleConstants.FontFamily,
+					"Lucida Console");
+			aset = sc.addAttribute(aset, StyleConstants.Alignment,
+					StyleConstants.ALIGN_JUSTIFIED);
+
+			int len = tp.getDocument().getLength();
+			tp.setCaretPosition(len);
+			tp.setCharacterAttributes(aset, false);
+			tp.replaceSelection(msg);
+			try {
+				tp.getStyledDocument().insertString(len, msg, aset);
+			} catch (BadLocationException e) {
+				e.printStackTrace();
+			}
 		}
+	}
+
+	private void clearPane(JTextPane tp) {
+		if (tp != null) {
+			int len = tp.getDocument().getLength();
+			try {
+				tp.getStyledDocument().remove(0, len);
+			} catch (BadLocationException e) {
+				e.printStackTrace();
+			}
 		}
-    }
-	
-	private void createTestKeys(){
+	}
+
+	private void createTestKeys() {
 		try {
 			labelProgress.setText(rb.getString("msg.creatingtestkeys"));
 			BlumBlumShub random = new BlumBlumShub(4096);
 			byte b[] = random.randBytes(4096);
 			random.setSeed(b);
-			KeyPairGenerator keyGen = KeyPairGenerator
-					.getInstance("RSA");
+			KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
 			keyGen.initialize(RSA_KEY_LENGTH, random);
 			KeyPair keyPair = keyGen.genKeyPair();
 			publicKey = keyPair.getPublic();
 			privateKey = keyPair.getPrivate();
-			
+
 			publicKeyBytes = privateKey.getEncoded();
 			base64PublicKey = Base64.encode(publicKeyBytes);
 
@@ -1739,104 +1816,201 @@ public class MainWindow extends JFrame {
 			e.printStackTrace();
 		}
 	}
-	private void testFile(){
-		new Thread() {
-			@Override
-			public void run() {
-				buttonExecute.setEnabled(false);
-				serialDuplicated=false;
-				errorReadingLine=false;
-				String fileBin=null;
-				String fileXml=null;
-				try{
-					String srcFileName = textFileInT.getText();
-					test=true;
-					appendToPane(jTextResults, rb.getString("msg.creatingtestkeys")+"\n", Color.BLUE);
-					createTestKeys();
-					if(!encrypt(srcFileName)){
-						appendToPane(jTextResults, rb.getString("msg.ciphererror")+"\n", Color.RED);
-						JOptionPane.showMessageDialog(parent,
-								rb.getString("msg.ciphererror"),
-								rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-						return;
-					}
-					else{
-						appendToPane(jTextResults, rb.getString("msg.cipherok")+"\n", Color.BLUE);
-					}
-					if(serialDuplicated){
-						JOptionPane.showMessageDialog(parent,
-								rb.getString("msg.doublederror"),
-								rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-						return;
-					}
-					if(errorReadingLine){
-						JOptionPane.showMessageDialog(parent,
-								rb.getString("msg.lineerror"),
-								rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-						return;
-					}
-					
-					fileBin=srcFileName + "_test.xml.ciphered.bin";
-					fileXml=srcFileName + "_test.xml";
 
-					if(!decrypt(fileBin, fileXml)){
-						JOptionPane.showMessageDialog(parent,
-								rb.getString("msg.deciphererror"),
-								rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-						return;
-					}
-					if(!verifyResults(fileXml)){
-						appendToPane(jTextResults, rb.getString("msg.testError")+"\n", Color.RED);
-						JOptionPane.showMessageDialog(parent,
-								rb.getString("msg.testError"),
-								rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-						return;
-					}
-					else{
-						appendToPane(jTextResults, rb.getString("msg.testOK")+"\n", Color.BLUE);
-						JOptionPane.showMessageDialog(parent,
-								rb.getString("msg.decipherok"), rb.getString("title.ok"),
-								JOptionPane.INFORMATION_MESSAGE);
+	private void readTestKeys() {
+		ByteArrayOutputStream bos = null;
+		InputStream fispbk = null;
+		InputStream fisprk1 = null;
+		InputStream fisprk2 = null;
+		try {
+			bos = new ByteArrayOutputStream();
+			fispbk = this.getClass().getResourceAsStream("/public.key");
+			fisprk1 = this.getClass().getResourceAsStream("/private1.key");
+			fisprk2 = this.getClass().getResourceAsStream("/private2.key");
 
-					}
-					
-					
-				}
-				finally{
-					if(fileBin!=null)
-					  new File(fileBin).delete();
-					if(fileXml!=null)
-					  new File(fileXml).delete();
-				}
-				
-				buttonExecute.setEnabled(true);
+			int b = fispbk.read();
+			while (b > -1) {
+				bos.write(b);
+				b = fispbk.read();
 			}
-		}.start();		
+			bos.flush();
+			byte[] key = bos.toByteArray();
+			bos.close();
+
+			bos = new ByteArrayOutputStream();
+			b = fisprk1.read();
+			while (b > -1) {
+				bos.write(b);
+				b = fisprk1.read();
+			}
+			bos.flush();
+			byte[] halfkey1 = bos.toByteArray();
+			bos.close();
+
+			bos = new ByteArrayOutputStream();
+			b = fisprk2.read();
+			while (b > -1) {
+				bos.write(b);
+				b = fisprk2.read();
+			}
+			bos.flush();
+			byte[] halfkey2 = bos.toByteArray();
+			bos.close();
+
+			publicKey = KeyFactory.getInstance("RSA").generatePublic(
+					new X509EncodedKeySpec(Base64.decode(key)));
+			base64PublicKey = new String(key);
+
+			byte[] b1 = Base64.decode(halfkey1);
+			byte[] b2 = Base64.decode(halfkey2);
+
+			byte[] privateKeyBytes = new byte[halfkey1.length + halfkey2.length];
+			for (int i = 0; i < b1.length; i++) {
+				privateKeyBytes[i] = b1[i];
+			}
+			for (int i = 0; i < b2.length; i++) {
+				privateKeyBytes[i + b1.length] = b2[i];
+			}
+
+			privateKey = KeyFactory.getInstance("RSA").generatePrivate(
+					new PKCS8EncodedKeySpec(privateKeyBytes));
+			bos.close();
+			fispbk.close();
+			fisprk1.close();
+			fisprk2.close();
+			bos = null;
+			fispbk = null;
+			fisprk1 = null;
+			fisprk2 = null;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		} finally {
+			try {
+				if (bos != null)
+					bos.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
+				if (fispbk != null)
+					fispbk.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
+				if (fisprk1 != null)
+					fisprk1.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
+				if (fisprk2 != null)
+					fisprk2.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
-	private void encryptFile() {
-		new Thread() {
-			@Override
-			public void run() {
-				String srcFileName = textFileIn.getText();
-				test=false;
-				if(encrypt(srcFileName)){
-					JOptionPane.showMessageDialog(parent, rb.getString("msg.cipherok"),
-							rb.getString("title.ok"), JOptionPane.INFORMATION_MESSAGE);
-					appendToPane(jTextResults, rb.getString("msg.cipherok")+"\n", Color.BLUE);
-				}
-				else{
-					JOptionPane.showMessageDialog(parent,
-							rb.getString("msg.ciphererror"),
-							rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-					appendToPane(jTextResults, rb.getString("msg.ciphererror")+"\n", Color.RED);
-				}
+
+	private void testFile() {
+
+		buttonExecute.setEnabled(false);
+		serialDuplicated = false;
+		errorReadingLine = false;
+		errorVerifying = false;
+		String fileBin = null;
+		String fileXml = null;
+		try {
+			String srcFileName = textFileInT.getText();
+			test = true;
+			appendToPane(jTextResults, rb.getString("msg.creatingtestkeys")
+					+ "\n", Color.BLUE);
+			// createTestKeys();
+			readTestKeys();
+			if (!encrypt(srcFileName)) {
+				appendToPane(jTextResults, rb.getString("msg.ciphererror")
+						+ "\n", Color.RED);
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.ciphererror"),
+						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+				return;
+			} else {
+				appendToPane(jTextResults, rb.getString("msg.cipherok") + "\n",
+						Color.BLUE);
+			}
+			if (serialDuplicated) {
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.doublederror"),
+						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			if (errorReadingLine) {
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.lineerror"),
+						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+
+			fileBin = srcFileName + "_test.xml.ciphered.bin";
+			fileXml = srcFileName + "_test.xml";
+
+			if (!decrypt(fileBin, fileXml)) {
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.deciphererror"),
+						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			if (!verifyResults(fileXml)) {
+				appendToPane(jTextResults,
+						rb.getString("msg.testError") + "\n", Color.RED);
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.testError"),
+						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+				errorVerifying = true;
+				return;
+			} else {
+				appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
+						Color.BLUE);
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.testOK"),
+						rb.getString("title.ok"),
+						JOptionPane.INFORMATION_MESSAGE);
 
 			}
-		}.start();
+
+		} finally {
+			if (fileBin != null)
+				new File(fileBin).delete();
+			if (fileXml != null)
+				new File(fileXml).delete();
+		}
+
+		buttonExecute.setEnabled(true);
+
+	}
+
+	private void encryptFile() {
+		String srcFileName = textFileIn.getText();
+		if (encrypt(srcFileName)) {
+			JOptionPane.showMessageDialog(parent, rb.getString("msg.cipherok"),
+					rb.getString("title.ok"), JOptionPane.INFORMATION_MESSAGE);
+			appendToPane(jTextResults, rb.getString("msg.cipherok") + "\n",
+					Color.BLUE);
+		} else {
+			JOptionPane.showMessageDialog(parent,
+					rb.getString("msg.ciphererror"),
+					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+			appendToPane(jTextResults, rb.getString("msg.ciphererror") + "\n",
+					Color.RED);
+		}
+
 	}
 
 	private synchronized boolean encrypt(String srcFileName) {
-		boolean retval=false;
+		boolean retval = false;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		String dateFormatted = sdf.format(new java.util.Date(System
 				.currentTimeMillis()));
@@ -1850,22 +2024,22 @@ public class MainWindow extends JFrame {
 		labelWait.setVisible(true);
 		buttonClose.setEnabled(false);
 		buttonExecute.setEnabled(false);
-		if(buttonFileIn!=null){
-		  buttonFileIn.setEnabled(false);
+		if (buttonFileIn != null) {
+			buttonFileIn.setEnabled(false);
 		}
-		if(buttonPublicKey!=null){
-		  buttonPublicKey.setEnabled(false);
+		if (buttonPublicKey != null) {
+			buttonPublicKey.setEnabled(false);
 		}
 		menuFile.setEnabled(false);
 		menuAbout.setEnabled(false);
 		menuLanguage.setEnabled(false);
-		
-		String fileXml=srcFileName + dateFormatted+ ".xml";
-		String fileBin=srcFileName + dateFormatted+ ".xml.ciphered.bin";
-		
-		if(test){
-			fileXml=srcFileName + "_test.xml";
-			fileBin=srcFileName + "_test.xml.ciphered.bin";
+
+		String fileXml = srcFileName + dateFormatted + ".xml";
+		String fileBin = srcFileName + dateFormatted + ".xml.ciphered.bin";
+
+		if (test) {
+			fileXml = srcFileName + "_test.xml";
+			fileBin = srcFileName + "_test.xml.ciphered.bin";
 		}
 		repaint();
 
@@ -1899,8 +2073,8 @@ public class MainWindow extends JFrame {
 					String linekey = serialkey[1];
 
 					if (!listSerial.contains(lineserial)) {
-						if(test){
-						  mapSerialSeed.put(lineserial, linekey);
+						if (test) {
+							mapSerialSeed.put(lineserial, linekey);
 						}
 						DeviceInfo di = new DeviceInfo("xyzw", lineserial);
 						byte[] byteSeed = keyGetByteCiphered(linekey);
@@ -1922,17 +2096,27 @@ public class MainWindow extends JFrame {
 						logger.error("Error: element(" + (i + 1) + ") file("
 								+ srcFileName + ") serial(" + lineserial
 								+ ") duplicate");
-						appendToPane(jTextResults, "("+(i + 1)+")["+lineserial+"] "+rb.getString("msg.doublederror")+"\n", Color.RED);
-						//jTextResults.append("("+(i + 1)+")["+lineserial+"] "+rb.getString("msg.doublederror")+"\n");
-						serialDuplicated=true;
+						appendToPane(
+								jTextResults,
+								"(" + (i + 1) + ")[" + lineserial + "] "
+										+ rb.getString("msg.doublederror")
+										+ "\n", Color.RED);
+						// jTextResults.append("("+(i +
+						// 1)+")["+lineserial+"] "+rb.getString("msg.doublederror")+"\n");
+						serialDuplicated = true;
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
 					logger.error("Error: element(" + (i + 1) + ") file("
 							+ srcFileName + ")", e);
-					appendToPane(jTextResults, "("+(i + 1)+") "+rb.getString("msg.lineerror")+"\n", Color.RED);
-					//jTextResults.append("("+(i + 1)+") "+rb.getString("msg.lineerror")+"\n");
-					errorReadingLine=true;
+					appendToPane(
+							jTextResults,
+							"(" + (i + 1) + ") "
+									+ rb.getString("msg.lineerror") + "\n",
+							Color.RED);
+					// jTextResults.append("("+(i +
+					// 1)+") "+rb.getString("msg.lineerror")+"\n");
+					errorReadingLine = true;
 				}
 
 				counter += string.length();
@@ -1985,11 +2169,11 @@ public class MainWindow extends JFrame {
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
 			/*
-			SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-			byte[] b = random.generateSeed(AES_KEY_LENGTH);
-			random.setSeed(b);
-			*/
-			
+			 * SecureRandom random = SecureRandom.getInstance("SHA1PRNG",
+			 * "SUN"); byte[] b = random.generateSeed(AES_KEY_LENGTH);
+			 * random.setSeed(b);
+			 */
+
 			BlumBlumShub random = new BlumBlumShub(1024);
 			byte b[] = random.randBytes(1024);
 			random.setSeed(b);
@@ -1997,10 +2181,10 @@ public class MainWindow extends JFrame {
 			keyGen.init(AES_KEY_LENGTH, random);
 			SecretKey secretAesKey = keyGen.generateKey();
 
-			byte[] aesKey = secretAesKey.getEncoded();			
+			byte[] aesKey = secretAesKey.getEncoded();
 
 			byte[] iv = new byte[16];
-			//SecureRandom.getInstance("SHA1PRNG").nextBytes(iv);
+			// SecureRandom.getInstance("SHA1PRNG").nextBytes(iv);
 			random = new BlumBlumShub(1024);
 			iv = random.randBytes(16);
 
@@ -2042,8 +2226,8 @@ public class MainWindow extends JFrame {
 			progressBar.setVisible(false);
 			labelProgress.setVisible(false);
 			labelWait.setVisible(false);
-			
-			retval=true;
+
+			retval = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.debug("Error: file(" + srcFileName + ")", e);
@@ -2069,11 +2253,11 @@ public class MainWindow extends JFrame {
 			buttonClose.setEnabled(true);
 			buttonExecute.setEnabled(true);
 
-			if(buttonFileIn!=null){
-			  buttonFileIn.setEnabled(true);
+			if (buttonFileIn != null) {
+				buttonFileIn.setEnabled(true);
 			}
-			if(buttonPublicKey!=null){
-			  buttonPublicKey.setEnabled(true);
+			if (buttonPublicKey != null) {
+				buttonPublicKey.setEnabled(true);
 			}
 			menuFile.setEnabled(true);
 			menuAbout.setEnabled(true);
@@ -2085,34 +2269,29 @@ public class MainWindow extends JFrame {
 	}
 
 	private void decryptFile() {
-		new Thread() {
-			@Override
-			public void run() {
-				String srcFileName = textFileInD.getText();
-				String destFileName = textFileOutD.getText();
+		String srcFileName = textFileInD.getText();
+		String destFileName = textFileOutD.getText();
 
-				// String destFile = textFileOutD.getText()+".bin";
-				test=false;
-				if(decrypt(srcFileName, destFileName)){
-					appendToPane(jTextResults, rb.getString("msg.decipherok")+"\n", Color.BLUE);
-					JOptionPane.showMessageDialog(parent,
-							rb.getString("msg.decipherok"), rb.getString("title.ok"),
-							JOptionPane.INFORMATION_MESSAGE);
-				}
-				else{
-					appendToPane(jTextResults, rb.getString("msg.deciphererror")+"\n", Color.RED);
-					JOptionPane.showMessageDialog(parent,
-							rb.getString("msg.deciphererror"),
-							rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-				}
+		// String destFile = textFileOutD.getText()+".bin";
+		test = false;
+		if (decrypt(srcFileName, destFileName)) {
+			appendToPane(jTextResults, rb.getString("msg.decipherok") + "\n",
+					Color.BLUE);
+			JOptionPane.showMessageDialog(parent,
+					rb.getString("msg.decipherok"), rb.getString("title.ok"),
+					JOptionPane.INFORMATION_MESSAGE);
+		} else {
+			appendToPane(jTextResults,
+					rb.getString("msg.deciphererror") + "\n", Color.RED);
+			JOptionPane.showMessageDialog(parent,
+					rb.getString("msg.deciphererror"),
+					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+		}
 
-			}
-
-		}.start();
 	}
 
 	private synchronized boolean decrypt(String srcFileName, String destFileName) {
-		boolean retval=false;
+		boolean retval = false;
 		progressBar.setVisible(true);
 		progressBar.setMaximum(0);
 		progressBar.setMaximum(100);
@@ -2122,17 +2301,17 @@ public class MainWindow extends JFrame {
 		labelWait.setVisible(true);
 		buttonClose.setEnabled(false);
 		buttonExecute.setEnabled(false);
-		if(buttonFileInD!=null){
-		  buttonFileInD.setEnabled(false);
+		if (buttonFileInD != null) {
+			buttonFileInD.setEnabled(false);
 		}
-		if(buttonFileOutD!=null){
-		  buttonFileOutD.setEnabled(false);
+		if (buttonFileOutD != null) {
+			buttonFileOutD.setEnabled(false);
 		}
-		if(buttonPrivateKey1!=null){
-		  buttonPrivateKey1.setEnabled(false);
+		if (buttonPrivateKey1 != null) {
+			buttonPrivateKey1.setEnabled(false);
 		}
-		if(buttonPrivateKey2!=null){
-		  buttonPrivateKey2.setEnabled(false);
+		if (buttonPrivateKey2 != null) {
+			buttonPrivateKey2.setEnabled(false);
 		}
 		menuFile.setEnabled(false);
 		menuAbout.setEnabled(false);
@@ -2205,7 +2384,7 @@ public class MainWindow extends JFrame {
 			outputWriter = null;
 			inputReader = null;
 
-            retval=true;
+			retval = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -2225,17 +2404,17 @@ public class MainWindow extends JFrame {
 			buttonClose.setEnabled(true);
 			buttonExecute.setEnabled(true);
 
-			if(buttonFileInD!=null){
-			  buttonFileInD.setEnabled(true);
+			if (buttonFileInD != null) {
+				buttonFileInD.setEnabled(true);
 			}
-			if(buttonFileOutD!=null){
-			  buttonFileOutD.setEnabled(true);
+			if (buttonFileOutD != null) {
+				buttonFileOutD.setEnabled(true);
 			}
-			if(buttonPrivateKey1!=null){
-			  buttonPrivateKey1.setEnabled(true);
+			if (buttonPrivateKey1 != null) {
+				buttonPrivateKey1.setEnabled(true);
 			}
-			if(buttonPrivateKey2!=null){
-			  buttonPrivateKey2.setEnabled(true);
+			if (buttonPrivateKey2 != null) {
+				buttonPrivateKey2.setEnabled(true);
 			}
 			menuFile.setEnabled(true);
 			menuAbout.setEnabled(true);
@@ -2245,84 +2424,268 @@ public class MainWindow extends JFrame {
 		return retval;
 	}
 
-	private synchronized boolean verifyResults(String fileXml){
-		boolean retval=false;	
-		
-		retval=verifySmallXML(fileXml);
-		
-		
+	private synchronized boolean verifyResults(String fileXml) {
+		boolean retval = false;
+		// 50 MB
+		if (new File(fileXml).length() < 52428800L) {
+			retval=verifySmallXML(fileXml);
+		} else {
+			retval=verifyLargeXML(fileXml);
+		}
 		return retval;
 	}
-	private synchronized boolean verifySmallXML(String fileXml){
-		boolean retval=true;
+
+	private synchronized boolean verifySmallXML(String fileXml) {
+		boolean retval = true;
 		JAXBContext jc;
-		java.io.InputStream is=null;
+		java.io.InputStream is = null;
 		try {
+			int progressValue=0;
+			int prevProgressValue=0;
+			progressBar.setVisible(true);
+			progressBar.setMaximum(0);
+			progressBar.setMaximum(100);
+			progressBar.setValue(0);
+			labelProgress.setVisible(true);
+			labelProgress.setText(rb.getString("msg.verification") + " 0%");
+            repaint();
 			jc = JAXBContext.newInstance("ietf.params.xml.ns.keyprov.pskc");
-			Unmarshaller u= jc.createUnmarshaller();
+			Unmarshaller u = jc.createUnmarshaller();
 			is = new java.io.FileInputStream(fileXml);
 			Object o = u.unmarshal(is);
 			javax.xml.bind.JAXBElement<KeyContainerType> f = (javax.xml.bind.JAXBElement<KeyContainerType>) o;
 			KeyContainerType keyContainer = (KeyContainerType) f.getValue();
-			
-			List<KeyPackageType> listPackages= keyContainer.getKeyPackage();
-			if(listPackages!=null&&listPackages.size()>0){
-				for(int i=0;i<listPackages.size();i++){
-					KeyPackageType KeyPackage=listPackages.get(i);
-					DeviceInfoType deviceInfo=KeyPackage.getDeviceInfo();
-					KeyType key=KeyPackage.getKey();
-					KeyDataType KeyData=key.getData();
-					BinaryDataType binaryDataType=KeyData.getSecret();
-					EncryptedDataType encryptedDataType=binaryDataType.getEncryptedValue();
-					
-					String seed=encryptedDataType.getCipherData().getCipherValue();					
-					String serial=deviceInfo.getSerialNo();
+
+			List<KeyPackageType> listPackages = keyContainer.getKeyPackage();
+			if (listPackages != null && listPackages.size() > 0) {
+				for (int i = 0; i < listPackages.size(); i++) {
+					KeyPackageType KeyPackage = listPackages.get(i);
+					DeviceInfoType deviceInfo = KeyPackage.getDeviceInfo();
+					KeyType key = KeyPackage.getKey();
+					KeyDataType KeyData = key.getData();
+					BinaryDataType binaryDataType = KeyData.getSecret();
+					EncryptedDataType encryptedDataType = binaryDataType
+							.getEncryptedValue();
+
+					String seed = encryptedDataType.getCipherData()
+							.getCipherValue();
+					String serial = deviceInfo.getSerialNo();
 
 					Cipher cipher = Cipher.getInstance("RSA");
-				    cipher.init(Cipher.DECRYPT_MODE, privateKey);
-				    byte[] cipherData=cipher.doFinal(Base64.decode(seed));
-				    String decodedseed = new String(cipherData);
+					cipher.init(Cipher.DECRYPT_MODE, privateKey);
+					byte[] cipherData = cipher.doFinal(Base64.decode(seed));
+					String decodedseed = new String(cipherData);
 
-					String seedOrigin=mapSerialSeed.remove(serial);
-					if(seedOrigin==null){
-						retval=false;
-						appendToPane(jTextResults, "(1)["+serial+"] "+rb.getString("msg.testNotFound")+"\n", Color.RED);
-					}
-					else{
-						if(!seedOrigin.equals(decodedseed)){
-							retval=false;
-							appendToPane(jTextResults, "["+serial+"] "+rb.getString("msg.testSeedNotMatch")+"\n", Color.RED);
+					String seedOrigin = mapSerialSeed.remove(serial);
+					if (seedOrigin == null) {
+						retval = false;
+						appendToPane(
+								jTextResults,
+								"(1)[" + serial + "] "
+										+ rb.getString("msg.testNotFound")
+										+ "\n", Color.RED);
+					} else {
+						if (!seedOrigin.equals(decodedseed)) {
+							retval = false;
+							appendToPane(
+									jTextResults,
+									"["
+											+ serial
+											+ "] "
+											+ rb.getString("msg.testSeedNotMatch")
+											+ "\n", Color.RED);
 						}
 					}
-					//System.out.println(serial+"\n"+decodedseed+"\n\n\n");
+					progressValue = (int) ((i * 100) / listPackages.size());
+					if (progressValue != prevProgressValue) {
+						progressBar.setValue(progressValue);
+						labelProgress.setText(rb.getString("msg.verification")
+								+ " " + progressValue + "%");
+						prevProgressValue = progressValue;
+						// System.out.println(prevProgressValue+"%");
+						repaint();
+					}
+
+					// System.out.println(serial+"\n"+decodedseed+"\n\n\n");
 				}
 			}
-			if(mapSerialSeed.size()>0){
-				retval=false;
-				Object[] object=mapSerialSeed.keySet().toArray();
-				for(int i=0;i<object.length;i++){
-				  appendToPane(jTextResults, "(2)["+object[i]+"] "+rb.getString("msg.testNotFound")+"\n", Color.RED);
+			if (mapSerialSeed.size() > 0) {
+				retval = false;
+				Object[] object = mapSerialSeed.keySet().toArray();
+				for (int i = 0; i < object.length; i++) {
+					appendToPane(
+							jTextResults,
+							"(2)[" + object[i] + "] "
+									+ rb.getString("msg.testNotFound") + "\n",
+							Color.RED);
 				}
 
 			}
-			//System.out.println("OK");
-			
-			
+			// System.out.println("OK");
+
 		} catch (Exception e) {
 			e.printStackTrace();
-			retval=false;
-		}
-		finally{
-			try{
-				if(is!=null)
+			retval = false;
+		} finally {
+			try {
+				if (is != null)
 					is.close();
-			}
-			catch(Exception e){
-				
+			} catch (Exception e) {
+
 			}
 		}
+		progressBar.setVisible(false);
+		labelProgress.setVisible(false);
+		repaint();
 		return retval;
 	}
+
+	private synchronized boolean verifyLargeXML(String fileXml) {
+		boolean retval = true;
+		JAXBContext jc;
+		XMLStreamReader xsr = null;
+		try {
+			
+			XMLInputFactory xif = XMLInputFactory.newFactory();
+			StreamSource xml = new StreamSource(fileXml);
+			xsr = xif.createXMLStreamReader(xml);
+			xsr.nextTag();
+
+			int progressValue=0;
+			int prevProgressValue=0;
+			progressBar.setVisible(true);
+			progressBar.setMaximum(0);
+			progressBar.setMaximum(100);
+			progressBar.setValue(0);
+			labelProgress.setVisible(true);
+			labelProgress.setText(rb.getString("msg.verification") + " 0%");
+            repaint();
+            int counter=0;
+            int len=mapSerialSeed.size();
+			while (xsr.hasNext()) {
+				if (xsr.isStartElement()) {
+					if (xsr.getLocalName().equals("KeyPackage")) {
+
+						jc = JAXBContext.newInstance(KeyPackageType.class);
+						Unmarshaller unmarshaller = jc.createUnmarshaller();
+						JAXBElement<KeyPackageType> jb = unmarshaller
+								.unmarshal(xsr, KeyPackageType.class);
+						xsr.close();
+						KeyPackageType KeyPackage = jb.getValue();
+
+						KeyType key = KeyPackage.getKey();
+						KeyDataType KeyData = key.getData();
+						BinaryDataType binaryDataType = KeyData.getSecret();
+						EncryptedDataType encryptedDataType = binaryDataType
+								.getEncryptedValue();
+						String seed = encryptedDataType.getCipherData()
+								.getCipherValue();
+
+						DeviceInfoType deviceInfo = KeyPackage.getDeviceInfo();
+						String serial = deviceInfo.getSerialNo();
+
+
+						Cipher cipher = Cipher.getInstance("RSA");
+						cipher.init(Cipher.DECRYPT_MODE, privateKey);
+						byte[] cipherData = cipher.doFinal(Base64.decode(seed));
+						String decodedseed = new String(cipherData);
+
+						String seedOrigin = mapSerialSeed.remove(serial);
+						if (seedOrigin == null) {
+							retval = false;
+							appendToPane(jTextResults, "(1)[" + serial + "] "
+									+ rb.getString("msg.testNotFound") + "\n",
+									Color.RED);
+						} else {
+							if (!seedOrigin.equals(decodedseed)) {
+								retval = false;
+								appendToPane(jTextResults, "[" + serial + "] "
+										+ rb.getString("msg.testSeedNotMatch")
+										+ "\n", Color.RED);
+							}
+						}
+						progressValue = (int) ((counter * 100) / len);
+						if (progressValue != prevProgressValue) {
+							progressBar.setValue(progressValue);
+							labelProgress.setText(rb.getString("msg.verification")
+									+ " " + progressValue + "%");
+							prevProgressValue = progressValue;
+							// System.out.println(prevProgressValue+"%");
+							repaint();
+						}
+
+						counter++;
+
+					}
+				}
+				
+				xsr.next();
+			}
+			if (mapSerialSeed.size() > 0) {
+				retval = false;
+				Object[] object = mapSerialSeed.keySet().toArray();
+				for (int i = 0; i < object.length; i++) {
+					appendToPane(
+							jTextResults,
+							"(2)[" + object[i] + "] "
+									+ rb.getString("msg.testNotFound") + "\n",
+							Color.RED);
+				}
+
+			}
+			progressBar.setValue(100);
+			labelProgress.setText(rb.getString("msg.verification")	+ " 100%");
+			repaint();
+		} catch (Exception e) {
+			e.printStackTrace();
+			retval = false;
+		} finally {
+			try {
+				if (xsr != null)
+					xsr.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		progressBar.setVisible(false);
+		labelProgress.setVisible(false);
+		repaint();
+		return retval;
+	}
+
+	private void reloadPublicKey() {
+		File file = new File(textPublicKey.getText());
+		FileInputStream fis = null;
+		try {
+			fis = new FileInputStream(file);
+			publicKeyBytes = new byte[(int) file.length()];
+			fis.read(publicKeyBytes);
+			publicKey = KeyFactory.getInstance("RSA").generatePublic(
+					new X509EncodedKeySpec(Base64.decode(publicKeyBytes)));
+			fis.close();
+			fis = null;
+			base64PublicKey = new String(publicKeyBytes);
+		} catch (Exception e) {
+			e.printStackTrace();
+			base64PublicKey = "";
+			publicKey = null;
+			publicKeyBytes = null;
+			textPublicKey.setText("");
+			labelStatusPublicKey.setIcon(new javax.swing.ImageIcon(getClass()
+					.getResource(iconKo)));
+			JOptionPane.showMessageDialog(parent,
+					rb.getString("msg.invalidpublickey"),
+					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+		} finally {
+			try {
+				if (fis != null)
+					fis.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	private synchronized void encryptAES(SecretKey key,
 			AlgorithmParameterSpec paramSpec, InputStream in, OutputStream out,
 			long fileLen) throws NoSuchAlgorithmException,
@@ -2411,34 +2774,26 @@ public class MainWindow extends JFrame {
 		}
 		return null;
 	}
-    /*
-	public synchronized byte[] hexStringToByteArray(String s) throws Exception {
-		int len = s.length();
-		byte[] data = new byte[len / 2];
-		for (int i = 0; i < len; i += 2)
-			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character
-					.digit(s.charAt(i + 1), 16));
-		return data;
-	}
 
-	public String byteArrayToHexString(byte[] raw)
-			throws UnsupportedEncodingException {
-		final byte[] HEX_CHAR_TABLE = { (byte) '0', (byte) '1', (byte) '2',
-				(byte) '3', (byte) '4', (byte) '5', (byte) '6', (byte) '7',
-				(byte) '8', (byte) '9', (byte) 'a', (byte) 'b', (byte) 'c',
-				(byte) 'd', (byte) 'e', (byte) 'f' };
-
-		byte[] hex = new byte[2 * raw.length];
-		int index = 0;
-
-		for (byte b : raw) {
-			int v = b & 0xFF;
-			hex[index++] = HEX_CHAR_TABLE[v >>> 4];
-			hex[index++] = HEX_CHAR_TABLE[v & 0xF];
-		}
-		return new String(hex, "ASCII");
-	}
-    */
+	/*
+	 * public synchronized byte[] hexStringToByteArray(String s) throws
+	 * Exception { int len = s.length(); byte[] data = new byte[len / 2]; for
+	 * (int i = 0; i < len; i += 2) data[i / 2] = (byte)
+	 * ((Character.digit(s.charAt(i), 16) << 4) + Character .digit(s.charAt(i +
+	 * 1), 16)); return data; }
+	 * 
+	 * public String byteArrayToHexString(byte[] raw) throws
+	 * UnsupportedEncodingException { final byte[] HEX_CHAR_TABLE = { (byte)
+	 * '0', (byte) '1', (byte) '2', (byte) '3', (byte) '4', (byte) '5', (byte)
+	 * '6', (byte) '7', (byte) '8', (byte) '9', (byte) 'a', (byte) 'b', (byte)
+	 * 'c', (byte) 'd', (byte) 'e', (byte) 'f' };
+	 * 
+	 * byte[] hex = new byte[2 * raw.length]; int index = 0;
+	 * 
+	 * for (byte b : raw) { int v = b & 0xFF; hex[index++] = HEX_CHAR_TABLE[v
+	 * >>> 4]; hex[index++] = HEX_CHAR_TABLE[v & 0xF]; } return new String(hex,
+	 * "ASCII"); }
+	 */
 	private synchronized String[] getSerialKey(String string) throws Exception {
 		// possibili separatori SPACE ;,:| TAB
 		if (string.contains(";")) {
@@ -2550,11 +2905,12 @@ public class MainWindow extends JFrame {
 	}
 
 	private static final int AES_KEY_LENGTH = 128;
-	private static final int RSA_KEY_LENGTH=4096;
-	private boolean test=false;
-	private boolean serialDuplicated=false;
-	private boolean errorReadingLine=false;	
-	private HashMap<String,String> mapSerialSeed=new HashMap<String,String>();
+	private static final int RSA_KEY_LENGTH = 4096;
+	private boolean test = false;
+	private boolean serialDuplicated = false;
+	private boolean errorReadingLine = false;
+	private boolean errorVerifying = false;
+	private HashMap<String, String> mapSerialSeed = new HashMap<String, String>();
 
 	/**
 	 * Main entry of the class. Note: This class is only created so that you can
