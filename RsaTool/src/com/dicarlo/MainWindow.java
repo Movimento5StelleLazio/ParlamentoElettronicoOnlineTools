@@ -1925,6 +1925,8 @@ public class MainWindow extends JFrame {
 		String fileXml = null;
 		try {
 			String srcFileName = textFileInT.getText();
+			fileBin = srcFileName + "_test.xml.ciphered.bin";
+			fileXml = srcFileName + "_test.xml";
 			test = true;
 			appendToPane(jTextResults, rb.getString("msg.creatingtestkeys")
 					+ "\n", Color.BLUE);
@@ -1954,8 +1956,6 @@ public class MainWindow extends JFrame {
 				return;
 			}
 
-			fileBin = srcFileName + "_test.xml.ciphered.bin";
-			fileXml = srcFileName + "_test.xml";
 
 			if (!decrypt(fileBin, fileXml)) {
 				JOptionPane.showMessageDialog(parent,
@@ -1982,9 +1982,9 @@ public class MainWindow extends JFrame {
 			}
 
 		} finally {
-			if (fileBin != null)
+			if (fileBin != null&&new File(fileBin).exists())
 				new File(fileBin).delete();
-			if (fileXml != null)
+			if (fileXml != null&&new File(fileXml).exists())
 				new File(fileXml).delete();
 		}
 
@@ -2068,6 +2068,7 @@ public class MainWindow extends JFrame {
 			while ((string = in.readLine()) != null) {
 
 				try {
+					if(!"".equals(string.trim())){
 					String[] serialkey = getSerialKey(string.trim());
 					String lineserial = serialkey[0];
 					String linekey = serialkey[1];
@@ -2104,6 +2105,7 @@ public class MainWindow extends JFrame {
 						// jTextResults.append("("+(i +
 						// 1)+")["+lineserial+"] "+rb.getString("msg.doublederror")+"\n");
 						serialDuplicated = true;
+					}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
