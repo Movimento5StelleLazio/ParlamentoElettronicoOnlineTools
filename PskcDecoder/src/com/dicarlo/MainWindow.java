@@ -1540,6 +1540,15 @@ public class MainWindow extends JFrame {
 			if(!outFolder.endsWith(File.separator)){
 				outFolder=outFolder+File.separator;
 			}
+			if(!new File(outFolder).exists()||!new File(outFolder).canWrite()){
+				appendToPane(jTextResults, rb.getString("msg.foldererror")
+						+ "\n", Color.RED);
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.foldererror"),
+						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
 			fileBin = outFolder + "test_ciphered.bin";
 			fileXml = outFolder + "test.xml";			
 			test = true;
