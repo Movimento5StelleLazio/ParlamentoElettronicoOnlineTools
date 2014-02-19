@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.security.InvalidAlgorithmParameterException;
@@ -161,7 +162,7 @@ public class MainWindow extends JFrame {
 	javax.swing.JMenuItem menuChinese = null;
 	private JProgressBar progressBar;
 
-	private boolean encryptMode = true;
+	//private boolean encryptMode = true;
 	private boolean testMode = false;
 
 	private boolean statusPrivateKey1 = false;
@@ -188,10 +189,10 @@ public class MainWindow extends JFrame {
 
 	// START COMPONENT FOR TEST
 	private JPanel panelTest;
-	private JTextField textFileInT;
-	private JLabel labelStatusFileInT;
-	private JButton buttonFileInT;
-	private JLabel labelFileInT;
+	private JTextField textFileOutT;
+	private JLabel labelStatusFileOutT;
+	private JButton buttonFileOutT;
+	private JLabel labelFileOutT;
 	// END COMPONENT FOR TEST
 
 	private JButton buttonExecute;
@@ -833,30 +834,31 @@ public class MainWindow extends JFrame {
 
 	// START COMPONENT FOR TEST
 	private JLabel getLabelFileInT() {
-		if (labelFileInT == null) {
-			labelFileInT = new JLabel();
-			labelFileInT.setText(rb.getString("title.filein"));
+		if (labelFileOutT == null) {
+			labelFileOutT = new JLabel();
+			labelFileOutT.setText(rb.getString("title.folderout"));
 		}
-		return labelFileInT;
+		return labelFileOutT;
 	}
 
-	private JTextField getTextFileInT() {
-		if (textFileInT == null) {
-			textFileInT = new JTextField();
-			textFileInT.setEditable(false);
+	private JTextField getTextFileOutT() {
+		if (textFileOutT == null) {
+			textFileOutT = new JTextField();
+			textFileOutT.setEditable(false);
 		}
-		return textFileInT;
+		return textFileOutT;
 	}
 
-	private JButton getButtonFileInT() {
-		if (buttonFileInT == null) {
-			buttonFileInT = new JButton();
-			buttonFileInT.setText("....");
-			buttonFileInT
+	private JButton getButtonFileOutT() {
+		if (buttonFileOutT == null) {
+			buttonFileOutT = new JButton();
+			buttonFileOutT.setText("....");
+			buttonFileOutT
 					.addActionListener((new java.awt.event.ActionListener() {
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
+							fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
 										@Override
@@ -864,15 +866,13 @@ public class MainWindow extends JFrame {
 											if (f.isDirectory()) {
 												return true;
 											} else {
-												return f.getName()
-														.toLowerCase()
-														.endsWith(".csv");
+												return false;
 											}
 										}
 
 										@Override
 										public String getDescription() {
-											return "CSV files";
+											return "Folder";
 										}
 									});
 
@@ -880,21 +880,21 @@ public class MainWindow extends JFrame {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
 									if (file.exists()) {
-										labelStatusFileInT
+										labelStatusFileOutT
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
 																iconOk)));
-										textFileInT.setText(file
+										textFileOutT.setText(file
 												.getAbsolutePath());
 
 
 										buttonExecute.setEnabled(true);
 									} else {
-										labelStatusFileInT
+										labelStatusFileOutT
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
 																iconKo)));
-										textFileInT.setText("");
+										textFileOutT.setText("");
 										buttonExecute.setEnabled(false);
 									}
 								}
@@ -905,16 +905,16 @@ public class MainWindow extends JFrame {
 					}));
 
 		}
-		return buttonFileInT;
+		return buttonFileOutT;
 	}
 
-	private JLabel getLabelStatusFileInT() {
-		if (labelStatusFileInT == null) {
-			labelStatusFileInT = new JLabel();
-			labelStatusFileInT.setIcon(new javax.swing.ImageIcon(getClass()
+	private JLabel getLabelStatusFileOutT() {
+		if (labelStatusFileOutT == null) {
+			labelStatusFileOutT = new JLabel();
+			labelStatusFileOutT.setIcon(new javax.swing.ImageIcon(getClass()
 					.getResource(iconKo)));
 		}
-		return labelStatusFileInT;
+		return labelStatusFileOutT;
 	}
 
 	private JScrollPane getJScrollPane0() {
@@ -940,11 +940,11 @@ public class MainWindow extends JFrame {
 			panelTest.setBorder(BorderFactory.createBevelBorder(
 					BevelBorder.LOWERED, null, null, null, null));
 			panelTest.setLayout(new GroupLayout());
-			panelTest.add(getTextFileInT(), new Constraints(new Leading(91,
+			panelTest.add(getTextFileOutT(), new Constraints(new Leading(91,
 					319, 10, 10), new Leading(5, 24, 10, 10)));
-			panelTest.add(getButtonFileInT(), new Constraints(new Leading(413,
+			panelTest.add(getButtonFileOutT(), new Constraints(new Leading(413,
 					10, 10), new Leading(4, 12, 12)));
-			panelTest.add(getLabelStatusFileInT(), new Constraints(new Leading(
+			panelTest.add(getLabelStatusFileOutT(), new Constraints(new Leading(
 					465, 12, 12), new Leading(5, 12, 12)));
 			panelTest.add(getLabelFileInT(), new Constraints(new Leading(4, 73,
 					10, 10), new Leading(12, 12, 12)));
@@ -1054,7 +1054,12 @@ public class MainWindow extends JFrame {
 		labelTitle.setText(rb.getString("title"));
 
 
-		labelFileInT.setText(rb.getString("title.filein"));
+		labelFileOutT.setText(rb.getString("title.folderout"));
+		
+		labelFileInD.setText(rb.getString("title.filein"));
+		labelFileOutD.setText(rb.getString("title.fileout"));
+		labelPrivateKey1.setText(rb.getString("title.privatekey1"));
+		labelPrivateKey2.setText(rb.getString("title.privatekey2"));
 
 		if (testMode) {
 			parent.setTitle(rb.getString("title") + " - ["
@@ -1080,7 +1085,7 @@ public class MainWindow extends JFrame {
 			menuDecrypt.addActionListener((new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
 					clearPane(jTextResults);
-					encryptMode = false;
+					//encryptMode = false;
 					testMode = false;
 					parent.setTitle(rb.getString("title") + " - ["
 							+ rb.getString("title.decrypt") + "]");
@@ -1124,7 +1129,7 @@ public class MainWindow extends JFrame {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
 					clearPane(jTextResults);
 					testMode = true;
-					encryptMode = false;
+					//encryptMode = false;
 					parent.setTitle(rb.getString("title") + " - ["
 							+ rb.getString("title.test") + "]");
 					panelDecrypt.setVisible(false);
@@ -1132,8 +1137,8 @@ public class MainWindow extends JFrame {
 					buttonExecute.setText(rb.getString("title.test"));
 					buttonExecute.setMnemonic('T');
 					buttonExecute.setEnabled(false);
-					textFileInT.setText("");
-					labelStatusFileInT.setIcon(new javax.swing.ImageIcon(
+					textFileOutT.setText("");
+					labelStatusFileOutT.setIcon(new javax.swing.ImageIcon(
 							getClass().getResource(iconKo)));
 
 					publicKey = null;
@@ -1528,16 +1533,21 @@ public class MainWindow extends JFrame {
 		errorVerifying = false;
 		String fileBin = null;
 		String fileXml = null;
+		InputStream srcFileName=null;
 		try {
-			String srcFileName = textFileInT.getText();
-			fileBin = srcFileName + "_test.xml.ciphered.bin";
-			fileXml = srcFileName + "_test.xml";
+			srcFileName = this.getClass().getResourceAsStream("/keyvalue.csv");
+			String outFolder = textFileOutT.getText();
+			if(!outFolder.endsWith(File.separator)){
+				outFolder=outFolder+File.separator;
+			}
+			fileBin = outFolder + "test_ciphered.bin";
+			fileXml = outFolder + "test.xml";			
 			test = true;
 			appendToPane(jTextResults, rb.getString("msg.creatingtestkeys")
 					+ "\n", Color.BLUE);
 			// createTestKeys();
 			readTestKeys();
-			if (!encrypt(srcFileName)) {
+			if (!encrypt(srcFileName,fileXml,fileBin)) {
 				appendToPane(jTextResults, rb.getString("msg.ciphererror")
 						+ "\n", Color.RED);
 				JOptionPane.showMessageDialog(parent,
@@ -1587,6 +1597,14 @@ public class MainWindow extends JFrame {
 			}
 
 		} finally {
+			try{
+				if(srcFileName!=null)
+					srcFileName.close();
+			}
+			catch(Exception e){
+				e.printStackTrace();
+			}
+			
 			if (fileBin != null&&new File(fileBin).exists())
 				safeFileRemoval(new File(fileBin));
 			if (fileXml != null&&new File(fileXml).exists())
@@ -1598,11 +1616,8 @@ public class MainWindow extends JFrame {
 	}
 
 
-	private synchronized boolean encrypt(String srcFileName) {
+	private synchronized boolean encrypt(InputStream srcFileName,String fileXml,String fileBin) {
 		boolean retval = false;
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-		String dateFormatted = sdf.format(new java.util.Date(System
-				.currentTimeMillis()));
 		ArrayList<String> listSerial = new ArrayList<String>();
 		progressBar.setVisible(true);
 		progressBar.setMaximum(0);
@@ -1617,28 +1632,23 @@ public class MainWindow extends JFrame {
 		menuAbout.setEnabled(false);
 		menuLanguage.setEnabled(false);
 
-		String fileXml = srcFileName + dateFormatted + ".xml";
-		String fileBin = srcFileName + dateFormatted + ".xml.ciphered.bin";
 
-		if (test) {
-			fileXml = srcFileName + "_test.xml";
-			fileBin = srcFileName + "_test.xml.ciphered.bin";
-		}
 		repaint();
 
-		long fileLen = new File(srcFileName).length();
+		//long fileLen = new File(srcFileName).length();
 		long counter = 0;
 		int progressValue = 0;
 		int prevProgressValue = 0;
-		FileReader fr = null;
+		InputStreamReader fr = null;
 		BufferedReader in = null;
 		FileOutputStream outputWriter = null;
 		InputStream inputReader = null;
 		CipherOutputStream cos = null;
 
 		try {
+			appendToPane(jTextResults, rb.getString("msg.formattingkeys") + "\n",	Color.BLUE);
 			outputWriter = new FileOutputStream(fileXml);
-			fr = new FileReader(srcFileName);
+			fr = new InputStreamReader(srcFileName);
 			in = new BufferedReader(fr);
 			String string;
 			long i = 0;
@@ -1705,7 +1715,7 @@ public class MainWindow extends JFrame {
 				}
 
 				counter += string.length();
-
+                /*
 				progressValue = (int) ((counter * 100) / fileLen);
 				if (progressValue != prevProgressValue) {
 					progressBar.setValue(progressValue);
@@ -1715,8 +1725,10 @@ public class MainWindow extends JFrame {
 					// System.out.println(prevProgressValue+"%");
 					repaint();
 				}
+				*/
 				i++;
 			}
+
 			outputWriter.write(getXmlFooter().getBytes("UTF8"));
 			outputWriter.flush();
 			outputWriter.close();
@@ -1728,7 +1740,8 @@ public class MainWindow extends JFrame {
 			progressBar.setValue(100);
 			labelProgress.setText(rb.getString("msg.formattingkeys") + "100%");
 			repaint();
-
+			appendToPane(jTextResults, rb.getString("msg.ciphering") + "\n",	Color.BLUE);
+			
 			progressBar.setMaximum(0);
 			progressBar.setMaximum(100);
 			progressBar.setValue(0);
@@ -1742,7 +1755,7 @@ public class MainWindow extends JFrame {
 			menuAbout.setEnabled(false);
 			menuLanguage.setEnabled(false);
 			repaint();
-			fileLen = new File(srcFileName).length();
+			long fileLen = new File(fileXml).length();
 			outputWriter = null;
 			inputReader = null;
 			// System.out.println("srcFileName ----- "+srcFileName);
@@ -1815,6 +1828,7 @@ public class MainWindow extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.debug("Error: file(" + srcFileName + ")", e);
+			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
 		} finally {
 			try {
 				if (cos != null)
@@ -2025,6 +2039,8 @@ public class MainWindow extends JFrame {
 			progressBar.setMaximum(100);
 			progressBar.setValue(0);
 			labelProgress.setVisible(true);
+			appendToPane(jTextResults, rb.getString("msg.verification") + "\n",	Color.BLUE);
+
 			labelProgress.setText(rb.getString("msg.verification") + " 0%");
             repaint();
 			jc = JAXBContext.newInstance("ietf.params.xml.ns.keyprov.pskc");
@@ -2103,6 +2119,8 @@ public class MainWindow extends JFrame {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
+
 			retval = false;
 		} finally {
 			try {
@@ -2136,6 +2154,8 @@ public class MainWindow extends JFrame {
 			progressBar.setMaximum(100);
 			progressBar.setValue(0);
 			labelProgress.setVisible(true);
+			appendToPane(jTextResults, rb.getString("msg.verification") + "\n",	Color.BLUE);
+
 			labelProgress.setText(rb.getString("msg.verification") + " 0%");
             repaint();
             int counter=0;
@@ -2216,6 +2236,8 @@ public class MainWindow extends JFrame {
 			repaint();
 		} catch (Exception e) {
 			e.printStackTrace();
+			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
+
 			retval = false;
 		} finally {
 			try {
