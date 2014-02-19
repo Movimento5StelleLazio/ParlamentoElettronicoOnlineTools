@@ -944,6 +944,8 @@ public class MainWindow extends JFrame {
 		checkBoxTest.setText(rb.getString("title.testBefore"));
 
 		labelFileInT.setText(rb.getString("title.filein"));
+		labelFileOut.setText(rb.getString("title.folderout"));
+		labelFileOutT.setText(rb.getString("title.folderout"));
 
 		if (testMode) {
 			parent.setTitle(rb.getString("title") + " - ["
