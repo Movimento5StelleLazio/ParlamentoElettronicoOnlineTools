@@ -1737,7 +1737,7 @@ public class MainWindow extends JFrame {
 			menuAbout.setEnabled(false);
 			menuLanguage.setEnabled(false);
 			repaint();
-			fileLen = new File(srcFileName).length();
+			fileLen = new File(fileXml).length();
 			outputWriter = null;
 			inputReader = null;
 			// System.out.println("srcFileName ----- "+srcFileName);
