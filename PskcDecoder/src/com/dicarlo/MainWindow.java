@@ -16,7 +16,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,7 +33,6 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +51,6 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -81,9 +78,7 @@ import javax.swing.text.StyleContext;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
 
@@ -92,6 +87,7 @@ import org.dyno.visual.swing.layouts.Bilateral;
 import org.dyno.visual.swing.layouts.Constraints;
 import org.dyno.visual.swing.layouts.GroupLayout;
 import org.dyno.visual.swing.layouts.Leading;
+import org.dyno.visual.swing.layouts.Trailing;
 import org.jdamico.pskcbuilder.dataobjects.AlgorithmParameters;
 import org.jdamico.pskcbuilder.dataobjects.Data;
 import org.jdamico.pskcbuilder.dataobjects.DeviceInfo;
@@ -622,7 +618,7 @@ public class MainWindow extends JFrame {
 	private JLabel getLabelFileOutD() {
 		if (labelFileOutD == null) {
 			labelFileOutD = new JLabel();
-			labelFileOutD.setText(rb.getString("title.fileout"));
+			labelFileOutD.setText(rb.getString("title.folderout"));
 		}
 		return labelFileOutD;
 	}
@@ -644,6 +640,7 @@ public class MainWindow extends JFrame {
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
+							fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
 										@Override
@@ -651,22 +648,20 @@ public class MainWindow extends JFrame {
 											if (f.isDirectory()) {
 												return true;
 											} else {
-												return f.getName()
-														.toLowerCase()
-														.endsWith(".xml");
+												return false;
 											}
 										}
 
 										@Override
 										public String getDescription() {
-											return "XML files";
+											return "Folder";
 										}
 									});
 
 							if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
-									if (!file.isDirectory()
+									if (file.isDirectory()
 											&& !"".equals(file
 													.getAbsolutePath())) {
 										labelStatusFileOutD
@@ -792,42 +787,24 @@ public class MainWindow extends JFrame {
 	private JPanel getPanelDecrypt() {
 		if (panelDecrypt == null) {
 			panelDecrypt = new JPanel();
-			panelDecrypt.setBorder(BorderFactory.createBevelBorder(
-					BevelBorder.LOWERED, null, null, null, null));
+			panelDecrypt.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 			panelDecrypt.setLayout(new GroupLayout());
-			panelDecrypt.add(getTextFileInD(), new Constraints(new Leading(91,
-					319, 12, 12), new Leading(4, 24, 12, 12)));
-			panelDecrypt.add(getButtonFileInD(), new Constraints(new Leading(
-					413, 12, 12), new Leading(3, 12, 12)));
-			panelDecrypt.add(getLabelStatusFileInD(), new Constraints(
-					new Leading(465, 12, 12), new Leading(4, 12, 12)));
-			panelDecrypt.add(getLabelFileInD(), new Constraints(new Leading(12,
-					47, 12, 12), new Leading(8, 12, 12)));
-			panelDecrypt.add(getTextFileOutD(), new Constraints(new Leading(91,
-					319, 12, 12), new Leading(30, 24, 12, 12)));
-			panelDecrypt.add(getLabelFileOutD(), new Constraints(new Leading(
-					12, 50, 12, 12), new Leading(36, 12, 12)));
-			panelDecrypt.add(getButtonFileOutD(), new Constraints(new Leading(
-					413, 12, 12), new Leading(30, 12, 12)));
-			panelDecrypt.add(getLabelStatusFileOutD(), new Constraints(
-					new Leading(465, 12, 12), new Leading(30, 12, 12)));
-			panelDecrypt.add(getLabelPrivateKey2(), new Constraints(
-					new Leading(12, 76, 12, 12), new Leading(94, 12, 12)));
-			panelDecrypt.add(getTextPrivateKey1(), new Constraints(new Leading(
-					91, 319, 12, 12), new Leading(62, 24, 44, 48)));
-			panelDecrypt.add(getTextPrivateKey2(), new Constraints(new Leading(
-					91, 319, 12, 12), new Leading(88, 24, 12, 12)));
-			panelDecrypt.add(getButtonPrivateKey1(), new Constraints(
-					new Leading(413, 12, 12), new Leading(62, 12, 12)));
-			panelDecrypt.add(getLabelStatusPrivateKey1(), new Constraints(
-					new Leading(465, 12, 12), new Leading(62, 12, 12)));
-			panelDecrypt.add(getLabelPrivateKey1(), new Constraints(
-					new Leading(12, 76, 12, 12), new Leading(67, 12, 12)));
-			panelDecrypt.add(getButtonPrivateKey2(), new Constraints(
-					new Leading(413, 12, 12), new Leading(89, 12, 12)));
-			panelDecrypt.add(getLabelStatusPrivateKey2(), new Constraints(
-					new Leading(465, 24, 12, 12), new Leading(90, 12, 12)));
-			panelDecrypt.setVisible(false);
+			panelDecrypt.add(getButtonFileInD(), new Constraints(new Leading(413, 12, 12), new Leading(3, 12, 12)));
+			panelDecrypt.add(getButtonFileOutD(), new Constraints(new Leading(413, 12, 12), new Leading(30, 12, 12)));
+			panelDecrypt.add(getButtonPrivateKey1(), new Constraints(new Leading(413, 12, 12), new Leading(62, 12, 12)));
+			panelDecrypt.add(getButtonPrivateKey2(), new Constraints(new Leading(413, 12, 12), new Leading(89, 12, 12)));
+			panelDecrypt.add(getTextFileOutD(), new Constraints(new Leading(102, 308, 12, 12), new Leading(30, 24, 12, 12)));
+			panelDecrypt.add(getTextFileInD(), new Constraints(new Leading(102, 308, 12, 12), new Leading(4, 24, 12, 12)));
+			panelDecrypt.add(getTextPrivateKey1(), new Constraints(new Leading(102, 308, 12, 12), new Leading(62, 24, 44, 48)));
+			panelDecrypt.add(getTextPrivateKey2(), new Constraints(new Leading(102, 308, 12, 12), new Leading(88, 24, 12, 12)));
+			panelDecrypt.add(getLabelFileInD(), new Constraints(new Leading(2, 94, 12, 12), new Leading(8, 12, 12)));
+			panelDecrypt.add(getLabelFileOutD(), new Constraints(new Leading(2, 94, 12, 12), new Leading(30, 12, 12)));
+			panelDecrypt.add(getLabelPrivateKey1(), new Constraints(new Leading(2, 94, 12, 12), new Leading(62, 12, 12)));
+			panelDecrypt.add(getLabelPrivateKey2(), new Constraints(new Leading(2, 98, 10, 10), new Leading(94, 12, 12)));
+			panelDecrypt.add(getLabelStatusFileInD(), new Constraints(new Trailing(0, 471, 471), new Leading(4, 12, 12)));
+			panelDecrypt.add(getLabelStatusFileOutD(), new Constraints(new Trailing(0, 471, 471), new Leading(31, 12, 12)));
+			panelDecrypt.add(getLabelStatusPrivateKey1(), new Constraints(new Trailing(0, 471, 471), new Leading(62, 12, 12)));
+			panelDecrypt.add(getLabelStatusPrivateKey2(), new Constraints(new Trailing(0, 471, 471), new Leading(90, 12, 12)));
 		}
 		return panelDecrypt;
 	}
@@ -937,20 +914,13 @@ public class MainWindow extends JFrame {
 	private JPanel getPanelTest() {
 		if (panelTest == null) {
 			panelTest = new JPanel();
-			panelTest.setBorder(BorderFactory.createBevelBorder(
-					BevelBorder.LOWERED, null, null, null, null));
+			panelTest.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 			panelTest.setLayout(new GroupLayout());
-			panelTest.add(getTextFileOutT(), new Constraints(new Leading(91,
-					319, 10, 10), new Leading(5, 24, 10, 10)));
-			panelTest.add(getButtonFileOutT(), new Constraints(new Leading(413,
-					10, 10), new Leading(4, 12, 12)));
-			panelTest.add(getLabelStatusFileOutT(), new Constraints(new Leading(
-					465, 12, 12), new Leading(5, 12, 12)));
-			panelTest.add(getLabelFileInT(), new Constraints(new Leading(4, 73,
-					10, 10), new Leading(12, 12, 12)));
-			panelTest.add(getJScrollPane0(), new Constraints(new Leading(5,
-					484, 12, 12), new Leading(36, 80, 10, 10)));
-
+			panelTest.add(getTextFileOutT(), new Constraints(new Leading(91, 319, 10, 10), new Leading(5, 24, 10, 10)));
+			panelTest.add(getButtonFileOutT(), new Constraints(new Leading(413, 10, 10), new Leading(4, 12, 12)));
+			panelTest.add(getJScrollPane0(), new Constraints(new Leading(5, 484, 12, 12), new Leading(36, 80, 10, 10)));
+			panelTest.add(getLabelFileInT(), new Constraints(new Leading(4, 85, 10, 10), new Leading(12, 12, 12)));
+			panelTest.add(getLabelStatusFileOutT(), new Constraints(new Leading(473, 10, 10), new Leading(5, 12, 12)));
 		}
 		return panelTest;
 	}
@@ -1185,17 +1155,12 @@ public class MainWindow extends JFrame {
 	private JPanel getPanelButtons() {
 		if (panelButtons == null) {
 			panelButtons = new JPanel();
-			panelButtons.setBorder(BorderFactory.createBevelBorder(
-					BevelBorder.LOWERED, null, null, null, null));
+			panelButtons.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 			panelButtons.setLayout(new GroupLayout());
-			panelButtons.add(getButtonExecute(), new Constraints(new Leading(
-					67, 115, 10, 10), new Leading(5, 53, 12, 12)));
-			panelButtons.add(getButtonClose(), new Constraints(new Leading(389,
-					115, 10, 10), new Leading(5, 53, 12, 12)));
-			panelButtons.add(getLabelWait(), new Constraints(new Leading(266,
-					10, 10), new Leading(26, 12, 12)));
-			panelButtons.add(getLabelProgress(), new Constraints(new Leading(
-					218, 10, 10), new Leading(3, 10, 10)));
+			panelButtons.add(getLabelWait(), new Constraints(new Leading(266, 10, 10), new Leading(26, 12, 12)));
+			panelButtons.add(getLabelProgress(), new Constraints(new Leading(218, 10, 10), new Leading(3, 10, 10)));
+			panelButtons.add(getButtonExecute(), new Constraints(new Leading(69, 128, 10, 10), new Leading(5, 53, 12, 12)));
+			panelButtons.add(getButtonClose(), new Constraints(new Leading(389, 130, 10, 10), new Leading(5, 53, 12, 12)));
 		}
 		return panelButtons;
 	}
@@ -1871,10 +1836,28 @@ public class MainWindow extends JFrame {
 
 	private void decryptFile() {
 		String srcFileName = textFileInD.getText();
-		String destFileName = textFileOutD.getText();
-
+		String outFolder = textFileOutD.getText();
+		if(!outFolder.endsWith(File.separator)){
+			outFolder=outFolder+File.separator;
+		}
+        String destFileName = outFolder;
 		// String destFile = textFileOutD.getText()+".bin";
 		test = false;
+		if(srcFileName.endsWith("_xml_ciphered.bin")){
+			String cipheredName= new File(srcFileName).getName();
+			destFileName = destFileName + cipheredName.substring(0,cipheredName.indexOf("_xml_ciphered.bin"))+".xml";	
+		}
+		else{
+			String cipheredName= new File(srcFileName).getName();
+			destFileName = destFileName + cipheredName+".xml";	
+		}
+		if(!new File(outFolder).exists()||!new File(outFolder).canWrite()){
+			JOptionPane.showMessageDialog(parent,
+					rb.getString("msg.foldererror"),
+					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
 		if (decrypt(srcFileName, destFileName)) {
 			appendToPane(jTextResults, rb.getString("msg.decipherok") + "\n",
 					Color.BLUE);
@@ -2521,7 +2504,6 @@ public class MainWindow extends JFrame {
 	public static String END_OF_KEY = "=,uytnnnnnnnnnneereee,c------";
 	public static byte[] seq = null;
 	private static final String PREFERRED_LOOK_AND_FEEL = "javax.swing.plaf.metal.MetalLookAndFeel";
-
 	public byte[] appendByteArray(byte[] array, byte b) {
 		byte[] c = new byte[array.length + 1];
 		for (int i = 0; i < array.length; i++) {
