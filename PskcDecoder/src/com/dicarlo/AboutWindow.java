@@ -60,15 +60,15 @@ public class AboutWindow extends javax.swing.JDialog {
 		setForeground(Color.black);
 		setAlwaysOnTop(true);
 		setLayout(new GroupLayout());
-		add(getJLabel0(), new Constraints(new Leading(19, 10, 10), new Leading(12, 12, 12)));
-		add(getJLabel1(), new Constraints(new Leading(19, 12, 12), new Leading(40, 12, 12)));
 		add(getJLabel2(), new Constraints(new Leading(19, 10, 10), new Leading(74, 10, 10)));
 		add(getJLabel3(), new Constraints(new Leading(121, 50, 10, 10), new Leading(104, 43, 10, 10)));
 		add(getJLabel4(), new Constraints(new Leading(180, 10, 10), new Leading(104, 47, 10, 10)));
 		add(getJLabel5(), new Constraints(new Leading(242, 10, 10), new Leading(104, 12, 12)));
 		add(getJLabel6(), new Constraints(new Leading(302, 12, 12), new Leading(104, 12, 12)));
-		add(getJButton0(), new Constraints(new Leading(166, 89, 10, 10), new Leading(176, 40, 12, 12)));
-		setSize(411, 248);
+		add(getJButton0(), new Constraints(new Leading(188, 127, 10, 10), new Leading(165, 40, 12, 12)));
+		add(getJLabel0(), new Constraints(new Leading(5, 12, 12), new Leading(14, 10, 10)));
+		add(getJLabel1(), new Constraints(new Leading(6, 10, 10), new Leading(42, 10, 10)));
+		setSize(475, 248);
 	}
 	private JLabel getJLabel6() {
 		if (jLabel6 == null) {
