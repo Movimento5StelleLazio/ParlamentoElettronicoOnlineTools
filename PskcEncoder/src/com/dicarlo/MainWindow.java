@@ -367,6 +367,7 @@ public class MainWindow extends JFrame {
 		if (labelFileIn == null) {
 			labelFileIn = new JLabel();
 			labelFileIn.setText(rb.getString("title.filein"));
+			//labelFileIn.setFont(new java.awt.Font("Arial Narrow",Font.BOLD,12));
 		}
 		return labelFileIn;
 	}
@@ -468,6 +469,7 @@ public class MainWindow extends JFrame {
 		if (labelFileOut == null) {
 			labelFileOut = new JLabel();
 			labelFileOut.setText(rb.getString("title.folderout"));
+			//labelFileOut.setFont(new java.awt.Font("Arial",Font.BOLD,12));
 		}
 		return labelFileOut;
 	}
@@ -574,17 +576,17 @@ public class MainWindow extends JFrame {
 			panelEncrypt.setLayout(new GroupLayout());
 			panelEncrypt.add(getTextFileIn(), new Constraints(new Leading(91, 319, 10, 10), new Leading(5, 24, 10, 10)));
 			panelEncrypt.add(getButtonFileIn(), new Constraints(new Leading(413, 12, 12), new Leading(3, 12, 12)));
-			panelEncrypt.add(getLabelStatusFileIn(), new Constraints(new Leading(465, 12, 12), new Leading(5, 12, 12)));
-			panelEncrypt.add(getLabelFileIn(), new Constraints(new Leading(4, 73, 10, 10), new Leading(12, 12, 12)));
 			panelEncrypt.add(getTextFileOut(), new Constraints(new Leading(91, 319, 12, 12), new Leading(30, 24, 12, 12)));
 			panelEncrypt.add(getButtonFileOut(), new Constraints(new Leading(413, 12, 12), new Leading(30, 12, 12)));
-			panelEncrypt.add(getLabelStatusFileOut(), new Constraints(new Leading(465, 12, 12), new Leading(30, 12, 12)));
 			panelEncrypt.add(getCheckBoxTest(), new Constraints(new Leading(4, 12, 12), new Leading(92, 10, 10)));
 			panelEncrypt.add(getTextPublicKey(), new Constraints(new Leading(90, 319, 48, 48), new Leading(62, 24, 12, 12)));
 			panelEncrypt.add(getButtonPublicKey(), new Constraints(new Leading(413, 48, 48), new Leading(62, 12, 12)));
-			panelEncrypt.add(getLabelStatusPublicKey(), new Constraints(new Leading(465, 12, 12), new Leading(62, 12, 12)));
 			panelEncrypt.add(getLabelPublicKey(), new Constraints(new Leading(4, 80, 12, 12), new Leading(66, 12, 12)));
-			panelEncrypt.add(getLabelFileOut(), new Constraints(new Leading(4, 72, 12, 12), new Leading(38, 12, 12)));
+			panelEncrypt.add(getLabelFileOut(), new Constraints(new Leading(4, 85, 10, 10), new Leading(38, 12, 12)));
+			panelEncrypt.add(getLabelFileIn(), new Constraints(new Leading(4, 84, 12, 12), new Leading(12, 12, 12)));
+			panelEncrypt.add(getLabelStatusFileIn(), new Constraints(new Leading(473, 10, 10), new Leading(5, 12, 12)));
+			panelEncrypt.add(getLabelStatusFileOut(), new Constraints(new Leading(473, 10, 10), new Leading(30, 12, 12)));
+			panelEncrypt.add(getLabelStatusPublicKey(), new Constraints(new Leading(473, 10, 10), new Leading(62, 12, 12)));
 		}
 		return panelEncrypt;
 	}
@@ -829,13 +831,13 @@ public class MainWindow extends JFrame {
 			panelTest.setLayout(new GroupLayout());
 			panelTest.add(getTextFileInT(), new Constraints(new Leading(91, 319, 10, 10), new Leading(5, 24, 10, 10)));
 			panelTest.add(getButtonFileInT(), new Constraints(new Leading(413, 10, 10), new Leading(4, 12, 12)));
-			panelTest.add(getLabelStatusFileInT(), new Constraints(new Leading(465, 12, 12), new Leading(5, 12, 12)));
-			panelTest.add(getLabelFileInT(), new Constraints(new Leading(4, 73, 10, 10), new Leading(12, 12, 12)));
 			panelTest.add(getTextFileOutT(), new Constraints(new Leading(91, 319, 12, 12), new Leading(30, 24, 12, 12)));
 			panelTest.add(getButtonFileOutT(), new Constraints(new Leading(413, 12, 12), new Leading(30, 12, 12)));
-			panelTest.add(getLabelStatusFileOutT(), new Constraints(new Leading(465, 12, 12), new Leading(30, 12, 12)));
 			panelTest.add(getJScrollPane0(), new Constraints(new Leading(5, 484, 12, 12), new Leading(59, 61, 10, 10)));
-			panelTest.add(getLabelFileOutT(), new Constraints(new Leading(4, 72, 12, 12), new Leading(38, 12, 12)));
+			panelTest.add(getLabelFileOutT(), new Constraints(new Leading(4, 85, 10, 10), new Leading(38, 12, 12)));
+			panelTest.add(getLabelFileInT(), new Constraints(new Leading(4, 84, 12, 12), new Leading(12, 12, 12)));
+			panelTest.add(getLabelStatusFileInT(), new Constraints(new Leading(473, 10, 10), new Leading(5, 12, 12)));
+			panelTest.add(getLabelStatusFileOutT(), new Constraints(new Leading(473, 10, 10), new Leading(30, 12, 12)));
 		}
 		return panelTest;
 	}
@@ -1262,6 +1264,10 @@ public class MainWindow extends JFrame {
 			if (lnfClassname == null)
 				lnfClassname = UIManager.getCrossPlatformLookAndFeelClassName();
 			UIManager.setLookAndFeel(lnfClassname);
+			//UIManager.getLookAndFeelDefaults().put("defaultFont", new Font("Arial Narrow", Font.PLAIN, 4));
+			
+			
+			
 		} catch (Exception e) {
 			System.err.println("Cannot install " + PREFERRED_LOOK_AND_FEEL
 					+ " on this platform:" + e.getMessage());
@@ -1557,7 +1563,7 @@ public class MainWindow extends JFrame {
 	}
 
 	private void encryptFile() {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 		String dateFormatted = sdf.format(new java.util.Date(System
 				.currentTimeMillis()));
 		String srcFileName = textFileIn.getText();
@@ -1565,8 +1571,8 @@ public class MainWindow extends JFrame {
 		if(!outFolder.endsWith(File.separator)){
 			outFolder=outFolder+File.separator;
 		}
-		String fileXml = outFolder + new File(srcFileName).getName()+"_"+ dateFormatted + ".xml";
-		String fileBin = outFolder + new File(srcFileName).getName().replaceAll("\\.", "_")+"_"+ dateFormatted + "_xml_ciphered.bin";
+		String fileXml = outFolder + new File(srcFileName).getName().replaceAll("\\.", "_")+"_"+ dateFormatted + "_PSKC.xml";
+		String fileBin = outFolder + new File(srcFileName).getName().replaceAll("\\.", "_")+"_"+ dateFormatted + "_PSKC_xml_ciphered.bin";
 		
 		if(!new File(outFolder).exists()||!new File(outFolder).canWrite()){
 			appendToPane(jTextResults, rb.getString("msg.foldererror")
