@@ -125,13 +125,18 @@ public class MainWindow extends JFrame {
 	String iconOk = "/ok.png";
 	String iconKo = "/ko.png";
 
-	private byte[] publicKeyBytes = null;
 
-	private PublicKey publicKey = null;
+
+	private byte[] privateKeyBytes = null;
+	private byte[] halfkey1 = null;
+	private byte[] halfkey2 = null;
+
 	private PrivateKey privateKey = null;
+	
+	private boolean statusPrivateKey1 = false;
+	private boolean statusPrivateKey2 = false;
 
-	private String base64PublicKey = "";
-
+	
 	private JPanel panelTitle;
 	private JLabel labelTitle;
 	private JPanel panelAction;
@@ -147,8 +152,8 @@ public class MainWindow extends JFrame {
 	private JScrollPane jScrollPane0;
 
 	javax.swing.JMenuItem menuVersion = null;
-	javax.swing.JMenuItem menuEncrypt = null;
 	javax.swing.JMenuItem menuTest = null;
+	javax.swing.JMenuItem menuLog = null;
 
 	javax.swing.JMenuItem menuItalian = null;
 	javax.swing.JMenuItem menuEnglish = null;
@@ -158,7 +163,6 @@ public class MainWindow extends JFrame {
 	private boolean encryptMode = true;
 	private boolean testMode = false;
 
-	private boolean statusPublicKey = false;
 
 
 	// START COMPONENT FOR TEST
@@ -173,6 +177,7 @@ public class MainWindow extends JFrame {
 	private JLabel labelStatusPrivateKey2;
 	private JButton buttonPrivateKey2;
 
+	private int panelSelected=0;
 	// PANEL 1
 	private JPanel panelTest1;
 	
@@ -180,11 +185,13 @@ public class MainWindow extends JFrame {
 	private JTextField textFileCsv;
 	private JButton buttonFileCsv;
 	private JLabel labelStatusFileCsv;
+	private boolean statusFileCsv=false;
 
 	private JTextField textFileBin;
 	private JLabel labelFileBin;
 	private JButton buttonFileBin;
 	private JLabel labelStatusFileBin;
+	private boolean statusFileBin=false;
 
 	// PANEL 2
 	private JPanel panelTest2;
@@ -193,11 +200,13 @@ public class MainWindow extends JFrame {
 	private JTextField textFileCsv1;
 	private JButton buttonFileCsv1;
 	private JLabel labelStatusFileCsv1;
+	private boolean statusFileCsv1=false;
 
 	private JTextField textFileXml;
 	private JLabel labelFileXml;
 	private JButton buttonFileXml;
 	private JLabel labelStatusFileXml;
+	private boolean statusFileXml=false;
 
 	// PANEL 3
 	private JPanel panelTest3;
@@ -206,11 +215,13 @@ public class MainWindow extends JFrame {
 	private JLabel labelFileXml1;
 	private JButton buttonFileXml1;
 	private JLabel labelStatusFileXml1;
+	private boolean statusFileXml1=false;
 
 	private JLabel labelFileBin1;
 	private JTextField textFileBin1;
 	private JButton buttonFileBin1;
 	private JLabel labelStatusFileBin1;
+	private boolean statusFileBin1=false;
 
 
 	
@@ -258,13 +269,13 @@ public class MainWindow extends JFrame {
 		if (jTabbedPane == null) {
 			jTabbedPane = new JTabbedPane();
 
-			jTabbedPane.addTab("Test 1",getPanelTest1());
+			jTabbedPane.addTab( rb.getString("title.test")+" 1",getPanelTest1());
 			jTabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
 			
-			jTabbedPane.addTab("Test 2",getPanelTest2());
+			jTabbedPane.addTab(rb.getString("title.test")+" 2",getPanelTest2());
 			jTabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
 			
-			jTabbedPane.addTab("Test 3",getPanelTest3());
+			jTabbedPane.addTab(rb.getString("title.test")+" 3",getPanelTest3());
 			jTabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
 			
 			jTabbedPane.addChangeListener(new ChangeListener() {
@@ -274,7 +285,7 @@ public class MainWindow extends JFrame {
                             int index=jTabbedPane.getSelectedIndex();
                             JTabbedPane pane = (JTabbedPane) e.getSource();
                             System.out.println("Selected paneNo : " + index);
-
+                            panelSelected=index;
                             
                         }
 
@@ -319,99 +330,154 @@ public class MainWindow extends JFrame {
 			buttonPrivateKey1 = new JButton();
 			buttonPrivateKey1.setText("....");
 			buttonPrivateKey1
-					.addActionListener((new java.awt.event.ActionListener() {
-						public void actionPerformed(
-								java.awt.event.ActionEvent evt) {
-							JFileChooser fileChooser = new JFileChooser();
-							fileChooser.setFileFilter(new FileFilter() {
-								@Override
-								public String getDescription() {
-									return "key file";
-								}
+			.addActionListener((new java.awt.event.ActionListener() {
+				public void actionPerformed(
+						java.awt.event.ActionEvent evt) {
+					JFileChooser fileChooser = new JFileChooser();
+					fileChooser.setFileFilter(new FileFilter() {
+						@Override
+						public String getDescription() {
+							return "key file";
+						}
 
-								@Override
-								public boolean accept(File file) {
-									if (file.isDirectory()) {
-										return true;
-									} else {
-										String path = file.getAbsolutePath()
-												.toLowerCase();
-										return path.toLowerCase().endsWith(
-												".key");
-									}
-								}
-							});
-							if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
-								File file = fileChooser.getSelectedFile();
-								if (file != null) {
-									if (file.exists()
-											&& file.getAbsolutePath()
-													.toLowerCase()
-													.endsWith(".key")
-											&& file.isFile()) {
+						@Override
+						public boolean accept(File file) {
+							if (file.isDirectory()) {
+								return true;
+							} else {
+								String path = file.getAbsolutePath()
+										.toLowerCase();
+								return path.toLowerCase().endsWith(
+										".key");
+							}
+						}
+					});
+					if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
+						File file = fileChooser.getSelectedFile();
+						if (file != null) {
+							if (file.exists()
+									&& file.getAbsolutePath()
+											.toLowerCase()
+											.endsWith(".key")
+									&& file.isFile()) {
+								textPrivateKey1.setText(file
+										.getAbsolutePath());
+								String filePK1 = textPrivateKey1
+										.getText();
+								String filePK2 = textPrivateKey2
+										.getText();
+								if (!"".equals(filePK1)
+										&& !"".equals(filePK2)) {
+									FileInputStream fis1 = null;
+									FileInputStream fis2 = null;
+									try {
+										fis1 = new FileInputStream(
+												new File(filePK1));
+										fis2 = new FileInputStream(
+												new File(filePK2));
+										halfkey1 = new byte[(int) new File(
+												filePK1).length()];
+										halfkey2 = new byte[(int) new File(
+												filePK2).length()];
+										fis1.read(halfkey1);
+										fis2.read(halfkey2);
+										byte[] b1 = Base64
+												.decode(halfkey1);
+										byte[] b2 = Base64
+												.decode(halfkey2);
+
+										privateKeyBytes = new byte[halfkey1.length
+												+ halfkey2.length];
+										for (int i = 0; i < b1.length; i++) {
+											privateKeyBytes[i] = b1[i];
+										}
+										for (int i = 0; i < b2.length; i++) {
+											privateKeyBytes[i
+													+ b1.length] = b2[i];
+										}
+										privateKey = KeyFactory
+												.getInstance("RSA")
+												.generatePrivate(
+														new PKCS8EncodedKeySpec(
+																privateKeyBytes));
+										fis1.close();
+										fis2.close();
+										fis1 = null;
+										fis2 = null;
 										labelStatusPrivateKey1
 												.setIcon(new javax.swing.ImageIcon(
-														getClass().getResource(
-																iconOk)));
-										textPrivateKey1.setText(file
-												.getAbsolutePath());
-										FileInputStream fis = null;
+														getClass()
+																.getResource(
+																		iconOk)));
+										labelStatusPrivateKey2
+												.setIcon(new javax.swing.ImageIcon(
+														getClass()
+																.getResource(
+																		iconOk)));
+									} catch (Exception e) {
+										e.printStackTrace();
+										privateKey = null;
+										privateKeyBytes = null;
+										textPrivateKey1.setText("");
+										textPrivateKey2.setText("");
+										labelStatusPrivateKey1
+												.setIcon(new javax.swing.ImageIcon(
+														getClass()
+																.getResource(
+																		iconKo)));
+										labelStatusPrivateKey2
+												.setIcon(new javax.swing.ImageIcon(
+														getClass()
+																.getResource(
+																		iconKo)));
+										JOptionPane.showMessageDialog(
+												parent,
+												rb.getString("msg.invalidprivatekey"),
+												rb.getString("title.error"),
+												JOptionPane.ERROR_MESSAGE);
+									} finally {
 										try {
-											fis = new FileInputStream(file);
-											publicKeyBytes = new byte[(int) file
-													.length()];
-											fis.read(publicKeyBytes);
-											publicKey = KeyFactory
-													.getInstance("RSA")
-													.generatePublic(
-															new X509EncodedKeySpec(
-																	Base64.decode(publicKeyBytes)));
-											fis.close();
-											fis = null;
-											base64PublicKey = new String(
-													publicKeyBytes);
+											if (fis1 != null)
+												fis1.close();
 										} catch (Exception e) {
 											e.printStackTrace();
-											base64PublicKey = "";
-											publicKey = null;
-											publicKeyBytes = null;
-											textPrivateKey1.setText("");
-											labelStatusPrivateKey1
-													.setIcon(new javax.swing.ImageIcon(
-															getClass()
-																	.getResource(
-																			iconKo)));
-											JOptionPane.showMessageDialog(
-													parent,
-													rb.getString("msg.invalidpublickey"),
-													rb.getString("title.error"),
-													JOptionPane.ERROR_MESSAGE);
-										} finally {
-											try {
-												if (fis != null)
-													fis.close();
-											} catch (Exception e) {
-												e.printStackTrace();
-											}
 										}
-
-										statusPublicKey = (publicKey != null);
-
-									} else {
-										labelStatusPrivateKey1
-												.setIcon(new javax.swing.ImageIcon(
-														getClass().getResource(
-																iconKo)));
-										textPrivateKey1.setText("");
-										statusPublicKey = false;
-										buttonExecute.setEnabled(false);
+										try {
+											if (fis2 != null)
+												fis2.close();
+										} catch (Exception e) {
+											e.printStackTrace();
+										}
 									}
+
+									statusPrivateKey1 = (privateKey != null);
+									statusPrivateKey2 = statusPrivateKey1;
+									
+
+								} else {
+									statusPrivateKey1 = false;
+									statusPrivateKey2 = false;
+									labelStatusPrivateKey1
+											.setIcon(null);
+									labelStatusPrivateKey2
+											.setIcon(null);
 								}
 
+								
+							} else {
+								labelStatusPrivateKey1
+										.setIcon(new javax.swing.ImageIcon(
+												getClass().getResource(
+														iconKo)));
+								textPrivateKey1.setText("");
+								statusPrivateKey1 = false;
 							}
-							repaint();
 						}
-					}));
+
+					}
+					repaint();
+				}
+			}));
 
 		}
 		return buttonPrivateKey1;
@@ -422,7 +488,6 @@ public class MainWindow extends JFrame {
 			labelStatusPrivateKey1 = new JLabel();
 			labelStatusPrivateKey1.setIcon(new ImageIcon(getClass().getResource(
 					"/ko.png")));
-			statusPublicKey = false;
 		}
 		return labelStatusPrivateKey1;
 	}
@@ -450,6 +515,155 @@ public class MainWindow extends JFrame {
 		if (buttonPrivateKey2 == null) {
 			buttonPrivateKey2 = new JButton();
 			buttonPrivateKey2.setText("....");
+			buttonPrivateKey2
+			.addActionListener((new java.awt.event.ActionListener() {
+				public void actionPerformed(
+						java.awt.event.ActionEvent evt) {
+					JFileChooser fileChooser = new JFileChooser();
+					fileChooser.setFileFilter(new FileFilter() {
+						@Override
+						public String getDescription() {
+							return "key file";
+						}
+
+						@Override
+						public boolean accept(File file) {
+							if (file.isDirectory()) {
+								return true;
+							} else {
+								String path = file.getAbsolutePath()
+										.toLowerCase();
+								return path.toLowerCase().endsWith(
+										".key");
+							}
+						}
+					});
+					if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
+						File file = fileChooser.getSelectedFile();
+						if (file != null) {
+							if (file.exists()
+									&& file.getAbsolutePath()
+											.toLowerCase()
+											.endsWith(".key")
+									&& file.isFile()) {
+								textPrivateKey2.setText(file
+										.getAbsolutePath());
+								String filePK1 = textPrivateKey1
+										.getText();
+								String filePK2 = textPrivateKey2
+										.getText();
+								if (!"".equals(filePK1)
+										&& !"".equals(filePK2)) {
+									FileInputStream fis1 = null;
+									FileInputStream fis2 = null;
+									try {
+										fis1 = new FileInputStream(
+												new File(filePK1));
+										fis2 = new FileInputStream(
+												new File(filePK2));
+										halfkey1 = new byte[(int) new File(
+												filePK1).length()];
+										halfkey2 = new byte[(int) new File(
+												filePK2).length()];
+										fis1.read(halfkey1);
+										fis2.read(halfkey2);
+										byte[] b1 = Base64
+												.decode(halfkey1);
+										byte[] b2 = Base64
+												.decode(halfkey2);
+
+										privateKeyBytes = new byte[halfkey1.length
+												+ halfkey2.length];
+										for (int i = 0; i < b1.length; i++) {
+											privateKeyBytes[i] = b1[i];
+										}
+										for (int i = 0; i < b2.length; i++) {
+											privateKeyBytes[i
+													+ b1.length] = b2[i];
+										}
+
+										privateKey = KeyFactory
+												.getInstance("RSA")
+												.generatePrivate(
+														new PKCS8EncodedKeySpec(
+																privateKeyBytes));
+										fis1.close();
+										fis2.close();
+										fis1 = null;
+										fis2 = null;
+										labelStatusPrivateKey1
+												.setIcon(new javax.swing.ImageIcon(
+														getClass()
+																.getResource(
+																		iconOk)));
+										labelStatusPrivateKey2
+												.setIcon(new javax.swing.ImageIcon(
+														getClass()
+																.getResource(
+																		iconOk)));
+									} catch (Exception e) {
+										e.printStackTrace();
+										privateKey = null;
+										privateKeyBytes = null;
+										textPrivateKey1.setText("");
+										textPrivateKey2.setText("");
+										labelStatusPrivateKey1
+												.setIcon(new javax.swing.ImageIcon(
+														getClass()
+																.getResource(
+																		iconKo)));
+										labelStatusPrivateKey2
+												.setIcon(new javax.swing.ImageIcon(
+														getClass()
+																.getResource(
+																		iconKo)));
+										JOptionPane.showMessageDialog(
+												parent,
+												rb.getString("msg.invalidprivatekey"),
+												rb.getString("title.error"),
+												JOptionPane.ERROR_MESSAGE);
+									} finally {
+										try {
+											if (fis1 != null)
+												fis1.close();
+										} catch (Exception e) {
+											e.printStackTrace();
+										}
+										try {
+											if (fis2 != null)
+												fis2.close();
+										} catch (Exception e) {
+											e.printStackTrace();
+										}
+									}
+
+									statusPrivateKey1 = (privateKey != null);
+									statusPrivateKey2 = statusPrivateKey1;
+									
+
+								} else {
+									statusPrivateKey1 = false;
+									statusPrivateKey2 = false;
+									labelStatusPrivateKey1
+											.setIcon(null);
+									labelStatusPrivateKey2
+											.setIcon(null);
+								}
+							} else {
+								labelStatusPrivateKey1
+										.setIcon(new javax.swing.ImageIcon(
+												getClass().getResource(
+														iconKo)));
+								textPrivateKey1.setText("");
+								statusPrivateKey1 = false;
+
+							}
+						}
+
+					}
+					repaint();
+				}
+			}));
 		}
 		return buttonPrivateKey2;
 	}
@@ -519,29 +733,32 @@ public class MainWindow extends JFrame {
 											if (f.isDirectory()) {
 												return true;
 											} else {
-												return f.getName()
+												return (f.getName()
 														.toLowerCase()
-														.endsWith(".csv");
+														.endsWith(".csv")||
+														f.getName()
+														.toLowerCase()
+														.endsWith(".txt"));
 											}
 										}
 
 										@Override
 										public String getDescription() {
-											return "CSV files";
+											return "csv txt files";
 										}
 									});
 
 							if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
-									if (file.exists()) {
+									if (file.exists()&&(file.getName().toLowerCase().endsWith(".csv")||file.getName().toLowerCase().endsWith(".txt"))) {
 										labelStatusFileCsv
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
 																iconOk)));
 										textFileCsv.setText(file
 												.getAbsolutePath());
-
+										statusFileCsv=true;
 
 									} else {
 										labelStatusFileCsv
@@ -549,7 +766,7 @@ public class MainWindow extends JFrame {
 														getClass().getResource(
 																iconKo)));
 										textFileCsv.setText("");
-										buttonExecute.setEnabled(false);
+										statusFileCsv=false;
 									}
 								}
 
@@ -623,22 +840,21 @@ public class MainWindow extends JFrame {
 
 										@Override
 										public String getDescription() {
-											return ".bin";
+											return "bin Files";
 										}
 									});
 
 							if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
-									if (!file.isDirectory()
-											&& !"".equals(file
-													.getAbsolutePath())) {
+									if (file.exists()&&file.getName().toLowerCase().endsWith(".bin")) {
 										labelStatusFileBin
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
 																iconOk)));
 										textFileBin.setText(file
 												.getAbsolutePath());
+										statusFileBin=true;
 										
 									} else {
 										labelStatusFileBin
@@ -646,7 +862,7 @@ public class MainWindow extends JFrame {
 														getClass().getResource(
 																iconKo)));
 										textFileBin.setText("");
-										
+										statusFileBin=false;
 									}
 								}
 
@@ -730,20 +946,21 @@ public class MainWindow extends JFrame {
 
 										@Override
 										public String getDescription() {
-											return "CSV files";
+											return "csv txt files";
 										}
 									});
 
 							if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
-									if (file.exists()) {
+									if (file.exists()&&(file.getName().toLowerCase().endsWith(".csv")||file.getName().toLowerCase().endsWith(".txt"))) {
 										labelStatusFileCsv1
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
 																iconOk)));
 										textFileCsv1.setText(file
 												.getAbsolutePath());
+										statusFileCsv1=true;
 
 									} else {
 										labelStatusFileCsv1
@@ -751,7 +968,7 @@ public class MainWindow extends JFrame {
 														getClass().getResource(
 																iconKo)));
 										textFileCsv1.setText("");
-
+										statusFileCsv1=false;
 									}
 								}
 
@@ -816,28 +1033,28 @@ public class MainWindow extends JFrame {
 
 										@Override
 										public String getDescription() {
-											return ".xml";
+											return "xml files";
 										}
 									});
 
 							if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
-									if (file.exists()
-											&& !"".equals(file
-													.getAbsolutePath())) {
+									if (file.exists()&&file.getName().toLowerCase().endsWith(".xml")) {
 										labelStatusFileXml
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
 																iconOk)));
 										textFileXml.setText(file
 												.getAbsolutePath());
+										statusFileXml=true;
 									} else {
 										labelStatusFileXml
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
 																iconKo)));
 										textFileXml.setText("");
+										statusFileXml=false;
 									}
 								}
 
@@ -947,28 +1164,28 @@ public class MainWindow extends JFrame {
 
 										@Override
 										public String getDescription() {
-											return ".xml";
+											return "xml files";
 										}
 									});
 
 							if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
-									if (file.exists()
-											&& !"".equals(file
-													.getAbsolutePath())) {
+									if (file.exists()&&file.getName().toLowerCase().endsWith(".xml")) {
 										labelStatusFileXml1
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
 																iconOk)));
 										textFileXml1.setText(file
 												.getAbsolutePath());
+										statusFileXml1=true;
 									} else {
 										labelStatusFileXml1
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
 																iconKo)));
 										textFileXml1.setText("");
+										statusFileXml1=false;
 									}
 								}
 
@@ -1032,20 +1249,21 @@ public class MainWindow extends JFrame {
 
 										@Override
 										public String getDescription() {
-											return "BIN files";
+											return "bin files";
 										}
 									});
 
 							if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
-									if (file.exists()) {
+									if (file.exists()&&file.getName().toLowerCase().endsWith(".bin")) {
 										labelStatusFileBin1
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
 																iconOk)));
 										textFileBin1.setText(file
 												.getAbsolutePath());
+										statusFileBin1=true;
 
 									} else {
 										labelStatusFileBin1
@@ -1053,7 +1271,7 @@ public class MainWindow extends JFrame {
 														getClass().getResource(
 																iconKo)));
 										textFileBin1.setText("");
-
+										statusFileBin1=false;
 									}
 								}
 
@@ -1156,8 +1374,8 @@ public class MainWindow extends JFrame {
 			menuFile = new JMenu();
 			menuFile.setText(rb.getString("title.file"));
 			menuFile.setMnemonic('F');
-			menuFile.add(getMenuEncrypt());
 			menuFile.add(getMenuTest());
+			menuFile.add(getMenuLog());
 		}
 		return menuFile;
 	}
@@ -1224,47 +1442,45 @@ public class MainWindow extends JFrame {
 
 		menuFile.setText(rb.getString("title.file"));
 		menuLanguage.setText(rb.getString("title.language"));
-		menuEncrypt.setText(rb.getString("title.encrypt"));
 		menuTest.setText(rb.getString("title.test"));
+		menuLog.setText(rb.getString("title.log"));
 		menuAbout.setText(rb.getString("title.about"));
 		menuVersion.setText(rb.getString("title.version"));
 		buttonClose.setText(rb.getString("button.close"));
 		labelTitle.setText(rb.getString("title"));
 
 		labelPrivateKey1.setText(rb.getString("title.privatekey1"));
-		// labelFileOut.setText(rb.getString("title.fileout"));
+		labelPrivateKey2.setText(rb.getString("title.privatekey2"));
+
+		jTabbedPane.setTabComponentAt(0, new JLabel(rb.getString("title.test")+" 1"));
+		jTabbedPane.setTabComponentAt(1, new JLabel(rb.getString("title.test")+" 2"));
+		jTabbedPane.setTabComponentAt(2, new JLabel(rb.getString("title.test")+" 3"));
+
+		
 		labelFileCsv.setText(rb.getString("title.filecsv"));
 		labelFileCsv1.setText(rb.getString("title.filecsv"));
-		labelFileBin.setText(rb.getString("title.filebin"));
+		
 		labelFileXml.setText(rb.getString("title.filexml"));
-
-		if (testMode) {
-			parent.setTitle(rb.getString("title") + " - ["
+		labelFileXml1.setText(rb.getString("title.filexml"));
+		
+		labelFileBin.setText(rb.getString("title.filebin"));
+		labelFileBin1.setText(rb.getString("title.filebin"));
+		
+		
+		parent.setTitle(rb.getString("title") + " - ["
 					+ rb.getString("title.test") + "]");
-			buttonExecute.setText(rb.getString("title.test"));
-			buttonExecute.setMnemonic('T');
-		} else {
-			if (encryptMode) {
-				parent.setTitle(rb.getString("title") + " - ["
-						+ rb.getString("title.encrypt") + "]");
-				buttonExecute.setText(rb.getString("title.encrypt"));
-				buttonExecute.setMnemonic('C');
-			} else {
-				parent.setTitle(rb.getString("title") + " - ["
-						+ rb.getString("title.decrypt") + "]");
-				buttonExecute.setText(rb.getString("title.decrypt"));
-				buttonExecute.setMnemonic('D');
-			}
-		}
+		buttonExecute.setText(rb.getString("title.test"));
+		buttonExecute.setMnemonic('T');
+
 		repaint();
 	}
 
-	private JMenuItem getMenuEncrypt() {
-		if (menuEncrypt == null) {
-			menuEncrypt = new javax.swing.JMenuItem(
+	private JMenuItem getMenuTest() {
+		if (menuTest == null) {
+			menuTest = new javax.swing.JMenuItem(
 					rb.getString("title.encrypt"));
-			menuEncrypt.setMnemonic('C');
-			menuEncrypt.addActionListener((new java.awt.event.ActionListener() {
+			menuTest.setMnemonic('C');
+			menuTest.addActionListener((new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
 					clearPane(jTextResults);
 					encryptMode = true;
@@ -1273,33 +1489,28 @@ public class MainWindow extends JFrame {
 							+ rb.getString("title.encrypt") + "]");
 					panelTestChoice.setVisible(true);
 					panelTestResults.setVisible(false);
-					buttonExecute.setText(rb.getString("title.encrypt"));
-					buttonExecute.setMnemonic('C');
-					buttonExecute.setEnabled(false);
+					buttonExecute.setText(rb.getString("title.test"));
+					buttonExecute.setMnemonic('T');
+					buttonExecute.setEnabled(true);
 					textPrivateKey1.setText("");
-					statusPublicKey = false;
 					labelStatusPrivateKey1.setIcon(new javax.swing.ImageIcon(
 							getClass().getResource(iconKo)));
 					textFileCsv.setText("");
 					labelStatusFileCsv.setIcon(new javax.swing.ImageIcon(
 							getClass().getResource(iconKo)));
 
-					publicKey = null;
-					publicKeyBytes = null;
-					base64PublicKey = "";
-					test = false;
 				}
 			}));
 		}
-		return menuEncrypt;
+		return menuTest;
 	}
 
 
-	private JMenuItem getMenuTest() {
-		if (menuTest == null) {
-			menuTest = new javax.swing.JMenuItem(rb.getString("title.test"));
-			menuTest.setMnemonic('T');
-			menuTest.addActionListener((new java.awt.event.ActionListener() {
+	private JMenuItem getMenuLog() {
+		if (menuLog == null) {
+			menuLog = new javax.swing.JMenuItem(rb.getString("title.test"));
+			menuLog.setMnemonic('T');
+			menuLog.addActionListener((new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
 					clearPane(jTextResults);
 					testMode = true;
@@ -1310,20 +1521,16 @@ public class MainWindow extends JFrame {
 					panelTestResults.setVisible(true);
 					buttonExecute.setText(rb.getString("title.test"));
 					buttonExecute.setMnemonic('T');
-					buttonExecute.setEnabled(false);
+					buttonExecute.setEnabled(true);
 					//textFileInT.setText("");
 					//textFileOutT.setText("");
 					//labelStatusFileInT.setIcon(new javax.swing.ImageIcon(getClass().getResource(iconKo)));
 
-					publicKey = null;
-					publicKeyBytes = null;
-					privateKey = null;
-					test = true;
 
 				}
 			}));
 		}
-		return menuTest;
+		return menuLog;
 	}
 
 	private JMenu getMenuAbout() {
@@ -1370,8 +1577,8 @@ public class MainWindow extends JFrame {
 		if (buttonExecute == null) {
 			buttonExecute = new JButton();
 			buttonExecute.setFont(new Font("Serif", Font.BOLD, 16));
-			buttonExecute.setText(rb.getString("title.encrypt"));
-			buttonExecute.setMnemonic('C');
+			buttonExecute.setText(rb.getString("title.test"));
+			buttonExecute.setMnemonic('T');
 			buttonExecute.setEnabled(false);
 			buttonExecute
 					.addActionListener((new java.awt.event.ActionListener() {
@@ -1382,19 +1589,7 @@ public class MainWindow extends JFrame {
 								@Override
 								public void run() {
 
-									if (testMode) {
-										mapSerialSeed.clear();
-										clearPane(jTextResults);
-										// jTextResults.setText("");
-										//testFile();
-									} else {
-										mapSerialSeed.clear();
-										clearPane(jTextResults);
-										// jTextResults.setText("");
-										
-											
-																			
-									}
+									buttonExecute.setEnabled(true);									
 
 								}
 							}.start();
@@ -1569,531 +1764,8 @@ public class MainWindow extends JFrame {
 		}
 	}
 
-	private void createTestKeys() {
-		try {
-			labelProgress.setText(rb.getString("msg.creatingtestkeys"));
-			BlumBlumShub random = new BlumBlumShub(4096);
-			byte b[] = random.randBytes(4096);
-			random.setSeed(b);
-			KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-			keyGen.initialize(RSA_KEY_LENGTH, random);
-			KeyPair keyPair = keyGen.genKeyPair();
-			publicKey = keyPair.getPublic();
-			privateKey = keyPair.getPrivate();
-
-			publicKeyBytes = privateKey.getEncoded();
-			base64PublicKey = Base64.encode(publicKeyBytes);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void readTestKeys() {
-		ByteArrayOutputStream bos = null;
-		InputStream fispbk = null;
-		InputStream fisprk1 = null;
-		InputStream fisprk2 = null;
-		try {
-			bos = new ByteArrayOutputStream();
-			fispbk = this.getClass().getResourceAsStream("/public.key");
-			fisprk1 = this.getClass().getResourceAsStream("/private1.key");
-			fisprk2 = this.getClass().getResourceAsStream("/private2.key");
-
-			int b = fispbk.read();
-			while (b > -1) {
-				bos.write(b);
-				b = fispbk.read();
-			}
-			bos.flush();
-			byte[] key = bos.toByteArray();
-			bos.close();
-
-			bos = new ByteArrayOutputStream();
-			b = fisprk1.read();
-			while (b > -1) {
-				bos.write(b);
-				b = fisprk1.read();
-			}
-			bos.flush();
-			byte[] halfkey1 = bos.toByteArray();
-			bos.close();
-
-			bos = new ByteArrayOutputStream();
-			b = fisprk2.read();
-			while (b > -1) {
-				bos.write(b);
-				b = fisprk2.read();
-			}
-			bos.flush();
-			byte[] halfkey2 = bos.toByteArray();
-			bos.close();
-
-			publicKey = KeyFactory.getInstance("RSA").generatePublic(
-					new X509EncodedKeySpec(Base64.decode(key)));
-			base64PublicKey = new String(key);
-
-			byte[] b1 = Base64.decode(halfkey1);
-			byte[] b2 = Base64.decode(halfkey2);
-
-			byte[] privateKeyBytes = new byte[halfkey1.length + halfkey2.length];
-			for (int i = 0; i < b1.length; i++) {
-				privateKeyBytes[i] = b1[i];
-			}
-			for (int i = 0; i < b2.length; i++) {
-				privateKeyBytes[i + b1.length] = b2[i];
-			}
-
-			privateKey = KeyFactory.getInstance("RSA").generatePrivate(
-					new PKCS8EncodedKeySpec(privateKeyBytes));
-			bos.close();
-			fispbk.close();
-			fisprk1.close();
-			fisprk2.close();
-			bos = null;
-			fispbk = null;
-			fisprk1 = null;
-			fisprk2 = null;
-
-		} catch (Exception e) {
-			e.printStackTrace();
-
-		} finally {
-			try {
-				if (bos != null)
-					bos.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-				if (fispbk != null)
-					fispbk.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-				if (fisprk1 != null)
-					fisprk1.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-				if (fisprk2 != null)
-					fisprk2.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-	}
-    /*
-	private void testFile() {
-
-		buttonExecute.setEnabled(false);
-		serialDuplicated = false;
-		errorReadingLine = false;
-		errorVerifying = false;
-		String fileBin = null;
-		String fileXml = null;
-		try {
-			String srcFileName = textFileInT.getText();
-			String outFolder = textFileOutT.getText();
-			if(!outFolder.endsWith(File.separator)){
-				outFolder=outFolder+File.separator;
-			}
-			fileBin = outFolder + "test_ciphered.bin";
-			fileXml = outFolder + "test.xml";
-			test = true;
-			if(!new File(outFolder).exists()||!new File(outFolder).canWrite()){
-				appendToPane(jTextResults, rb.getString("msg.foldererror")
-						+ "\n", Color.RED);
-				JOptionPane.showMessageDialog(parent,
-						rb.getString("msg.foldererror"),
-						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-				testMode=true;
-				encryptMode=false;
-				return;
-			}
-			
-			appendToPane(jTextResults, rb.getString("msg.creatingtestkeys")
-					+ "\n", Color.BLUE);
-			// createTestKeys();
-			readTestKeys();
-			if (!encrypt(srcFileName,fileXml,fileBin)) {
-				appendToPane(jTextResults, rb.getString("msg.ciphererror")
-						+ "\n", Color.RED);
-				JOptionPane.showMessageDialog(parent,
-						rb.getString("msg.ciphererror"),
-						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-				testMode=true;
-				encryptMode=false;
-				return;
-			} else {
-				appendToPane(jTextResults, rb.getString("msg.cipherok") + "\n",
-						Color.BLUE);
-			}
-			if (serialDuplicated) {
-				JOptionPane.showMessageDialog(parent,
-						rb.getString("msg.doublederror"),
-						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-				testMode=true;
-				encryptMode=false;
-				return;
-			}
-			if (errorReadingLine) {
-				JOptionPane.showMessageDialog(parent,
-						rb.getString("msg.lineerror"),
-						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-				testMode=true;
-				encryptMode=false;
-				return;
-			}
 
 
-			if (!decrypt(fileBin, fileXml)) {
-				JOptionPane.showMessageDialog(parent,
-						rb.getString("msg.deciphererror"),
-						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-				testMode=true;
-				encryptMode=false;
-				return;
-			}
-			if (!verifyResults(fileXml)) {
-				appendToPane(jTextResults,
-						rb.getString("msg.testError") + "\n", Color.RED);
-				JOptionPane.showMessageDialog(parent,
-						rb.getString("msg.testError"),
-						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-				errorVerifying = true;
-				testMode=true;
-				encryptMode=false;
-				return;
-			} else {
-				appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
-						Color.BLUE);
-				JOptionPane.showMessageDialog(parent,
-						rb.getString("msg.testOK"),
-						rb.getString("title.ok"),
-						JOptionPane.INFORMATION_MESSAGE);
-
-			}
-
-		} 
-		catch(Exception e){
-			appendToPane(jTextResults,e.getLocalizedMessage() + "\n", Color.RED);
-		}
-		finally {
-			if (fileBin != null&&new File(fileBin).exists())
-				safeFileRemoval(new File(fileBin));
-			if (fileXml != null&&new File(fileXml).exists())
-				safeFileRemoval(new File(fileXml));
-		}
-
-		buttonExecute.setEnabled(true);
-
-	}
-    */
-	private void encryptFile() {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-		String dateFormatted = sdf.format(new java.util.Date(System
-				.currentTimeMillis()));
-		String srcFileName = textFileCsv.getText();
-		String outFolder = textFileBin.getText();
-		if(!outFolder.endsWith(File.separator)){
-			outFolder=outFolder+File.separator;
-		}
-		String fileXml = outFolder + new File(srcFileName).getName().replaceAll("\\.", "_")+"_"+ dateFormatted + "_PSKC.xml";
-		String fileBin = outFolder + new File(srcFileName).getName().replaceAll("\\.", "_")+"_"+ dateFormatted + "_PSKC_xml_ciphered.bin";
-		
-		if(!new File(outFolder).exists()||!new File(outFolder).canWrite()){
-			appendToPane(jTextResults, rb.getString("msg.foldererror")
-					+ "\n", Color.RED);
-			JOptionPane.showMessageDialog(parent,
-					rb.getString("msg.foldererror"),
-					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-
-		if (encrypt(srcFileName,fileXml,fileBin)) {
-			JOptionPane.showMessageDialog(parent, rb.getString("msg.cipherok"),
-					rb.getString("title.ok"), JOptionPane.INFORMATION_MESSAGE);
-			appendToPane(jTextResults, rb.getString("msg.cipherok") + "\n",
-					Color.BLUE);
-		} else {
-			JOptionPane.showMessageDialog(parent,
-					rb.getString("msg.ciphererror"),
-					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-			appendToPane(jTextResults, rb.getString("msg.ciphererror") + "\n",
-					Color.RED);
-		}
-
-	}
-
-	private synchronized boolean encrypt(String srcFileName,String fileXml,String fileBin) {
-		boolean retval = false;
-		ArrayList<String> listSerial = new ArrayList<String>();
-		progressBar.setVisible(true);
-		progressBar.setMaximum(0);
-		progressBar.setMaximum(100);
-		progressBar.setValue(0);
-		labelProgress.setText(rb.getString("msg.formattingkeys") + " 0%");
-		labelProgress.setVisible(true);
-		labelWait.setVisible(true);
-		buttonClose.setEnabled(false);
-		buttonExecute.setEnabled(false);
-		if (buttonFileCsv != null) {
-			buttonFileCsv.setEnabled(false);
-		}
-		if (buttonPrivateKey1 != null) {
-			buttonPrivateKey1.setEnabled(false);
-		}
-		menuFile.setEnabled(false);
-		menuAbout.setEnabled(false);
-		menuLanguage.setEnabled(false);
-
-		repaint();
-
-		long fileLen = new File(srcFileName).length();
-		long counter = 0;
-		int progressValue = 0;
-		int prevProgressValue = 0;
-		FileReader fr = null;
-		BufferedReader in = null;
-		FileOutputStream outputWriter = null;
-		InputStream inputReader = null;
-		CipherOutputStream cos = null;
-
-		try {
-			appendToPane(jTextResults, rb.getString("msg.formattingkeys") + "\n",	Color.BLUE);
-
-			outputWriter = new FileOutputStream(fileXml);
-			fr = new FileReader(srcFileName);
-			in = new BufferedReader(fr);
-			String string;
-			long i = 0;
-			AlgorithmParameters ap = new AlgorithmParameters(
-					new ResponseFormat("6", "DECIMAL"),
-					Constants.ALGO_TYPE_TOTP);
-			// String separator=";";
-			outputWriter.write(getXmlHeader().getBytes("UTF8"));
-			outputWriter.flush();
-			while ((string = in.readLine()) != null) {
-
-				try {
-					if(!"".equals(string.trim())){
-					String[] serialkey = getSerialKey(string.trim());
-					String lineserial = serialkey[0];
-					String linekey = serialkey[1];
-
-					if (!listSerial.contains(lineserial)) {
-						if (test) {
-							mapSerialSeed.put(lineserial, linekey);
-						}
-						DeviceInfo di = new DeviceInfo("xyzw", lineserial);
-						byte[] byteSeed = keyGetByteCiphered(linekey);
-
-						String data = Base64.encode(byteSeed);
-						Data d = new Data(new Secret(data), "60", "0");
-						// Data d = new Data(new Secret(linekey), "60", "0");
-						org.jdamico.pskcbuilder.dataobjects.Key k = new org.jdamico.pskcbuilder.dataobjects.Key(
-								"1", "urn:ietf:params:xml:ns:keyprov:pskc:"
-										+ Constants.ALGO_TYPE_TOTP, "xyzw", d,
-								ap);
-						KeyPackage kp = new KeyPackage(di, k);
-
-						outputWriter.write(getObj2XmlStr(kp, i)
-								.getBytes("UTF8"));
-						outputWriter.flush();
-						listSerial.add(lineserial);
-					} else {
-						logger.error("Error: element(" + (i + 1) + ") file("
-								+ srcFileName + ") serial(" + lineserial
-								+ ") duplicate");
-						appendToPane(
-								jTextResults,
-								"(" + (i + 1) + ")[" + lineserial + "] "
-										+ rb.getString("msg.doublederror")
-										+ "\n", Color.RED);
-						// jTextResults.append("("+(i +
-						// 1)+")["+lineserial+"] "+rb.getString("msg.doublederror")+"\n");
-						serialDuplicated = true;
-					}
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					logger.error("Error: element(" + (i + 1) + ") file("
-							+ srcFileName + ")", e);
-					appendToPane(
-							jTextResults,
-							"(" + (i + 1) + ") "
-									+ rb.getString("msg.lineerror") + "\n",
-							Color.RED);
-					// jTextResults.append("("+(i +
-					// 1)+") "+rb.getString("msg.lineerror")+"\n");
-					errorReadingLine = true;
-				}
-
-				counter += string.length();
-
-				progressValue = (int) ((counter * 100) / fileLen);
-				if (progressValue != prevProgressValue) {
-					progressBar.setValue(progressValue);
-					labelProgress.setText(rb.getString("msg.formattingkeys")
-							+ " " + progressValue + "%");
-					prevProgressValue = progressValue;
-					// System.out.println(prevProgressValue+"%");
-					repaint();
-				}
-				i++;
-			}
-			outputWriter.write(getXmlFooter().getBytes("UTF8"));
-			outputWriter.flush();
-			outputWriter.close();
-			in.close();
-			fr.close();
-			in = null;
-			fr = null;
-			outputWriter = null;
-			progressBar.setValue(100);
-			labelProgress.setText(rb.getString("msg.formattingkeys") + "100%");
-			repaint();
-
-			appendToPane(jTextResults, rb.getString("msg.ciphering") + "\n",	Color.BLUE);
-
-			progressBar.setMaximum(0);
-			progressBar.setMaximum(100);
-			progressBar.setValue(0);
-			labelProgress.setText(rb.getString("msg.ciphering") + " 0%");
-			labelProgress.setVisible(true);
-			labelWait.setVisible(true);
-			buttonClose.setEnabled(false);
-			buttonExecute.setEnabled(false);
-
-			buttonPrivateKey1.setEnabled(false);
-			menuFile.setEnabled(false);
-			menuAbout.setEnabled(false);
-			menuLanguage.setEnabled(false);
-			repaint();
-			fileLen = new File(fileXml).length();
-			outputWriter = null;
-			inputReader = null;
-			// System.out.println("srcFileName ----- "+srcFileName);
-			// System.out.println("destFileName ----- "+destFileName);
-
-			Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-
-			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-
-			/*
-			 * SecureRandom random = SecureRandom.getInstance("SHA1PRNG",
-			 * "SUN"); byte[] b = random.generateSeed(AES_KEY_LENGTH);
-			 * random.setSeed(b);
-			 */
-
-			BlumBlumShub random = new BlumBlumShub(1024);
-			byte b[] = random.randBytes(1024);
-			random.setSeed(b);
-			KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-			keyGen.init(AES_KEY_LENGTH, random);
-			SecretKey secretAesKey = keyGen.generateKey();
-
-			byte[] aesKey = secretAesKey.getEncoded();
-
-			byte[] iv = new byte[16];
-			// SecureRandom.getInstance("SHA1PRNG").nextBytes(iv);
-			random = new BlumBlumShub(1024);
-			iv = random.randBytes(16);
-
-			counter = 0;
-			progressValue = 0;
-			prevProgressValue = 0;
-
-			outputWriter = new FileOutputStream(fileBin);
-			inputReader = new FileInputStream(fileXml);
-			byte[] cipherText = null;
-			cipherText = cipher.doFinal(aesKey);
-			outputWriter.write(cipherText);
-			outputWriter.flush();
-
-			outputWriter.write(END_OF_KEY.getBytes("UTF-8"));
-			outputWriter.flush();
-
-			cipherText = null;
-			cipherText = cipher.doFinal(iv);
-			outputWriter.write(cipherText);
-			outputWriter.flush();
-
-			// outputWriter.write(iv);
-			// outputWriter.flush();
-			outputWriter.write(END_OF_KEY.getBytes("UTF-8"));
-			outputWriter.flush();
-
-			cipher = Cipher.getInstance("AES");
-
-			AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
-
-			encryptAES(secretAesKey, paramSpec, inputReader, outputWriter,
-					fileLen);
-
-			outputWriter.close();
-			inputReader.close();
-			outputWriter = null;
-			inputReader = null;
-			progressBar.setVisible(false);
-			labelProgress.setVisible(false);
-			labelWait.setVisible(false);
-
-			retval = true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.debug("Error: file(" + srcFileName + ")", e);
-			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
-
-			menuFile.setEnabled(true);
-			menuAbout.setEnabled(true);
-			menuLanguage.setEnabled(true);
-			progressBar.setVisible(false);
-			labelProgress.setVisible(false);
-			labelWait.setVisible(false);
-			buttonClose.setEnabled(true);
-			buttonExecute.setEnabled(true);
-
-		} finally {
-			try {
-				if (cos != null)
-					cos.close();
-				if (in != null)
-					in.close();
-				if (fr != null)
-					fr.close();
-				if (outputWriter != null)
-					outputWriter.close();
-				if (inputReader != null)
-					inputReader.close();
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			progressBar.setVisible(false);
-			labelProgress.setVisible(false);
-			labelWait.setVisible(false);
-			buttonClose.setEnabled(true);
-			buttonExecute.setEnabled(true);
-
-			if (buttonFileCsv != null) {
-				buttonFileCsv.setEnabled(true);
-			}
-			if (buttonPrivateKey1 != null) {
-				buttonPrivateKey1.setEnabled(true);
-			}
-			menuFile.setEnabled(true);
-			menuAbout.setEnabled(true);
-			menuLanguage.setEnabled(true);
-			safeFileRemoval(new File(fileXml));
-
-		}
-		return retval;
-	}
 
 
 	private synchronized boolean decrypt(String srcFileName, String destFileName) {
@@ -2444,38 +2116,6 @@ public class MainWindow extends JFrame {
 		return retval;
 	}
 
-	private void reloadPublicKey() {
-		File file = new File(textPrivateKey1.getText());
-		FileInputStream fis = null;
-		try {
-			fis = new FileInputStream(file);
-			publicKeyBytes = new byte[(int) file.length()];
-			fis.read(publicKeyBytes);
-			publicKey = KeyFactory.getInstance("RSA").generatePublic(
-					new X509EncodedKeySpec(Base64.decode(publicKeyBytes)));
-			fis.close();
-			fis = null;
-			base64PublicKey = new String(publicKeyBytes);
-		} catch (Exception e) {
-			e.printStackTrace();
-			base64PublicKey = "";
-			publicKey = null;
-			publicKeyBytes = null;
-			textPrivateKey1.setText("");
-			labelStatusPrivateKey1.setIcon(new javax.swing.ImageIcon(getClass()
-					.getResource(iconKo)));
-			JOptionPane.showMessageDialog(parent,
-					rb.getString("msg.invalidpublickey"),
-					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-		} finally {
-			try {
-				if (fis != null)
-					fis.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
 
 	private synchronized void encryptAES(SecretKey key,
 			AlgorithmParameterSpec paramSpec, InputStream in, OutputStream out,
@@ -2548,23 +2188,6 @@ public class MainWindow extends JFrame {
 
 	}
 
-	private byte[] keyGetByteCiphered(String value) {
-		try {
-			Cipher cipher = Cipher.getInstance("RSA");
-			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-			// byte[]byteSeed = cipher.doFinal(linekey.getBytes());
-			// byte[]byteSeed =
-			// cipher.doFinal(formatKey(value.getBytes("UTF8")));
-			byte[] byteSeed = cipher.doFinal(value.getBytes("UTF8"));
-			cipher.doFinal();
-			cipher.getIV();
-			cipher = null;
-			return byteSeed;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 
 	private synchronized String[] getSerialKey(String string) throws Exception {
@@ -2611,78 +2234,7 @@ public class MainWindow extends JFrame {
 		return serialKey;
 	}
 
-	private synchronized String getXmlHeader() {
-		StringBuffer sb = new StringBuffer();
-		/*
-		 * sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"); sb.append(
-		 * "<KeyContainer Version=\"1.0\" xmlns=\"urn:ietf:params:xml:ns:keyprov:pskc\">\n"
-		 * );
-		 */
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<KeyContainer xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"urn:ietf:params:xml:ns:keyprov:pskc\" xmlns:xenc=\"http://www.w3.org/2001/04/xmlenc#\" id=\"KC0001\" Version=\"1.0\">\n");
-		sb.append("<EncryptionKey><ds:X509Data><ds:X509Certificate>"
-				+ base64PublicKey
-				+ "</ds:X509Certificate></ds:X509Data></EncryptionKey>\n");
-		return sb.toString();
-	}
 
-	private synchronized String getXmlFooter() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("</KeyContainer>");
-		return sb.toString();
-	}
-
-	private synchronized String getObj2XmlStr(KeyPackage kp, long i) {
-		StringBuffer sb = new StringBuffer();
-
-		sb.append("<KeyPackage>\n");
-		sb.append("<DeviceInfo>\n");
-		sb.append("<Manufacturer>" + kp.getDeviceInfo().getManufacturer()
-				+ "</Manufacturer>\n");
-		sb.append("<SerialNo>" + kp.getDeviceInfo().getSerialNo()
-				+ "</SerialNo>\n");
-		sb.append("</DeviceInfo>\n");
-		sb.append("<Key Id=\"" + (i + 1) + "\" Algorithm=\""
-				+ kp.getKey().getAlgorithm() + "\">\n");
-		sb.append("<Issuer>" + kp.getKey().getIssuer() + "</Issuer>\n");
-		sb.append("<AlgorithmParameters>\n");
-		sb.append("<ResponseFormat Length=\""
-				+ kp.getKey().getAlgorithmParameters().getResponseFormat()
-						.getLength()
-				+ "\" Encoding=\""
-				+ kp.getKey().getAlgorithmParameters().getResponseFormat()
-						.getEncoding() + "\"/>\n");
-		sb.append("</AlgorithmParameters>\n");
-		sb.append("<Data>\n");
-
-		sb.append("<Secret><EncryptedValue><xenc:EncryptionMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#rsa_1_5\"/><xenc:CipherData><xenc:CipherValue>"
-				+ kp.getKey().getData().getSecret().getPlainValue()
-				+ "</xenc:CipherValue></xenc:CipherData></EncryptedValue></Secret>\n");
-
-		String sAlgoType = kp.getKey().getAlgorithmParameters().getAlgoType() == Constants.ALGO_TYPE_HOTP ? "Counter"
-				: "Time";
-
-		sb.append("<" + sAlgoType + "><PlainValue>"
-				+ kp.getKey().getData().getCounter() + "</PlainValue></"
-				+ sAlgoType + ">\n");
-		sb.append("<TimeInterval><PlainValue>"
-				+ kp.getKey().getData().getTimeInterval()
-				+ "</PlainValue></TimeInterval>\n");
-		// "<TimeDrift><PlainValue>"+kp.getKeyPackageList().get(i).getKey().getData().getTimeInterval()+"</PlainValue></TimeDrift>\n"
-		// +
-		sb.append("</Data>\n");
-		sb.append("</Key>\n");
-		sb.append("</KeyPackage>\n");
-
-		return sb.toString();
-	}
-
-	private static final int AES_KEY_LENGTH = 128;
-	private static final int RSA_KEY_LENGTH = 4096;
-	private boolean test = false;
-	private boolean serialDuplicated = false;
-	private boolean errorReadingLine = false;
-	private boolean errorVerifying = false;
 	private HashMap<String, String> mapSerialSeed = new HashMap<String, String>();
 
 	/**
