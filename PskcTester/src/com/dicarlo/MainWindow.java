@@ -206,22 +206,13 @@ public class MainWindow extends JFrame {
 	private JButton buttonFileBin1;
 	private JLabel labelStatusFileBin1;
 	private boolean statusFileBin1=false;
+	// END COMPONENT FOR TEST
 
 
 	
 	// START COMPONENT FOR LOG
 	private JPanel panelTestResults;
-	/*
-	private JTextField textFileInT;
-	private JTextField textFileOutT;
-	private JLabel labelStatusFileInT;
-	private JLabel labelStatusFileOutT;
-	private JButton buttonFileInT;
-	private JButton buttonFileOutT;
-	private JLabel labelFileInT;
-	private JLabel labelFileOutT;
-	*/
-	// END COMPONENT FOR TEST
+	// END COMPONENT FOR LOG
 
 	private JButton buttonExecute;
 	private JLabel labelWait;
@@ -1464,8 +1455,8 @@ public class MainWindow extends JFrame {
 	private JMenuItem getMenuTest() {
 		if (menuTest == null) {
 			menuTest = new javax.swing.JMenuItem(
-					rb.getString("title.encrypt"));
-			menuTest.setMnemonic('C');
+					rb.getString("title.test"));
+			menuTest.setMnemonic('T');
 			menuTest.addActionListener((new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
 					parent.setTitle(rb.getString("title") + " - ["
@@ -1491,8 +1482,8 @@ public class MainWindow extends JFrame {
 
 	private JMenuItem getMenuLog() {
 		if (menuLog == null) {
-			menuLog = new javax.swing.JMenuItem(rb.getString("title.test"));
-			menuLog.setMnemonic('T');
+			menuLog = new javax.swing.JMenuItem(rb.getString("title.log"));
+			menuLog.setMnemonic('L');
 			menuLog.addActionListener((new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
 					clearPane(jTextResults);
@@ -1661,7 +1652,7 @@ public class MainWindow extends JFrame {
 			labelProgress = new JLabel();
 			labelProgress.setForeground(new Color(0, 0, 255));
 			labelProgress.setFont(new Font("Serif", Font.BOLD, 16));
-			labelProgress.setText("jLabel0");
+			labelProgress.setText("");
 			labelProgress.setVisible(false);
 		}
 		return labelProgress;
@@ -1781,6 +1772,127 @@ public class MainWindow extends JFrame {
 				e.printStackTrace();
 			}
 		}
+	}
+	private synchronized boolean verifyFiles(String fileXml,String fileXml1){
+	    boolean retval = true;
+	    FileReader fr=null;
+	    BufferedReader br=null;
+	    FileReader fr1=null;
+	    BufferedReader br1=null;
+	    try{
+			appendToPane(
+					jTextResults,fileXml+ "\n", Color.BLUE);
+			appendToPane(
+					jTextResults,fileXml1+ "\n", Color.BLUE);
+			appendToPane(
+					jTextResults,rb.getString("msg.testFileMatch")
+							+ "\n", Color.BLUE);
+
+			progressBar.setVisible(true);
+			progressBar.setMaximum(0);
+			progressBar.setMaximum(100);
+			progressBar.setValue(0);
+			labelProgress.setText(rb.getString("msg.testFileMatch") + " 0%");
+
+		    if(new File(fileXml).length()==new File(fileXml1).length()){
+				fr = new FileReader(fileXml);
+				br = new BufferedReader(fr);
+				fr1 = new FileReader(fileXml1);
+				br1 = new BufferedReader(fr1);
+				String string=null;
+				String string1=null;
+                long counter=0;
+                long fileLen=new File(fileXml).length();
+                int progressValue=0;
+                int prevProgressValue=0;
+				while ((string = br.readLine()) != null&&(string1 = br1.readLine()) != null) {
+					if(!string.equals(string1)){
+						appendToPane(
+								jTextResults,fileXml+ ": "+string
+										+ "\n", Color.RED);
+						appendToPane(
+								jTextResults,fileXml1+ " "+string1
+										+ "\n", Color.RED);
+						appendToPane(
+								jTextResults,rb.getString("msg.testFileNotMatch")
+										+ "\n", Color.RED);
+                        logger.error(fileXml+ ": "+string);
+                        logger.error(fileXml1+ ": "+string1);
+                        logger.error(rb.getString("msg.testFileNotMatch"));
+                        
+						retval=false;
+					}
+					counter += string.length();
+
+					progressValue = (int) ((counter * 100) / fileLen);
+					if (progressValue != prevProgressValue) {
+						progressBar.setValue(progressValue);
+						labelProgress.setText(rb.getString("msg.testFileMatch")
+								+ " " + progressValue + "%");
+						prevProgressValue = progressValue;
+						// System.out.println(prevProgressValue+"%");
+						repaint();
+					}
+
+				}
+				if((string==null&&string1!=null)||(string!=null&&string1==null)||(string!=null&&string1!=null&&!string.equals(string1))){
+					appendToPane(
+							jTextResults,fileXml+ ": "+((string!=null)?string:"null")
+									+ "\n", Color.RED);
+					appendToPane(
+							jTextResults,fileXml1+ " "+((string1!=null)?string1:"null")
+									+ "\n", Color.RED);
+					appendToPane(
+							jTextResults,rb.getString("msg.testFileNotMatch")
+									+ "\n", Color.RED);
+                    logger.error(fileXml+ ": "+string);
+                    logger.error(fileXml1+ ": "+string1);
+                    logger.error(rb.getString("msg.testFileNotMatch"));
+
+					retval=false;
+				}
+
+				progressBar.setValue(100);
+				labelProgress.setText(rb.getString("msg.testFileMatch") + " 100%");
+
+		    }
+		    else{
+				appendToPane(
+						jTextResults,fileXml+ " "+new File(fileXml).length()
+								+ "\n", Color.RED);
+				appendToPane(
+						jTextResults,fileXml1+ " "+new File(fileXml1).length()
+								+ "\n", Color.RED);
+				appendToPane(
+						jTextResults,rb.getString("msg.testFileLenghtNotMatch")
+								+ "\n", Color.RED);
+                logger.error(fileXml+ ": "+new File(fileXml).length());
+                logger.error(fileXml1+ ": "+new File(fileXml1).length());
+                logger.error(rb.getString("msg.testFileLenghtNotMatch"));
+				retval=false;
+		    }
+	    }
+	    catch(Exception e){
+			appendToPane(
+					jTextResults,e.getMessage()
+							+ "\n", Color.RED);
+			retval=false;
+	    }
+	    finally{
+			try {
+				if (br != null)
+					br.close();
+				if (fr != null)
+					fr.close();
+				if (br1 != null)
+					br1.close();
+				if (fr1 != null)
+					fr1.close();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+	    }
+	    return retval;
 	}
 
 	private synchronized boolean verifyResults(String fileXml) {
@@ -2213,6 +2325,7 @@ public class MainWindow extends JFrame {
 	private synchronized void test1() throws Exception{
 		// check parameters
 		if(statusPrivateKey1&&statusPrivateKey2&&statusFileCsv&&statusFileBin){
+			appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 1\n",	Color.BLUE);
 			readFileSerialSid(textFileCsv.getText());
 			if (serialDuplicated) {
 				JOptionPane.showMessageDialog(parent,
@@ -2261,6 +2374,7 @@ public class MainWindow extends JFrame {
 	private synchronized void test2() throws Exception{
 		// check parameters
 		if(statusPrivateKey1&&statusPrivateKey2&&statusFileCsv1&&statusFileXml){
+			appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 2\n",	Color.BLUE);
 			readFileSerialSid(textFileCsv1.getText());
 			String fileXml=textFileXml.getText();
 			if(verifyResults(fileXml)){
@@ -2288,10 +2402,27 @@ public class MainWindow extends JFrame {
 	private synchronized void test3() throws Exception{
 		// check parameters
 		if(statusPrivateKey1&&statusPrivateKey2&&statusFileXml1&&statusFileBin1){
+			appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 3\n",	Color.BLUE);
+			String fileXml = textFileXml1.getText();
 			String fileBin = textFileBin1.getText();
-			String fileXml="test.xml";
-			decodeBinFile(fileBin,fileXml);
+			String fileXml1="test.xml";
+			decodeBinFile(fileBin,fileXml1);
 			
+			if(verifyFiles(fileXml,fileXml1)){
+				appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
+						Color.BLUE);
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.testOK"),
+						rb.getString("title.ok"),
+						JOptionPane.INFORMATION_MESSAGE);
+			}
+			else{
+				appendToPane(jTextResults,
+						rb.getString("msg.testError") + "\n", Color.RED);
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.testError"),
+						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+			}			
 		}
 		else{
 			JOptionPane.showMessageDialog(parent,
@@ -2319,7 +2450,6 @@ public class MainWindow extends JFrame {
 		int prevProgressValue = 0;
 		FileReader fr = null;
 		BufferedReader in = null;
-		InputStream inputReader = null;
 
 		try {
 			appendToPane(jTextResults, rb.getString("msg.readingserialsid") + "\n",	Color.BLUE);
@@ -2383,9 +2513,6 @@ public class MainWindow extends JFrame {
 						in.close();
 					if (fr != null)
 						fr.close();
-					if (inputReader != null)
-						inputReader.close();
-
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
