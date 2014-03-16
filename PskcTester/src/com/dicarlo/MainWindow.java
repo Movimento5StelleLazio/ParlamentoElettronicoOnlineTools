@@ -2508,6 +2508,7 @@ public class MainWindow extends JFrame {
 		BufferedReader in = null;
 
 		try {
+			logger.debug(fileCsv+" "+rb.getString("msg.readingserialsid"));
 			appendToPane(jTextResults, rb.getString("msg.readingserialsid") + "\n",	Color.BLUE);
 
 			fr = new FileReader(fileCsv);
@@ -2582,6 +2583,7 @@ public class MainWindow extends JFrame {
 		progressBar.setMaximum(0);
 		progressBar.setMaximum(100);
 		progressBar.setValue(0);
+		logger.debug(fileBin+" "+rb.getString("msg.deciphering"));
 		appendToPane(jTextResults, rb.getString("msg.deciphering") + "\n",	Color.BLUE);
 
 		labelProgress.setText(rb.getString("msg.deciphering") + " 0%");
