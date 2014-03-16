@@ -111,7 +111,9 @@ public class MainWindow extends JFrame {
 	String iconOk = "/ok.png";
 	String iconKo = "/ko.png";
 
-
+	String pathFileCsv="";
+	String pathFileBin="";
+	String pathFileXml="";    
 
 	private byte[] privateKeyBytes = null;
 	private byte[] halfkey1 = null;
@@ -261,7 +263,7 @@ public class MainWindow extends JFrame {
                         if (e.getSource() instanceof JTabbedPane) {
                             int index=jTabbedPane.getSelectedIndex();
                             //JTabbedPane pane = (JTabbedPane) e.getSource();
-                            System.out.println("Selected paneNo : " + index);
+                            //System.out.println("Selected paneNo : " + index);
                             panelSelected=index;
                             
                         }
@@ -662,21 +664,20 @@ public class MainWindow extends JFrame {
 		if (panelTest1 == null) {
 			panelTest1 = new JPanel();
 			panelTest1.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+			panelTest1.setVisible(false);
 			panelTest1.setLayout(new GroupLayout());
-			panelTest1.add(getLabelFileCsv(), new Constraints(new Leading(4, 111, 12, 12), new Leading(12, 12, 12)));
-			panelTest1.add(getTextFileCsv(), new Constraints(new Leading(121, 319, 10, 10), new Leading(8, 24, 12, 12)));
 			panelTest1.add(getButtonFileCsv(), new Constraints(new Leading(443, 10, 10), new Leading(5, 12, 12)));
 			panelTest1.add(getLabelStatusFileCsv(), new Constraints(new Leading(503, 10, 10), new Leading(8, 12, 12)));
-			panelTest1.add(getLabelFileBin(), new Constraints(new Leading(4, 111, 12, 12), new Leading(37, 17, 12, 12)));
-			panelTest1.add(getTextFileBin(), new Constraints(new Leading(121, 319, 10, 10), new Leading(34, 24, 12, 12)));
 			panelTest1.add(getButtonFileBin(), new Constraints(new Leading(443, 10, 10), new Leading(34, 12, 12)));
 			panelTest1.add(getLabelStatusFileBin(), new Constraints(new Leading(503, 10, 10), new Leading(34, 12, 12)));
+			panelTest1.add(getTextFileCsv(), new Constraints(new Leading(152, 288, 10, 10), new Leading(8, 24, 12, 12)));
+			panelTest1.add(getTextFileBin(), new Constraints(new Leading(152, 288, 12, 12), new Leading(34, 24, 12, 12)));
+			panelTest1.add(getLabelFileBin(), new Constraints(new Leading(4, 145, 10, 10), new Leading(37, 17, 12, 12)));
+			panelTest1.add(getLabelFileCsv(), new Constraints(new Leading(4, 144, 12, 12), new Leading(12, 12, 12)));
 		}
 		return panelTest1;
 	}
 
-	
-	
 	private JLabel getLabelFileCsv() {
 		if (labelFileCsv == null) {
 			labelFileCsv = new JLabel();
@@ -703,6 +704,9 @@ public class MainWindow extends JFrame {
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
+							if(!pathFileCsv.equals("")){
+							  fileChooser.setCurrentDirectory(new File(pathFileCsv));
+							}
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
 										@Override
@@ -729,6 +733,7 @@ public class MainWindow extends JFrame {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
 									if (file.exists()&&(file.getName().toLowerCase().endsWith(".csv")||file.getName().toLowerCase().endsWith(".txt"))) {
+										pathFileCsv=file.getParent();
 										labelStatusFileCsv
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -801,6 +806,10 @@ public class MainWindow extends JFrame {
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
+							if(!pathFileBin.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathFileBin));
+							}
+
 							//fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
@@ -825,6 +834,7 @@ public class MainWindow extends JFrame {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
 									if (file.exists()&&file.getName().toLowerCase().endsWith(".bin")) {
+										pathFileBin=file.getParent();
 										labelStatusFileBin
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -864,24 +874,24 @@ public class MainWindow extends JFrame {
 	
 	
 	
-	// PANEL 2
 	private JPanel getPanelTest2() {
 		if (panelTest2 == null) {
 			panelTest2 = new JPanel();
 			panelTest2.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+			panelTest2.setVisible(false);
 			panelTest2.setLayout(new GroupLayout());
-			panelTest2.add(getLabelFileCsv1(), new Constraints(new Leading(4, 111, 12, 12), new Leading(12, 12, 12)));
-			panelTest2.add(getTextFileCsv1(), new Constraints(new Leading(121, 319, 10, 10), new Leading(8, 24, 12, 12)));
 			panelTest2.add(getButtonFileCsv1(), new Constraints(new Leading(443, 10, 10), new Leading(5, 12, 12)));
 			panelTest2.add(getLabelStatusFileCsv1(), new Constraints(new Leading(503, 10, 10), new Leading(8, 12, 12)));
-			panelTest2.add(getLabelFileXml(), new Constraints(new Leading(4, 111, 12, 12), new Leading(37, 17, 12, 12)));
-			panelTest2.add(getTextFileXml(), new Constraints(new Leading(121, 319, 10, 10), new Leading(34, 24, 12, 12)));
 			panelTest2.add(getButtonFileXml(), new Constraints(new Leading(443, 10, 10), new Leading(34, 12, 12)));
 			panelTest2.add(getLabelStatusFileXml(), new Constraints(new Leading(503, 10, 10), new Leading(34, 12, 12)));
+			panelTest2.add(getTextFileCsv1(), new Constraints(new Leading(156, 284, 10, 10), new Leading(8, 24, 12, 12)));
+			panelTest2.add(getTextFileXml(), new Constraints(new Leading(156, 284, 12, 12), new Leading(34, 24, 12, 12)));
+			panelTest2.add(getLabelFileCsv1(), new Constraints(new Leading(4, 146, 12, 12), new Leading(12, 12, 12)));
+			panelTest2.add(getLabelFileXml(), new Constraints(new Leading(4, 146, 12, 12), new Leading(37, 17, 12, 12)));
 		}
 		return panelTest2;
 	}
-	
+
 	private JLabel getLabelFileCsv1() {
 		if (labelFileCsv1 == null) {
 			labelFileCsv1 = new JLabel();
@@ -908,6 +918,9 @@ public class MainWindow extends JFrame {
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
+							if(!pathFileCsv.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathFileCsv));
+							}
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
 										@Override
@@ -931,6 +944,7 @@ public class MainWindow extends JFrame {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
 									if (file.exists()&&(file.getName().toLowerCase().endsWith(".csv")||file.getName().toLowerCase().endsWith(".txt"))) {
+										pathFileCsv=file.getParent();
 										labelStatusFileCsv1
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -994,7 +1008,10 @@ public class MainWindow extends JFrame {
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
-							//fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
+							if(!pathFileXml.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathFileXml));
+							}
+						//fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
 										@Override
@@ -1018,6 +1035,7 @@ public class MainWindow extends JFrame {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
 									if (file.exists()&&file.getName().toLowerCase().endsWith(".xml")) {
+										pathFileXml=file.getParent();
 										labelStatusFileXml
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -1079,26 +1097,23 @@ public class MainWindow extends JFrame {
 	
 	
 	
-	// PANEL 3
 	private JPanel getPanelTest3() {
 		if (panelTest3 == null) {
 			panelTest3 = new JPanel();
 			panelTest3.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 			panelTest3.setLayout(new GroupLayout());
-			panelTest3.add(getLabelFileXml1(), new Constraints(new Leading(4, 111, 12, 12), new Leading(12, 12, 12)));
-			panelTest3.add(getTextFileXml1(), new Constraints(new Leading(121, 319, 10, 10), new Leading(8, 24, 12, 12)));
 			panelTest3.add(getButtonFileXml1(), new Constraints(new Leading(443, 10, 10), new Leading(5, 12, 12)));
 			panelTest3.add(getLabelStatusFileXml1(), new Constraints(new Leading(503, 10, 10), new Leading(8, 12, 12)));
-			panelTest3.add(getLabelFileBin1(), new Constraints(new Leading(4, 111, 12, 12), new Leading(37, 17, 12, 12)));
-			panelTest3.add(getTextFileBin1(), new Constraints(new Leading(121, 319, 10, 10), new Leading(34, 24, 12, 12)));
 			panelTest3.add(getButtonFileBin1(), new Constraints(new Leading(443, 10, 10), new Leading(34, 12, 12)));
 			panelTest3.add(getLabelStatusFileBin1(), new Constraints(new Leading(503, 10, 10), new Leading(34, 12, 12)));
+			panelTest3.add(getTextFileXml1(), new Constraints(new Leading(152, 288, 10, 10), new Leading(8, 24, 12, 12)));
+			panelTest3.add(getTextFileBin1(), new Constraints(new Leading(152, 288, 12, 12), new Leading(34, 24, 12, 12)));
+			panelTest3.add(getLabelFileXml1(), new Constraints(new Leading(4, 144, 10, 10), new Leading(12, 12, 12)));
+			panelTest3.add(getLabelFileBin1(), new Constraints(new Leading(4, 144, 12, 12), new Leading(37, 17, 12, 12)));
 		}
 		return panelTest3;
 	}
 
-	
-	
 	private JLabel getLabelFileXml1() {
 		if (labelFileXml1 == null) {
 			labelFileXml1 = new JLabel();
@@ -1125,6 +1140,9 @@ public class MainWindow extends JFrame {
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
+							if(!pathFileXml.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathFileXml));
+							}
 							//fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
@@ -1149,6 +1167,7 @@ public class MainWindow extends JFrame {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
 									if (file.exists()&&file.getName().toLowerCase().endsWith(".xml")) {
+										pathFileXml=file.getParent();
 										labelStatusFileXml1
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -1211,6 +1230,9 @@ public class MainWindow extends JFrame {
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
+							if(!pathFileBin.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathFileBin));
+							}
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
 										@Override
@@ -1234,6 +1256,7 @@ public class MainWindow extends JFrame {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
 									if (file.exists()&&file.getName().toLowerCase().endsWith(".bin")) {
+										pathFileBin=file.getParent();
 										labelStatusFileBin1
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -1466,13 +1489,6 @@ public class MainWindow extends JFrame {
 					buttonExecute.setText(rb.getString("title.test"));
 					buttonExecute.setMnemonic('T');
 					buttonExecute.setEnabled(true);
-					textPrivateKey1.setText("");
-					labelStatusPrivateKey1.setIcon(new javax.swing.ImageIcon(
-							getClass().getResource(iconKo)));
-					textFileCsv.setText("");
-					labelStatusFileCsv.setIcon(new javax.swing.ImageIcon(
-							getClass().getResource(iconKo)));
-
 				}
 			}));
 		}
@@ -1494,11 +1510,6 @@ public class MainWindow extends JFrame {
 					buttonExecute.setText(rb.getString("title.test"));
 					buttonExecute.setMnemonic('T');
 					buttonExecute.setEnabled(true);
-					//textFileInT.setText("");
-					//textFileOutT.setText("");
-					//labelStatusFileInT.setIcon(new javax.swing.ImageIcon(getClass().getResource(iconKo)));
-
-
 				}
 			}));
 		}
@@ -1560,6 +1571,7 @@ public class MainWindow extends JFrame {
 							new Thread() {
 								@Override
 								public void run() {
+									logger.debug("*******************START TEST*****************************");
 									labelProgress.setVisible(true);
 									labelWait.setVisible(true);
 									buttonClose.setEnabled(false);
@@ -1586,7 +1598,7 @@ public class MainWindow extends JFrame {
     									}
                                     }
                                     catch(Exception e){
-                            			appendToPane(jTextResults, rb.getString("msg.verification") + "\n",	Color.BLUE);
+                            			appendToPane(jTextResults, e.getMessage() + "\n",	Color.RED);
 
                             			JOptionPane.showMessageDialog(parent,
                             					e.getMessage(),
@@ -1600,6 +1612,7 @@ public class MainWindow extends JFrame {
 									menuFile.setEnabled(true);
 									menuAbout.setEnabled(true);
 									menuLanguage.setEnabled(true);
+									logger.debug("********************END TEST*****************************");
 
 								}
 							}.start();
@@ -1689,7 +1702,7 @@ public class MainWindow extends JFrame {
 			panelTitle.setBackground(Color.white);
 			panelTitle.setBorder(new LineBorder(Color.black, 1, false));
 			panelTitle.setLayout(new GroupLayout());
-			panelTitle.add(getLabelTitle(), new Constraints(new Bilateral(12, 12, 0), new Leading(7, 23, 10, 10)));
+			panelTitle.add(getLabelTitle(), new Constraints(new Leading(7, 629, 10, 10), new Leading(0, 12, 12)));
 		}
 		return panelTitle;
 	}
@@ -1952,6 +1965,7 @@ public class MainWindow extends JFrame {
 					String seedOrigin = mapSerialSeed.remove(serial);
 					if (seedOrigin == null) {
 						retval = false;
+						logger.error("(1)[" + serial + "] "	+ rb.getString("msg.testNotFound"));
 						appendToPane(
 								jTextResults,
 								"(1)[" + serial + "] "
@@ -1960,6 +1974,7 @@ public class MainWindow extends JFrame {
 					} else {
 						if (!seedOrigin.equals(decodedseed)) {
 							retval = false;
+							logger.error("[" + serial + "] "	+ rb.getString("msg.testSeedNotMatch"));
 							appendToPane(
 									jTextResults,
 									"["
@@ -1969,6 +1984,7 @@ public class MainWindow extends JFrame {
 											+ "\n", Color.RED);
 						}
 						else{
+							logger.debug("[" + serial + "] "	+ rb.getString("msg.testSerialSidOk"));
 							appendToPane(
 									jTextResults,
 									"["
@@ -1995,6 +2011,7 @@ public class MainWindow extends JFrame {
 				retval = false;
 				Object[] object = mapSerialSeed.keySet().toArray();
 				for (int i = 0; i < object.length; i++) {
+					logger.error("(2)[" + object[i] + "] "	+ rb.getString("msg.testNotFound"));
 					appendToPane(
 							jTextResults,
 							"(2)[" + object[i] + "] "
@@ -2007,6 +2024,7 @@ public class MainWindow extends JFrame {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error(" "	+ e.getLocalizedMessage());
 			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
 
 			retval = false;
@@ -2078,15 +2096,27 @@ public class MainWindow extends JFrame {
 						String seedOrigin = mapSerialSeed.remove(serial);
 						if (seedOrigin == null) {
 							retval = false;
+							logger.error("(1)[" + serial + "] "	+ rb.getString("msg.testNotFound"));
 							appendToPane(jTextResults, "(1)[" + serial + "] "
 									+ rb.getString("msg.testNotFound") + "\n",
 									Color.RED);
 						} else {
 							if (!seedOrigin.equals(decodedseed)) {
 								retval = false;
+								logger.error("[" + serial + "] "	+ rb.getString("msg.testSeedNotMatch"));
 								appendToPane(jTextResults, "[" + serial + "] "
 										+ rb.getString("msg.testSeedNotMatch")
 										+ "\n", Color.RED);
+							}
+							else{
+								logger.debug("[" + serial + "] "	+ rb.getString("msg.testSerialSidOk"));
+								appendToPane(
+										jTextResults,
+										"["
+												+ serial
+												+ "] "
+												+ rb.getString("msg.testSerialSidOk")
+												+ "\n", Color.BLUE);
 							}
 						}
 						progressValue = (int) ((counter * 100) / len);
@@ -2110,6 +2140,7 @@ public class MainWindow extends JFrame {
 				retval = false;
 				Object[] object = mapSerialSeed.keySet().toArray();
 				for (int i = 0; i < object.length; i++) {
+					logger.error("(2)[" + object[i] + "] "	+ rb.getString("msg.testNotFound"));
 					appendToPane(
 							jTextResults,
 							"(2)[" + object[i] + "] "
@@ -2123,7 +2154,8 @@ public class MainWindow extends JFrame {
 			repaint();
 		} catch (Exception e) {
 			e.printStackTrace();
-			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
+			logger.error(" "	+ e.getLocalizedMessage());
+		    appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
 			retval = false;
 		} finally {
 			try {
@@ -2325,27 +2357,35 @@ public class MainWindow extends JFrame {
 	private synchronized void test1() throws Exception{
 		// check parameters
 		if(statusPrivateKey1&&statusPrivateKey2&&statusFileCsv&&statusFileBin){
+			String fileBin = textFileBin.getText();
+			String fileXml="test.xml";
 			appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 1\n",	Color.BLUE);
+			logger.debug(rb.getString("title.filecsv")+": "+textFileCsv.getText());
+			logger.debug(rb.getString("title.filebin")+": "+textFileBin.getText());
+			logger.debug(rb.getString("title.privatekey1")+": "+textPrivateKey1.getText());
+			logger.debug(rb.getString("title.privatekey2")+": "+textPrivateKey2.getText());
+			
 			readFileSerialSid(textFileCsv.getText());
 			if (serialDuplicated) {
+				logger.debug(rb.getString("msg.doublederror"));
 				JOptionPane.showMessageDialog(parent,
 						rb.getString("msg.doublederror"),
 						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			if (errorReadingLine) {
+				logger.debug(rb.getString("msg.lineerror"));
 				JOptionPane.showMessageDialog(parent,
 						rb.getString("msg.lineerror"),
 						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			
-			String fileBin = textFileBin.getText();
-			String fileXml="test.xml";
 			try{
 				decodeBinFile(fileBin,fileXml);
 				
 				if(verifyResults(fileXml)){
+					logger.debug(rb.getString("msg.testOK"));
 					appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
 							Color.BLUE);
 					JOptionPane.showMessageDialog(parent,
@@ -2354,6 +2394,7 @@ public class MainWindow extends JFrame {
 							JOptionPane.INFORMATION_MESSAGE);
 				}
 				else{
+					logger.error(rb.getString("msg.testError"));
 					appendToPane(jTextResults,
 							rb.getString("msg.testError") + "\n", Color.RED);
 					JOptionPane.showMessageDialog(parent,
@@ -2366,6 +2407,7 @@ public class MainWindow extends JFrame {
 			}
 		}
 		else{
+			logger.error(rb.getString("msg.missingparameter"));
 			JOptionPane.showMessageDialog(parent,
 					rb.getString("msg.missingparameter"),
 					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
@@ -2374,10 +2416,15 @@ public class MainWindow extends JFrame {
 	private synchronized void test2() throws Exception{
 		// check parameters
 		if(statusPrivateKey1&&statusPrivateKey2&&statusFileCsv1&&statusFileXml){
+			logger.debug(rb.getString("title.filecsv")+": "+textFileCsv1.getText());
+			logger.debug(rb.getString("title.filexml")+": "+textFileXml.getText());
+			logger.debug(rb.getString("title.privatekey1")+": "+textPrivateKey1.getText());
+			logger.debug(rb.getString("title.privatekey2")+": "+textPrivateKey2.getText());
 			appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 2\n",	Color.BLUE);
 			readFileSerialSid(textFileCsv1.getText());
 			String fileXml=textFileXml.getText();
 			if(verifyResults(fileXml)){
+				logger.debug(rb.getString("msg.testOK"));
 				appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
 						Color.BLUE);
 				JOptionPane.showMessageDialog(parent,
@@ -2386,6 +2433,7 @@ public class MainWindow extends JFrame {
 						JOptionPane.INFORMATION_MESSAGE);
 			}
 			else{
+				logger.error(rb.getString("msg.testError"));
 				appendToPane(jTextResults,
 						rb.getString("msg.testError") + "\n", Color.RED);
 				JOptionPane.showMessageDialog(parent,
@@ -2394,6 +2442,7 @@ public class MainWindow extends JFrame {
 			}
 		}
 		else{
+			logger.error(rb.getString("msg.missingparameter"));
 			JOptionPane.showMessageDialog(parent,
 					rb.getString("msg.missingparameter"),
 					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
@@ -2402,6 +2451,10 @@ public class MainWindow extends JFrame {
 	private synchronized void test3() throws Exception{
 		// check parameters
 		if(statusPrivateKey1&&statusPrivateKey2&&statusFileXml1&&statusFileBin1){
+			logger.debug(rb.getString("title.filexml")+": "+textFileXml1.getText());
+			logger.debug(rb.getString("title.filebin")+": "+textFileBin1.getText());
+			logger.debug(rb.getString("title.privatekey1")+": "+textPrivateKey1.getText());
+			logger.debug(rb.getString("title.privatekey2")+": "+textPrivateKey2.getText());
 			appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 3\n",	Color.BLUE);
 			String fileXml = textFileXml1.getText();
 			String fileBin = textFileBin1.getText();
@@ -2409,6 +2462,7 @@ public class MainWindow extends JFrame {
 			decodeBinFile(fileBin,fileXml1);
 			
 			if(verifyFiles(fileXml,fileXml1)){
+				logger.debug(rb.getString("msg.testOK"));
 				appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
 						Color.BLUE);
 				JOptionPane.showMessageDialog(parent,
@@ -2417,6 +2471,7 @@ public class MainWindow extends JFrame {
 						JOptionPane.INFORMATION_MESSAGE);
 			}
 			else{
+				logger.error(rb.getString("msg.testError"));
 				appendToPane(jTextResults,
 						rb.getString("msg.testError") + "\n", Color.RED);
 				JOptionPane.showMessageDialog(parent,
@@ -2425,6 +2480,7 @@ public class MainWindow extends JFrame {
 			}			
 		}
 		else{
+			logger.error(rb.getString("msg.missingparameter"));
 			JOptionPane.showMessageDialog(parent,
 					rb.getString("msg.missingparameter"),
 					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
@@ -2469,7 +2525,7 @@ public class MainWindow extends JFrame {
 					} else {
 						logger.error("Error: element(" + (i + 1) + ") file("
 								+ fileCsv + ") serial(" + lineserial
-								+ ") duplicate");
+								+ ") "+rb.getString("msg.doublederror"));
 						appendToPane(
 								jTextResults,
 								"(" + (i + 1) + ")[" + lineserial + "] "
@@ -2482,7 +2538,7 @@ public class MainWindow extends JFrame {
 				}
 				else{
 					logger.error("Error: element(" + (i + 1) + ") file("
-							+ fileCsv + ")");
+							+ fileCsv + ") "+ rb.getString("msg.lineerror"));
 					appendToPane(
 							jTextResults,
 							"(" + (i + 1) + ") "
