@@ -113,7 +113,9 @@ public class MainWindow extends JFrame {
 
 	String pathFileCsv="";
 	String pathFileBin="";
-	String pathFileXml="";    
+	String pathFileXml=""; 
+	String pathKeys="";
+	String pathDefault="";
 
 	private byte[] privateKeyBytes = null;
 	private byte[] halfkey1 = null;
@@ -313,6 +315,13 @@ public class MainWindow extends JFrame {
 				public void actionPerformed(
 						java.awt.event.ActionEvent evt) {
 					JFileChooser fileChooser = new JFileChooser();
+					if(!pathKeys.equals("")){
+						  fileChooser.setCurrentDirectory(new File(pathKeys));
+					}
+					else if(!pathDefault.equals("")){
+						  fileChooser.setCurrentDirectory(new File(pathDefault));
+				    }
+
 					fileChooser.setFileFilter(new FileFilter() {
 						@Override
 						public String getDescription() {
@@ -339,6 +348,8 @@ public class MainWindow extends JFrame {
 											.toLowerCase()
 											.endsWith(".key")
 									&& file.isFile()) {
+								pathKeys=file.getParent();
+								pathDefault=file.getParent();
 								textPrivateKey1.setText(file
 										.getAbsolutePath());
 								String filePK1 = textPrivateKey1
@@ -499,6 +510,13 @@ public class MainWindow extends JFrame {
 				public void actionPerformed(
 						java.awt.event.ActionEvent evt) {
 					JFileChooser fileChooser = new JFileChooser();
+					if(!pathKeys.equals("")){
+						  fileChooser.setCurrentDirectory(new File(pathKeys));
+					}
+					else if(!pathDefault.equals("")){
+						  fileChooser.setCurrentDirectory(new File(pathDefault));
+				    }
+					
 					fileChooser.setFileFilter(new FileFilter() {
 						@Override
 						public String getDescription() {
@@ -525,6 +543,8 @@ public class MainWindow extends JFrame {
 											.toLowerCase()
 											.endsWith(".key")
 									&& file.isFile()) {
+								pathKeys=file.getParent();
+								pathDefault=file.getParent();
 								textPrivateKey2.setText(file
 										.getAbsolutePath());
 								String filePK1 = textPrivateKey1
@@ -664,16 +684,15 @@ public class MainWindow extends JFrame {
 		if (panelTest1 == null) {
 			panelTest1 = new JPanel();
 			panelTest1.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
-			panelTest1.setVisible(false);
 			panelTest1.setLayout(new GroupLayout());
 			panelTest1.add(getButtonFileCsv(), new Constraints(new Leading(443, 10, 10), new Leading(5, 12, 12)));
 			panelTest1.add(getLabelStatusFileCsv(), new Constraints(new Leading(503, 10, 10), new Leading(8, 12, 12)));
 			panelTest1.add(getButtonFileBin(), new Constraints(new Leading(443, 10, 10), new Leading(34, 12, 12)));
 			panelTest1.add(getLabelStatusFileBin(), new Constraints(new Leading(503, 10, 10), new Leading(34, 12, 12)));
-			panelTest1.add(getTextFileCsv(), new Constraints(new Leading(152, 288, 10, 10), new Leading(8, 24, 12, 12)));
+			panelTest1.add(getLabelFileBin(), new Constraints(new Leading(4, 147, 10, 10), new Leading(37, 17, 12, 12)));
+			panelTest1.add(getLabelFileCsv(), new Constraints(new Leading(4, 143, 10, 10), new Leading(12, 12, 12)));
+			panelTest1.add(getTextFileCsv(), new Constraints(new Leading(153, 287, 12, 12), new Leading(8, 24, 12, 12)));
 			panelTest1.add(getTextFileBin(), new Constraints(new Leading(152, 288, 12, 12), new Leading(34, 24, 12, 12)));
-			panelTest1.add(getLabelFileBin(), new Constraints(new Leading(4, 145, 10, 10), new Leading(37, 17, 12, 12)));
-			panelTest1.add(getLabelFileCsv(), new Constraints(new Leading(4, 144, 12, 12), new Leading(12, 12, 12)));
 		}
 		return panelTest1;
 	}
@@ -707,6 +726,9 @@ public class MainWindow extends JFrame {
 							if(!pathFileCsv.equals("")){
 							  fileChooser.setCurrentDirectory(new File(pathFileCsv));
 							}
+							else if(!pathDefault.equals("")){
+							  fileChooser.setCurrentDirectory(new File(pathDefault));
+					        }
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
 										@Override
@@ -734,6 +756,7 @@ public class MainWindow extends JFrame {
 								if (file != null) {
 									if (file.exists()&&(file.getName().toLowerCase().endsWith(".csv")||file.getName().toLowerCase().endsWith(".txt"))) {
 										pathFileCsv=file.getParent();
+										pathDefault=file.getParent();
 										labelStatusFileCsv
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -809,6 +832,9 @@ public class MainWindow extends JFrame {
 							if(!pathFileBin.equals("")){
 								  fileChooser.setCurrentDirectory(new File(pathFileBin));
 							}
+							else if(!pathDefault.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathDefault));
+						    }
 
 							//fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 							fileChooser
@@ -835,6 +861,7 @@ public class MainWindow extends JFrame {
 								if (file != null) {
 									if (file.exists()&&file.getName().toLowerCase().endsWith(".bin")) {
 										pathFileBin=file.getParent();
+										pathDefault=file.getParent();
 										labelStatusFileBin
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -884,10 +911,10 @@ public class MainWindow extends JFrame {
 			panelTest2.add(getLabelStatusFileCsv1(), new Constraints(new Leading(503, 10, 10), new Leading(8, 12, 12)));
 			panelTest2.add(getButtonFileXml(), new Constraints(new Leading(443, 10, 10), new Leading(34, 12, 12)));
 			panelTest2.add(getLabelStatusFileXml(), new Constraints(new Leading(503, 10, 10), new Leading(34, 12, 12)));
-			panelTest2.add(getTextFileCsv1(), new Constraints(new Leading(156, 284, 10, 10), new Leading(8, 24, 12, 12)));
-			panelTest2.add(getTextFileXml(), new Constraints(new Leading(156, 284, 12, 12), new Leading(34, 24, 12, 12)));
-			panelTest2.add(getLabelFileCsv1(), new Constraints(new Leading(4, 146, 12, 12), new Leading(12, 12, 12)));
-			panelTest2.add(getLabelFileXml(), new Constraints(new Leading(4, 146, 12, 12), new Leading(37, 17, 12, 12)));
+			panelTest2.add(getLabelFileCsv1(), new Constraints(new Leading(4, 144, 10, 10), new Leading(12, 12, 12)));
+			panelTest2.add(getLabelFileXml(), new Constraints(new Leading(4, 144, 12, 12), new Leading(37, 17, 12, 12)));
+			panelTest2.add(getTextFileCsv1(), new Constraints(new Leading(154, 286, 12, 12), new Leading(8, 24, 12, 12)));
+			panelTest2.add(getTextFileXml(), new Constraints(new Leading(154, 286, 12, 12), new Leading(34, 24, 12, 12)));
 		}
 		return panelTest2;
 	}
@@ -921,6 +948,9 @@ public class MainWindow extends JFrame {
 							if(!pathFileCsv.equals("")){
 								  fileChooser.setCurrentDirectory(new File(pathFileCsv));
 							}
+							else if(!pathDefault.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathDefault));
+						    }
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
 										@Override
@@ -945,6 +975,7 @@ public class MainWindow extends JFrame {
 								if (file != null) {
 									if (file.exists()&&(file.getName().toLowerCase().endsWith(".csv")||file.getName().toLowerCase().endsWith(".txt"))) {
 										pathFileCsv=file.getParent();
+										pathDefault=file.getParent();
 										labelStatusFileCsv1
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -1011,6 +1042,9 @@ public class MainWindow extends JFrame {
 							if(!pathFileXml.equals("")){
 								  fileChooser.setCurrentDirectory(new File(pathFileXml));
 							}
+							else if(!pathDefault.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathDefault));
+						    }
 						//fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
@@ -1036,6 +1070,7 @@ public class MainWindow extends JFrame {
 								if (file != null) {
 									if (file.exists()&&file.getName().toLowerCase().endsWith(".xml")) {
 										pathFileXml=file.getParent();
+										pathDefault=file.getParent();
 										labelStatusFileXml
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -1101,15 +1136,16 @@ public class MainWindow extends JFrame {
 		if (panelTest3 == null) {
 			panelTest3 = new JPanel();
 			panelTest3.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+			panelTest3.setVisible(false);
 			panelTest3.setLayout(new GroupLayout());
 			panelTest3.add(getButtonFileXml1(), new Constraints(new Leading(443, 10, 10), new Leading(5, 12, 12)));
 			panelTest3.add(getLabelStatusFileXml1(), new Constraints(new Leading(503, 10, 10), new Leading(8, 12, 12)));
 			panelTest3.add(getButtonFileBin1(), new Constraints(new Leading(443, 10, 10), new Leading(34, 12, 12)));
 			panelTest3.add(getLabelStatusFileBin1(), new Constraints(new Leading(503, 10, 10), new Leading(34, 12, 12)));
+			panelTest3.add(getLabelFileXml1(), new Constraints(new Leading(4, 139, 10, 10), new Leading(12, 12, 12)));
+			panelTest3.add(getLabelFileBin1(), new Constraints(new Leading(4, 142, 10, 10), new Leading(37, 17, 12, 12)));
 			panelTest3.add(getTextFileXml1(), new Constraints(new Leading(152, 288, 10, 10), new Leading(8, 24, 12, 12)));
 			panelTest3.add(getTextFileBin1(), new Constraints(new Leading(152, 288, 12, 12), new Leading(34, 24, 12, 12)));
-			panelTest3.add(getLabelFileXml1(), new Constraints(new Leading(4, 144, 10, 10), new Leading(12, 12, 12)));
-			panelTest3.add(getLabelFileBin1(), new Constraints(new Leading(4, 144, 12, 12), new Leading(37, 17, 12, 12)));
 		}
 		return panelTest3;
 	}
@@ -1143,6 +1179,9 @@ public class MainWindow extends JFrame {
 							if(!pathFileXml.equals("")){
 								  fileChooser.setCurrentDirectory(new File(pathFileXml));
 							}
+							else if(!pathDefault.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathDefault));
+						    }
 							//fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
@@ -1168,6 +1207,7 @@ public class MainWindow extends JFrame {
 								if (file != null) {
 									if (file.exists()&&file.getName().toLowerCase().endsWith(".xml")) {
 										pathFileXml=file.getParent();
+										pathDefault=file.getParent();
 										labelStatusFileXml1
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -1233,6 +1273,9 @@ public class MainWindow extends JFrame {
 							if(!pathFileBin.equals("")){
 								  fileChooser.setCurrentDirectory(new File(pathFileBin));
 							}
+							else if(!pathDefault.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathDefault));
+						    }
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
 										@Override
@@ -1257,6 +1300,7 @@ public class MainWindow extends JFrame {
 								if (file != null) {
 									if (file.exists()&&file.getName().toLowerCase().endsWith(".bin")) {
 										pathFileBin=file.getParent();
+										pathDefault=file.getParent();
 										labelStatusFileBin1
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -1502,7 +1546,7 @@ public class MainWindow extends JFrame {
 			menuLog.setMnemonic('L');
 			menuLog.addActionListener((new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
-					clearPane(jTextResults);
+					//clearPane(jTextResults);
 					parent.setTitle(rb.getString("title") + " - ["
 							+ rb.getString("title.test") + "]");
 					panelTestChoice.setVisible(false);
@@ -2316,7 +2360,7 @@ public class MainWindow extends JFrame {
 	
 	private void safeFileRemoval(File file){
 		if (file.exists()) {
-		  appendToPane(jTextResults, "secure delete file "+file.getName()+ "\n", Color.BLUE);
+		  //appendToPane(jTextResults, "secure delete file "+file.getName()+ "\n", Color.BLUE);
 		  RandomAccessFile raf = null;
 		  try{
 			long length = file.length();
@@ -2368,6 +2412,9 @@ public class MainWindow extends JFrame {
 			readFileSerialSid(textFileCsv.getText());
 			if (serialDuplicated) {
 				logger.debug(rb.getString("msg.doublederror"));
+				logger.error(rb.getString("msg.testError"));
+				appendToPane(jTextResults,
+						rb.getString("msg.testError") + "\n", Color.RED);
 				JOptionPane.showMessageDialog(parent,
 						rb.getString("msg.doublederror"),
 						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
@@ -2375,6 +2422,9 @@ public class MainWindow extends JFrame {
 			}
 			if (errorReadingLine) {
 				logger.debug(rb.getString("msg.lineerror"));
+				logger.error(rb.getString("msg.testError"));
+				appendToPane(jTextResults,
+						rb.getString("msg.testError") + "\n", Color.RED);
 				JOptionPane.showMessageDialog(parent,
 						rb.getString("msg.lineerror"),
 						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
@@ -2387,7 +2437,7 @@ public class MainWindow extends JFrame {
 				if(verifyResults(fileXml)){
 					logger.debug(rb.getString("msg.testOK"));
 					appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
-							Color.BLUE);
+							Color.GREEN);
 					JOptionPane.showMessageDialog(parent,
 							rb.getString("msg.testOK"),
 							rb.getString("title.ok"),
@@ -2422,11 +2472,32 @@ public class MainWindow extends JFrame {
 			logger.debug(rb.getString("title.privatekey2")+": "+textPrivateKey2.getText());
 			appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 2\n",	Color.BLUE);
 			readFileSerialSid(textFileCsv1.getText());
+			if (serialDuplicated) {
+				logger.debug(rb.getString("msg.doublederror"));
+				logger.error(rb.getString("msg.testError"));
+				appendToPane(jTextResults,
+						rb.getString("msg.testError") + "\n", Color.RED);
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.doublederror"),
+						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			if (errorReadingLine) {
+				logger.debug(rb.getString("msg.lineerror"));
+				logger.error(rb.getString("msg.testError"));
+				appendToPane(jTextResults,
+						rb.getString("msg.testError") + "\n", Color.RED);
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.lineerror"),
+						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
 			String fileXml=textFileXml.getText();
 			if(verifyResults(fileXml)){
 				logger.debug(rb.getString("msg.testOK"));
 				appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
-						Color.BLUE);
+						Color.GREEN);
 				JOptionPane.showMessageDialog(parent,
 						rb.getString("msg.testOK"),
 						rb.getString("title.ok"),
@@ -2462,7 +2533,7 @@ public class MainWindow extends JFrame {
 			decodeBinFile(fileBin,fileXml1);
 			
 			if(verifyFiles(fileXml,fileXml1)){
-				logger.debug(rb.getString("msg.testOK"));
+				logger.debug(rb.getString("msg.GREEN"));
 				appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
 						Color.BLUE);
 				JOptionPane.showMessageDialog(parent,
@@ -2496,7 +2567,7 @@ public class MainWindow extends JFrame {
 		progressBar.setMaximum(0);
 		progressBar.setMaximum(100);
 		progressBar.setValue(0);
-		labelProgress.setText(rb.getString("msg.formattingkeys") + " 0%");
+		labelProgress.setText(rb.getString("msg.readingserialsid") + " 0%");
 
 		repaint();
 
@@ -2509,7 +2580,7 @@ public class MainWindow extends JFrame {
 
 		try {
 			logger.debug(fileCsv+" "+rb.getString("msg.readingserialsid"));
-			appendToPane(jTextResults, rb.getString("msg.readingserialsid") + "\n",	Color.BLUE);
+			appendToPane(jTextResults, fileCsv+" "+rb.getString("msg.readingserialsid") + "\n",	Color.BLUE);
 
 			fr = new FileReader(fileCsv);
 			in = new BufferedReader(fr);
@@ -2522,6 +2593,8 @@ public class MainWindow extends JFrame {
 					String linekey = serialkey[1];
 
 					if (!listSerial.contains(lineserial)) {
+						logger.debug(rb.getString("title.serial")+": "+lineserial);
+						appendToPane(jTextResults, rb.getString("title.serial")+": "+lineserial + "\n",	Color.BLUE);
 						mapSerialSeed.put(lineserial, linekey);
 					} else {
 						logger.error("Error: element(" + (i + 1) + ") file("
@@ -2538,10 +2611,10 @@ public class MainWindow extends JFrame {
 					}
 				}
 				else{
-					logger.error("Error: element(" + (i + 1) + ") file("
+					logger.error("Error: "+rb.getString("title.line")+"(" + (i + 1) + ") file("
 							+ fileCsv + ") "+ rb.getString("msg.lineerror"));
 					appendToPane(
-							jTextResults,
+							jTextResults, rb.getString("title.line")+
 							"(" + (i + 1) + ") "
 									+ rb.getString("msg.lineerror") + "\n",
 							Color.RED);
