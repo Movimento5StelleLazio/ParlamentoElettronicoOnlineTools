@@ -80,7 +80,6 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
-import org.dyno.visual.swing.layouts.Bilateral;
 import org.dyno.visual.swing.layouts.Constraints;
 import org.dyno.visual.swing.layouts.GroupLayout;
 import org.dyno.visual.swing.layouts.Leading;
@@ -94,7 +93,7 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
  */
 
 //VS4E -- DO NOT REMOVE THIS LINE!
-public class MainWindow extends JFrame {
+public class MainWindow extends JFrame implements ErrorCodes{
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger("trace");
@@ -226,26 +225,45 @@ public class MainWindow extends JFrame {
 
 	private boolean serialDuplicated=false;
 	private boolean errorReadingLine=false;
+	private String errorMsg="";
+
 
 	public MainWindow() {
 		initComponents();
 	}
 
-	private void initComponents() {
-		setResizable(false);
-		setLayout(new GroupLayout());
-		add(getProgressBar(), new Constraints(new Bilateral(12, 12, 10), new Leading(214, 12, 12)));
-		add(getPanelTitle(), new Constraints(new Leading(12, 655, 12, 12), new Leading(7, 41, 10, 10)));
-		add(getPanelButtons(), new Constraints(new Leading(12, 654, 12, 12), new Leading(246, 65, 12, 12)));
-		add(getPanelAction(), new Constraints(new Leading(12, 654, 28, 166), new Leading(51, 12, 12)));
-		setJMenuBar(getJMenuBar());
-		setSize(694, 350);
-	}
+	
 
 
 	// START COMPONENT FOR TEST
 
 	
+	private void initComponents() {
+		setResizable(false);
+		setLayout(new GroupLayout());
+		add(getPanelTitle(), new Constraints(new Leading(12, 655, 12, 12), new Leading(7, 41, 10, 10)));
+		add(getPanelAction(), new Constraints(new Leading(12, 654, 28, 166), new Leading(51, 12, 12)));
+		add(getPanelButtons(), new Constraints(new Leading(12, 12, 12), new Leading(254, 84, 10, 10)));
+		setJMenuBar(getJMenuBar());
+		setSize(694, 386);
+	}
+
+
+
+
+	private JLabel getJLabel0() {
+		if (jLabel0 == null) {
+			jLabel0 = new JLabel();
+			jLabel0.setFont(new Font("Serif", Font.BOLD, 16));
+			jLabel0.setForeground(Color.blue);
+			jLabel0.setText("jLabel0");
+		}
+		return jLabel0;
+	}
+
+
+
+
 	private JTabbedPane getJTabbedPane() {
 		if (jTabbedPane == null) {
 			jTabbedPane = new JTabbedPane();
@@ -1372,7 +1390,7 @@ public class MainWindow extends JFrame {
 			panelTestResults = new JPanel();
 			panelTestResults.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 			panelTestResults.setLayout(new GroupLayout());
-			panelTestResults.add(getJScrollPane0(), new Constraints(new Leading(5, 542, 10, 10), new Leading(8, 151, 10, 10)));
+			panelTestResults.add(getJScrollPane0(), new Constraints(new Leading(20, 524, 10, 10), new Leading(8, 137, 10, 10)));
 		}
 		return panelTestResults;
 	}
@@ -1397,11 +1415,14 @@ public class MainWindow extends JFrame {
 
 	private JProgressBar getProgressBar() {
 		if (progressBar == null) {
-			progressBar = new JProgressBar(0, 100);
+			progressBar = new JProgressBar();
 			progressBar.setVisible(false);
 		}
 		return progressBar;
 	}
+
+
+
 
 	public JMenuBar getJMenuBar() {
 		if (menuBar == null) {
@@ -1511,7 +1532,7 @@ public class MainWindow extends JFrame {
 		labelFileBin1.setText(rb.getString("title.filebin"));
 		
 		
-		parent.setTitle(rb.getString("title") + " - ["
+		parent.setTitle(rb.getString("version") + " - ["
 					+ rb.getString("title.test") + "]");
 		buttonExecute.setText(rb.getString("title.test"));
 		buttonExecute.setMnemonic('T');
@@ -1526,8 +1547,8 @@ public class MainWindow extends JFrame {
 			menuTest.setMnemonic('T');
 			menuTest.addActionListener((new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
-					parent.setTitle(rb.getString("title") + " - ["
-							+ rb.getString("title.test") + "]");
+					parent.setTitle(rb.getString("version") + " - ["
+							+ rb.getString("title.test") + "] ");
 					panelTestChoice.setVisible(true);
 					panelTestResults.setVisible(false);
 					buttonExecute.setText(rb.getString("title.test"));
@@ -1547,8 +1568,8 @@ public class MainWindow extends JFrame {
 			menuLog.addActionListener((new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
 					//clearPane(jTextResults);
-					parent.setTitle(rb.getString("title") + " - ["
-							+ rb.getString("title.test") + "]");
+					parent.setTitle(rb.getString("version") + " - ["
+							+ rb.getString("title.test") + "] ");
 					panelTestChoice.setVisible(false);
 					panelTestResults.setVisible(true);
 					buttonExecute.setText(rb.getString("title.test"));
@@ -1592,13 +1613,18 @@ public class MainWindow extends JFrame {
 			panelButtons = new JPanel();
 			panelButtons.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 			panelButtons.setLayout(new GroupLayout());
-			panelButtons.add(getLabelWait(), new Constraints(new Leading(266, 10, 10), new Leading(26, 12, 12)));
-			panelButtons.add(getLabelProgress(), new Constraints(new Leading(218, 10, 10), new Leading(3, 10, 10)));
-			panelButtons.add(getButtonExecute(), new Constraints(new Leading(97, 115, 12, 12), new Leading(5, 53, 12, 12)));
-			panelButtons.add(getButtonClose(), new Constraints(new Leading(407, 115, 10, 10), new Leading(5, 53, 12, 12)));
+			panelButtons.add(getProgressBar(), new Constraints(new Leading(7, 633, 10, 10), new Leading(4, 12, 12)));
+			panelButtons.add(getButtonExecute(), new Constraints(new Leading(71, 115, 10, 10), new Leading(24, 53, 12, 12)));
+			panelButtons.add(getButtonClose(), new Constraints(new Leading(470, 115, 12, 12), new Leading(24, 53, 12, 12)));
+			panelButtons.add(getLabelWait(), new Constraints(new Leading(304, 10, 10), new Leading(42, 12, 12)));
+			panelButtons.add(getJLabel0(), new Constraints(new Leading(189, 240, 10, 10), new Leading(28, 0, 10, 10)));
+			panelButtons.add(getLabelProgress(), new Constraints(new Leading(212, 240, 12, 12), new Leading(19, 10, 10)));
 		}
 		return panelButtons;
 	}
+
+
+
 
 	private JButton getButtonExecute() {
 		if (buttonExecute == null) {
@@ -1615,7 +1641,7 @@ public class MainWindow extends JFrame {
 							new Thread() {
 								@Override
 								public void run() {
-									logger.debug("*******************START TEST*****************************");
+									
 									labelProgress.setVisible(true);
 									labelWait.setVisible(true);
 									buttonClose.setEnabled(false);
@@ -1626,10 +1652,9 @@ public class MainWindow extends JFrame {
 									menuLanguage.setEnabled(false);
 									panelTestChoice.setVisible(false);
 									panelTestResults.setVisible(true);
-
+                                    repaint();
                                     try{
-                    					clearPane(jTextResults);
-    									switch(panelSelected){
+                                    	switch(panelSelected){
     									case 0:
     										test1();
     										break;
@@ -1639,25 +1664,22 @@ public class MainWindow extends JFrame {
     									case 2:
     										test3();
     										break;
-    									}
-                                    }
-                                    catch(Exception e){
-                            			appendToPane(jTextResults, e.getMessage() + "\n",	Color.RED);
-
-                            			JOptionPane.showMessageDialog(parent,
-                            					e.getMessage(),
-                            					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-                                    }
+                                    	}
+                                    }catch(Exception e){
+                        				JOptionPane.showMessageDialog(parent,
+                        					e.getMessage(),
+                        					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+                        			}
 									labelProgress.setVisible(false);
 									labelWait.setVisible(false);
+									progressBar.setVisible(false);
 									buttonClose.setEnabled(true);
 									buttonExecute.setEnabled(true);
 
 									menuFile.setEnabled(true);
 									menuAbout.setEnabled(true);
 									menuLanguage.setEnabled(true);
-									logger.debug("********************END TEST*****************************");
-
+									repaint();
 								}
 							}.start();
 						}
@@ -1687,12 +1709,14 @@ public class MainWindow extends JFrame {
 	private JLabel getLabelWait() {
 		if (labelWait == null) {
 			labelWait = new JLabel();
-			labelWait.setIcon(new javax.swing.ImageIcon(getClass().getResource(
-					iconLoading)));
+			labelWait.setIcon(new ImageIcon(getClass().getResource("/loading.gif")));
 			labelWait.setVisible(false);
 		}
 		return labelWait;
 	}
+
+
+
 
 	private JLabel getLabelIcon() {
 		if (labelIcon == null) {
@@ -1707,13 +1731,14 @@ public class MainWindow extends JFrame {
 	private JLabel getLabelProgress() {
 		if (labelProgress == null) {
 			labelProgress = new JLabel();
-			labelProgress.setForeground(new Color(0, 0, 255));
 			labelProgress.setFont(new Font("Serif", Font.BOLD, 16));
-			labelProgress.setText("");
-			labelProgress.setVisible(false);
+			labelProgress.setForeground(Color.blue);
 		}
 		return labelProgress;
 	}
+
+
+
 
 	private JPanel getPanelAction() {
 		if (panelAction == null) {
@@ -1768,7 +1793,7 @@ public class MainWindow extends JFrame {
 	}
 
 	public void setIcon() {
-		setTitle(rb.getString("title") + " - [" + rb.getString("title.encrypt")
+		setTitle(rb.getString("version") + " - [" + rb.getString("title.test")
 				+ "]");
 		Dimension dim = this.getToolkit().getScreenSize();
 		int screenWidth = dim.width;
@@ -1797,11 +1822,19 @@ public class MainWindow extends JFrame {
 		parent = this;
 	}
 
-	private void appendToPane(JTextPane tp, String msg, Color c) {
+	private void appendToPane(JTextPane tp, String msg, Color color) {
+		String msgLog=msg.replaceAll("\n","");
+		if(color.equals(Color.RED)){
+			logger.error(msgLog);
+		}
+		else{
+			logger.debug(msgLog);
+		}
+		
 		if (tp != null) {
 			StyleContext sc = StyleContext.getDefaultStyleContext();
 			AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY,
-					StyleConstants.Foreground, c);
+					StyleConstants.Foreground, color);
 
 			aset = sc.addAttribute(aset, StyleConstants.FontFamily,
 					"Lucida Console");
@@ -1949,6 +1982,8 @@ public class MainWindow extends JFrame {
 				ex.printStackTrace();
 			}
 	    }
+	    progressBar.setVisible(false);
+	    labelProgress.setVisible(false);
 	    return retval;
 	}
 
@@ -2009,26 +2044,17 @@ public class MainWindow extends JFrame {
 					String seedOrigin = mapSerialSeed.remove(serial);
 					if (seedOrigin == null) {
 						retval = false;
-						logger.error("(1)[" + serial + "] "	+ rb.getString("msg.testNotFound"));
-						appendToPane(
-								jTextResults,
-								"(1)[" + serial + "] "
-										+ rb.getString("msg.testNotFound")
-										+ "\n", Color.RED);
+						//logger.error("(1)[" + serial + "] "	+ rb.getString("msg.testNotFound"));
+						errorMsg=rb.getString("title.error")+" - "+ rb.getString("title.serial")+" : "+serial+" - " +rb.getString("title.errorcode")+" "+SERIAL_NOTFOUND1_ERROR+" : "+rb.getString("msg.testNotFound");
+						appendToPane(jTextResults,errorMsg+ "\n", Color.RED);
 					} else {
 						if (!seedOrigin.equals(decodedseed)) {
 							retval = false;
-							logger.error("[" + serial + "] "	+ rb.getString("msg.testSeedNotMatch"));
-							appendToPane(
-									jTextResults,
-									"["
-											+ serial
-											+ "] "
-											+ rb.getString("msg.testSeedNotMatch")
-											+ "\n", Color.RED);
+							errorMsg=rb.getString("title.error")+" - " + rb.getString("title.serial")+" : "+serial+" - " +rb.getString("title.errorcode")+" "+SID_NOTMATCH_ERROR+" : "+rb.getString("msg.testSeedNotMatch");
+							appendToPane(jTextResults,errorMsg+ "\n", Color.RED);
 						}
 						else{
-							logger.debug("[" + serial + "] "	+ rb.getString("msg.testSerialSidOk"));
+							//logger.debug("[" + serial + "] "	+ rb.getString("msg.testSerialSidOk"));
 							appendToPane(
 									jTextResults,
 									"["
@@ -2055,22 +2081,17 @@ public class MainWindow extends JFrame {
 				retval = false;
 				Object[] object = mapSerialSeed.keySet().toArray();
 				for (int i = 0; i < object.length; i++) {
-					logger.error("(2)[" + object[i] + "] "	+ rb.getString("msg.testNotFound"));
-					appendToPane(
-							jTextResults,
-							"(2)[" + object[i] + "] "
-									+ rb.getString("msg.testNotFound") + "\n",
-							Color.RED);
+					errorMsg=rb.getString("title.error")+" - "+ rb.getString("title.serial")+" : "+object[i]+" - " +rb.getString("title.errorcode")+" "+SERIAL_NOTFOUND2_ERROR+" : "+rb.getString("msg.testNotFound");
+					appendToPane(jTextResults,errorMsg+ "\n",Color.RED);
+					repaint();
 				}
 
 			}
 			// System.out.println("OK");
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error(" "	+ e.getLocalizedMessage());
-			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
-
+			errorMsg=rb.getString("title.error")+" - "+rb.getString("title.errorcode")+" "+UNKNOWN_ERROR+" : "+e.getLocalizedMessage();
+			appendToPane(jTextResults, errorMsg+ "\n",	Color.RED);
 			retval = false;
 		} finally {
 			try {
@@ -2140,20 +2161,16 @@ public class MainWindow extends JFrame {
 						String seedOrigin = mapSerialSeed.remove(serial);
 						if (seedOrigin == null) {
 							retval = false;
-							logger.error("(1)[" + serial + "] "	+ rb.getString("msg.testNotFound"));
-							appendToPane(jTextResults, "(1)[" + serial + "] "
-									+ rb.getString("msg.testNotFound") + "\n",
-									Color.RED);
+							errorMsg=rb.getString("title.error")+" - "+ rb.getString("title.serial")+" : "+serial+" - " +rb.getString("title.errorcode")+" "+SERIAL_NOTFOUND1_ERROR+" : "+rb.getString("msg.testNotFound");
+							appendToPane(jTextResults,errorMsg+ "\n", Color.RED);
 						} else {
 							if (!seedOrigin.equals(decodedseed)) {
 								retval = false;
-								logger.error("[" + serial + "] "	+ rb.getString("msg.testSeedNotMatch"));
-								appendToPane(jTextResults, "[" + serial + "] "
-										+ rb.getString("msg.testSeedNotMatch")
-										+ "\n", Color.RED);
+								errorMsg=rb.getString("title.error")+" - " + rb.getString("title.serial")+" : "+serial+" - " +rb.getString("title.errorcode")+" "+SID_NOTMATCH_ERROR+" : "+rb.getString("msg.testSeedNotMatch");
+								appendToPane(jTextResults,errorMsg+ "\n", Color.RED);
 							}
 							else{
-								logger.debug("[" + serial + "] "	+ rb.getString("msg.testSerialSidOk"));
+								//logger.debug("[" + serial + "] "	+ rb.getString("msg.testSerialSidOk"));
 								appendToPane(
 										jTextResults,
 										"["
@@ -2184,12 +2201,9 @@ public class MainWindow extends JFrame {
 				retval = false;
 				Object[] object = mapSerialSeed.keySet().toArray();
 				for (int i = 0; i < object.length; i++) {
-					logger.error("(2)[" + object[i] + "] "	+ rb.getString("msg.testNotFound"));
-					appendToPane(
-							jTextResults,
-							"(2)[" + object[i] + "] "
-									+ rb.getString("msg.testNotFound") + "\n",
-							Color.RED);
+					errorMsg=rb.getString("title.error")+" - "+ rb.getString("title.serial")+" : "+object[i]+" - " +rb.getString("title.errorcode")+" "+SERIAL_NOTFOUND2_ERROR+" : "+rb.getString("msg.testNotFound");
+					appendToPane(jTextResults,errorMsg+ "\n",Color.RED);
+					repaint();
 				}
 
 			}
@@ -2197,9 +2211,8 @@ public class MainWindow extends JFrame {
 			labelProgress.setText(rb.getString("msg.verification")	+ " 100%");
 			repaint();
 		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error(" "	+ e.getLocalizedMessage());
-		    appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
+			errorMsg=rb.getString("title.error")+" - "+rb.getString("title.errorcode")+" "+UNKNOWN_ERROR+" : "+e.getLocalizedMessage();
+			appendToPane(jTextResults, errorMsg+ "\n",	Color.RED);
 			retval = false;
 		} finally {
 			try {
@@ -2331,6 +2344,7 @@ public class MainWindow extends JFrame {
 
 	public static String END_OF_KEY = "=,uytnnnnnnnnnneereee,c------";
 	public static byte[] seq = null;
+	private JLabel jLabel0;
 	private static final String PREFERRED_LOOK_AND_FEEL = "javax.swing.plaf.metal.MetalLookAndFeel";
 	public byte[] appendByteArray(byte[] array, byte b) {
 		byte[] c = new byte[array.length + 1];
@@ -2398,28 +2412,36 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
-	private synchronized void test1() throws Exception{
+	private synchronized void test1() {
 		// check parameters
-		if(statusPrivateKey1&&statusPrivateKey2&&statusFileCsv&&statusFileBin){
-			String fileBin = textFileBin.getText();
+		if(statusPrivateKey1&&statusPrivateKey2&&statusFileCsv&&statusFileBin				
+				&&new File(textFileCsv.getText()).exists()
+				&&new File(textFileBin.getText()).exists()
+				&&new File(textPrivateKey1.getText()).exists()
+				&&new File(textPrivateKey2.getText()).exists()){
 			String fileXml="test.xml";
-			appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 1\n",	Color.BLUE);
-			logger.debug(rb.getString("title.filecsv")+": "+textFileCsv.getText());
-			logger.debug(rb.getString("title.filebin")+": "+textFileBin.getText());
-			logger.debug(rb.getString("title.privatekey1")+": "+textPrivateKey1.getText());
-			logger.debug(rb.getString("title.privatekey2")+": "+textPrivateKey2.getText());
-			
-			readFileSerialSid(textFileCsv.getText());
-			if (serialDuplicated) {
-				logger.debug(rb.getString("msg.doublederror"));
-				logger.error(rb.getString("msg.testError"));
-				appendToPane(jTextResults,
+			try{
+				clearPane(jTextResults);
+				appendToPane(jTextResults,"*******************START TEST*****************************"+ "\n", Color.BLUE);
+				String fileBin = textFileBin.getText();
+				appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 1\n",	Color.BLUE);
+				appendToPane(jTextResults,rb.getString("title.filecsv")+": "+textFileCsv.getText()+"\n",	Color.BLUE);
+				appendToPane(jTextResults,rb.getString("title.filebin")+": "+textFileBin.getText()+"\n",	Color.BLUE);
+				appendToPane(jTextResults,rb.getString("title.privatekey1")+": "+textPrivateKey1.getText()+"\n",	Color.BLUE);
+				appendToPane(jTextResults,rb.getString("title.privatekey2")+": "+textPrivateKey2.getText()+"\n",	Color.BLUE);
+				repaint();
+				readFileSerialSid(textFileCsv.getText());
+				if (serialDuplicated) {
+					appendToPane(jTextResults,rb.getString("msg.doublederror") + "\n", Color.RED);
+					appendToPane(jTextResults,
 						rb.getString("msg.testError") + "\n", Color.RED);
-				JOptionPane.showMessageDialog(parent,
+					JOptionPane.showMessageDialog(parent,
 						rb.getString("msg.doublederror"),
 						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-				return;
-			}
+					return;
+				}
+				appendToPane(jTextResults,rb.getString("msg.totalseeds") +" : "+mapSerialSeed.size()+ "\n", Color.BLUE);
+			/*
 			if (errorReadingLine) {
 				logger.debug(rb.getString("msg.lineerror"));
 				logger.error(rb.getString("msg.testError"));
@@ -2430,12 +2452,12 @@ public class MainWindow extends JFrame {
 						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 				return;
 			}
-			
-			try{
+			*/
+
 				decodeBinFile(fileBin,fileXml);
 				
 				if(verifyResults(fileXml)){
-					logger.debug(rb.getString("msg.testOK"));
+					//logger.debug(rb.getString("msg.testOK"));
 					appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
 							Color.GREEN);
 					JOptionPane.showMessageDialog(parent,
@@ -2444,44 +2466,65 @@ public class MainWindow extends JFrame {
 							JOptionPane.INFORMATION_MESSAGE);
 				}
 				else{
-					logger.error(rb.getString("msg.testError"));
+					//logger.error(rb.getString("msg.testError"));
 					appendToPane(jTextResults,
 							rb.getString("msg.testError") + "\n", Color.RED);
 					JOptionPane.showMessageDialog(parent,
 							rb.getString("msg.testError"),
 							rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 				}
+			}catch(Exception e){
+				errorMsg=rb.getString("title.error")+" - "+rb.getString("title.errorcode")+" "+UNKNOWN_ERROR+" : "+e.getLocalizedMessage();
+
+				appendToPane(jTextResults,errorMsg+ "\n", Color.RED);
+				appendToPane(jTextResults,rb.getString("msg.testError") + "\n", Color.RED);
+
+				JOptionPane.showMessageDialog(parent,
+					e.getLocalizedMessage(),
+					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 			}
 			finally{
 				safeFileRemoval(new File(fileXml));
 			}
+			appendToPane(jTextResults,"********************END TEST*****************************"+ "\n", Color.BLUE);
+
 		}
 		else{
-			logger.error(rb.getString("msg.missingparameter"));
+			//logger.error(rb.getString("msg.missingparameter"));
 			JOptionPane.showMessageDialog(parent,
 					rb.getString("msg.missingparameter"),
 					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
-	private synchronized void test2() throws Exception{
+	private synchronized void test2() {
 		// check parameters
-		if(statusPrivateKey1&&statusPrivateKey2&&statusFileCsv1&&statusFileXml){
-			logger.debug(rb.getString("title.filecsv")+": "+textFileCsv1.getText());
-			logger.debug(rb.getString("title.filexml")+": "+textFileXml.getText());
-			logger.debug(rb.getString("title.privatekey1")+": "+textPrivateKey1.getText());
-			logger.debug(rb.getString("title.privatekey2")+": "+textPrivateKey2.getText());
-			appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 2\n",	Color.BLUE);
-			readFileSerialSid(textFileCsv1.getText());
-			if (serialDuplicated) {
-				logger.debug(rb.getString("msg.doublederror"));
-				logger.error(rb.getString("msg.testError"));
-				appendToPane(jTextResults,
+		if(statusPrivateKey1&&statusPrivateKey2&&statusFileCsv1&&statusFileXml
+				&&new File(textFileCsv1.getText()).exists()
+				&&new File(textFileXml.getText()).exists()
+				&&new File(textPrivateKey1.getText()).exists()
+				&&new File(textPrivateKey2.getText()).exists()){
+			try{
+				clearPane(jTextResults);
+				appendToPane(jTextResults,"*******************START TEST*****************************"+ "\n", Color.BLUE);
+				appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 2\n",	Color.BLUE);
+
+				appendToPane(jTextResults,rb.getString("title.filecsv")+": "+textFileCsv1.getText()+ "\n", Color.BLUE);
+				appendToPane(jTextResults,rb.getString("title.filexml")+": "+textFileXml.getText()+ "\n", Color.BLUE);
+				appendToPane(jTextResults,rb.getString("title.privatekey1")+": "+textPrivateKey1.getText()+ "\n", Color.BLUE);
+				appendToPane(jTextResults,rb.getString("title.privatekey2")+": "+textPrivateKey2.getText()+ "\n", Color.BLUE);
+			
+				repaint();
+				readFileSerialSid(textFileCsv1.getText());
+				if (serialDuplicated) {
+					appendToPane(jTextResults,rb.getString("msg.doublederror") + "\n", Color.RED);
+					appendToPane(jTextResults,
 						rb.getString("msg.testError") + "\n", Color.RED);
-				JOptionPane.showMessageDialog(parent,
+					JOptionPane.showMessageDialog(parent,
 						rb.getString("msg.doublederror"),
 						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-				return;
-			}
+					return;
+				}
+			/*
 			if (errorReadingLine) {
 				logger.debug(rb.getString("msg.lineerror"));
 				logger.error(rb.getString("msg.testError"));
@@ -2492,66 +2535,97 @@ public class MainWindow extends JFrame {
 						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 				return;
 			}
-			
-			String fileXml=textFileXml.getText();
-			if(verifyResults(fileXml)){
-				logger.debug(rb.getString("msg.testOK"));
-				appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
+			*/
+				String fileXml=textFileXml.getText();
+				if(verifyResults(fileXml)){
+					//logger.debug(rb.getString("msg.testOK"));
+					appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
 						Color.GREEN);
-				JOptionPane.showMessageDialog(parent,
+					JOptionPane.showMessageDialog(parent,
 						rb.getString("msg.testOK"),
 						rb.getString("title.ok"),
 						JOptionPane.INFORMATION_MESSAGE);
-			}
-			else{
-				logger.error(rb.getString("msg.testError"));
-				appendToPane(jTextResults,
+				}
+				else{
+					//logger.error(rb.getString("msg.testError"));
+					appendToPane(jTextResults,
 						rb.getString("msg.testError") + "\n", Color.RED);
-				JOptionPane.showMessageDialog(parent,
+					JOptionPane.showMessageDialog(parent,
 						rb.getString("msg.testError"),
 						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+				}
+			
+			}catch(Exception e){
+				appendToPane(jTextResults,
+						rb.getString("msg.testError") + "\n", Color.RED);
+				appendToPane(jTextResults, e.getMessage() + "\n",	Color.RED);
+
+				JOptionPane.showMessageDialog(parent,
+					e.getMessage(),
+					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 			}
+			appendToPane(jTextResults,"********************END TEST*****************************"+ "\n", Color.BLUE);
+
 		}
 		else{
-			logger.error(rb.getString("msg.missingparameter"));
+			//logger.error(rb.getString("msg.missingparameter"));
 			JOptionPane.showMessageDialog(parent,
 					rb.getString("msg.missingparameter"),
 					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
-	private synchronized void test3() throws Exception{
+	private synchronized void test3() {
 		// check parameters
-		if(statusPrivateKey1&&statusPrivateKey2&&statusFileXml1&&statusFileBin1){
-			logger.debug(rb.getString("title.filexml")+": "+textFileXml1.getText());
-			logger.debug(rb.getString("title.filebin")+": "+textFileBin1.getText());
-			logger.debug(rb.getString("title.privatekey1")+": "+textPrivateKey1.getText());
-			logger.debug(rb.getString("title.privatekey2")+": "+textPrivateKey2.getText());
-			appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 3\n",	Color.BLUE);
-			String fileXml = textFileXml1.getText();
-			String fileBin = textFileBin1.getText();
-			String fileXml1="test.xml";
-			decodeBinFile(fileBin,fileXml1);
+		if(statusPrivateKey1&&statusPrivateKey2&&statusFileXml1&&statusFileBin1
+			&&new File(textFileXml1.getText()).exists()
+			&&new File(textFileBin1.getText()).exists()
+			&&new File(textPrivateKey1.getText()).exists()
+			&&new File(textPrivateKey2.getText()).exists()){
+			try{
+				clearPane(jTextResults);
+				appendToPane(jTextResults,"*******************START TEST*****************************"+ "\n", Color.BLUE);
+				appendToPane(jTextResults, "Start "+rb.getString("title.test") + " 3\n",	Color.BLUE);
+
+				appendToPane(jTextResults,rb.getString("title.filexml")+": "+textFileXml1.getText()+ "\n", Color.BLUE);
+				appendToPane(jTextResults,rb.getString("title.filebin")+": "+textFileBin1.getText()+ "\n", Color.BLUE);
+				appendToPane(jTextResults,rb.getString("title.privatekey1")+": "+textPrivateKey1.getText()+ "\n", Color.BLUE);
+				appendToPane(jTextResults,rb.getString("title.privatekey2")+": "+textPrivateKey2.getText()+ "\n", Color.BLUE);
+				String fileXml = textFileXml1.getText();
+				String fileBin = textFileBin1.getText();
+				String fileXml1="test.xml";
+				decodeBinFile(fileBin,fileXml1);
 			
-			if(verifyFiles(fileXml,fileXml1)){
-				logger.debug(rb.getString("msg.GREEN"));
-				appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
-						Color.BLUE);
-				JOptionPane.showMessageDialog(parent,
+				if(verifyFiles(fileXml,fileXml1)){
+					//logger.debug(rb.getString("msg.testOK"));
+					appendToPane(jTextResults, rb.getString("msg.testOK") + "\n",
+						Color.GREEN);
+					JOptionPane.showMessageDialog(parent,
 						rb.getString("msg.testOK"),
 						rb.getString("title.ok"),
 						JOptionPane.INFORMATION_MESSAGE);
-			}
-			else{
-				logger.error(rb.getString("msg.testError"));
-				appendToPane(jTextResults,
+				}
+				else{
+					//logger.error(rb.getString("msg.testError"));
+					appendToPane(jTextResults,
 						rb.getString("msg.testError") + "\n", Color.RED);
-				JOptionPane.showMessageDialog(parent,
+					JOptionPane.showMessageDialog(parent,
 						rb.getString("msg.testError"),
 						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
-			}			
+				}
+			}catch(Exception e){
+				appendToPane(jTextResults,
+						rb.getString("msg.testError") + "\n", Color.RED);
+				appendToPane(jTextResults, e.getMessage() + "\n",	Color.RED);
+
+				JOptionPane.showMessageDialog(parent,
+					e.getMessage(),
+					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+			}
+			appendToPane(jTextResults,"********************END TEST*****************************"+ "\n", Color.BLUE);
+
 		}
 		else{
-			logger.error(rb.getString("msg.missingparameter"));
+			//logger.error(rb.getString("msg.missingparameter"));
 			JOptionPane.showMessageDialog(parent,
 					rb.getString("msg.missingparameter"),
 					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
@@ -2579,8 +2653,8 @@ public class MainWindow extends JFrame {
 		BufferedReader in = null;
 
 		try {
-			logger.debug(fileCsv+" "+rb.getString("msg.readingserialsid"));
-			appendToPane(jTextResults, fileCsv+" "+rb.getString("msg.readingserialsid") + "\n",	Color.BLUE);
+			//logger.debug(fileCsv+" "+rb.getString("msg.readingserialsid"));
+			appendToPane(jTextResults, rb.getString("title.file")+" : "+   fileCsv+" - "+rb.getString("msg.readingserialsid") + "\n",	Color.BLUE);
 
 			fr = new FileReader(fileCsv);
 			in = new BufferedReader(fr);
@@ -2593,31 +2667,31 @@ public class MainWindow extends JFrame {
 					String linekey = serialkey[1];
 
 					if (!listSerial.contains(lineserial)) {
-						logger.debug(rb.getString("title.serial")+": "+lineserial);
+						//logger.debug(rb.getString("title.serial")+": "+lineserial);
 						appendToPane(jTextResults, rb.getString("title.serial")+": "+lineserial + "\n",	Color.BLUE);
 						mapSerialSeed.put(lineserial, linekey);
 					} else {
+						errorMsg=rb.getString("title.error")+" - " +rb.getString("title.file")+" : "+fileCsv+" - "+rb.getString("title.line")+ " "+(i+1)+" - "+ rb.getString("title.errorcode")+" "+DUPLICATE_SERIAL_ERROR+" : "+rb.getString("msg.doublederror");
+						/*
 						logger.error("Error: element(" + (i + 1) + ") file("
 								+ fileCsv + ") serial(" + lineserial
 								+ ") "+rb.getString("msg.doublederror"));
-						appendToPane(
-								jTextResults,
-								"(" + (i + 1) + ")[" + lineserial + "] "
-										+ rb.getString("msg.doublederror")
-										+ "\n", Color.RED);
+						*/
+						appendToPane(jTextResults,errorMsg+ "\n", Color.RED);
 						// jTextResults.append("("+(i +
 						// 1)+")["+lineserial+"] "+rb.getString("msg.doublederror")+"\n");
 						serialDuplicated = true;
 					}
 				}
 				else{
+					errorMsg=rb.getString("title.error")+" - " +rb.getString("title.file")+" : "+fileCsv+" - "+rb.getString("title.line")+ " "+(i+1)+" - "+ rb.getString("title.errorcode")+" "+EMPTY_LINE_ERROR+" : "+rb.getString("msg.lineerror");
+					
+					/*
 					logger.error("Error: "+rb.getString("title.line")+"(" + (i + 1) + ") file("
 							+ fileCsv + ") "+ rb.getString("msg.lineerror"));
-					appendToPane(
-							jTextResults, rb.getString("title.line")+
-							"(" + (i + 1) + ") "
-									+ rb.getString("msg.lineerror") + "\n",
-							Color.RED);
+				
+				    */
+					appendToPane(jTextResults, errorMsg+ "\n",Color.RED);
 					errorReadingLine=true;
 				}
 				counter += string.length();
@@ -2636,6 +2710,7 @@ public class MainWindow extends JFrame {
 			}
 			progressBar.setValue(100);
 			labelProgress.setText(rb.getString("msg.readingserialsid") + " 100%");
+			repaint();
 
 		}finally{
 				try {
@@ -2647,6 +2722,8 @@ public class MainWindow extends JFrame {
 					ex.printStackTrace();
 				}
 		}
+	    progressBar.setVisible(false);
+	    labelProgress.setVisible(false);
 
 		
 	}
@@ -2656,8 +2733,8 @@ public class MainWindow extends JFrame {
 		progressBar.setMaximum(0);
 		progressBar.setMaximum(100);
 		progressBar.setValue(0);
-		logger.debug(fileBin+" "+rb.getString("msg.deciphering"));
-		appendToPane(jTextResults, rb.getString("msg.deciphering") + "\n",	Color.BLUE);
+		//logger.debug(fileBin+" "+rb.getString("msg.deciphering"));
+		appendToPane(jTextResults, rb.getString("title.file")+" : "+   fileBin+" - "+rb.getString("msg.deciphering") + "\n",	Color.BLUE);
 
 		labelProgress.setText(rb.getString("msg.deciphering") + " 0%");
 		labelProgress.setVisible(true);
@@ -2736,6 +2813,10 @@ public class MainWindow extends JFrame {
 				// bos.close();
 				if (outputWriter != null)
 					outputWriter.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
 				if (inputReader != null)
 					inputReader.close();
 			} catch (Exception e) {
@@ -2743,6 +2824,9 @@ public class MainWindow extends JFrame {
 			}
 
 		}
+	    progressBar.setVisible(false);
+	    labelProgress.setVisible(false);
+
 
 	}
 
