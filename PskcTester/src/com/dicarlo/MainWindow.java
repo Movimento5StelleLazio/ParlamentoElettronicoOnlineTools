@@ -2671,7 +2671,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 						appendToPane(jTextResults, rb.getString("title.serial")+": "+lineserial + "\n",	Color.BLUE);
 						mapSerialSeed.put(lineserial, linekey);
 					} else {
-						errorMsg=rb.getString("title.error")+" - " +rb.getString("title.file")+" : "+fileCsv+" - "+rb.getString("title.line")+ " "+(i+1)+" - "+ rb.getString("title.errorcode")+" "+DUPLICATE_SERIAL_ERROR+" : "+rb.getString("msg.doublederror");
+						errorMsg=rb.getString("title.error")+" - " +rb.getString("title.file")+" : "+fileCsv+" - "+rb.getString("title.line")+ " "+(i+1)+" - "+rb.getString("title.serial")+ " "+lineserial+" - "+ rb.getString("title.errorcode")+" "+DUPLICATE_SERIAL_ERROR+" : "+rb.getString("msg.doublederror");
 						/*
 						logger.error("Error: element(" + (i + 1) + ") file("
 								+ fileCsv + ") serial(" + lineserial
