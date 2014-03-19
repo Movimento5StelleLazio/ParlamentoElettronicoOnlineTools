@@ -108,7 +108,7 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
  */
 
 //VS4E -- DO NOT REMOVE THIS LINE!
-public class MainWindow extends JFrame {
+public class MainWindow extends JFrame implements ErrorCodes{
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger("trace");
@@ -1032,12 +1032,12 @@ public class MainWindow extends JFrame {
 		labelPrivateKey2.setText(rb.getString("title.privatekey2"));
 
 		if (testMode) {
-			parent.setTitle(rb.getString("title") + " - ["
+			parent.setTitle(rb.getString("version") + " - ["
 					+ rb.getString("title.test") + "]");
 			buttonExecute.setText(rb.getString("title.test"));
 			buttonExecute.setMnemonic('T');
 		} else {
-			parent.setTitle(rb.getString("title") + " - ["
+			parent.setTitle(rb.getString("version") + " - ["
 						+ rb.getString("title.decrypt") + "]");
 			buttonExecute.setText(rb.getString("title.decrypt"));
 			buttonExecute.setMnemonic('D');
@@ -1057,7 +1057,7 @@ public class MainWindow extends JFrame {
 					clearPane(jTextResults);
 					//encryptMode = false;
 					testMode = false;
-					parent.setTitle(rb.getString("title") + " - ["
+					parent.setTitle(rb.getString("version") + " - ["
 							+ rb.getString("title.decrypt") + "]");
 					panelDecrypt.setVisible(true);
 					panelTest.setVisible(false);
@@ -1100,7 +1100,7 @@ public class MainWindow extends JFrame {
 					clearPane(jTextResults);
 					testMode = true;
 					//encryptMode = false;
-					parent.setTitle(rb.getString("title") + " - ["
+					parent.setTitle(rb.getString("version") + " - ["
 							+ rb.getString("title.test") + "]");
 					panelDecrypt.setVisible(false);
 					panelTest.setVisible(true);
@@ -1309,7 +1309,7 @@ public class MainWindow extends JFrame {
 	}
 
 	public void setIcon() {
-		setTitle(rb.getString("title") + " - [" + rb.getString("title.encrypt")
+		setTitle(rb.getString("version") + " - [" + rb.getString("title.encrypt")
 				+ "]");
 		Dimension dim = this.getToolkit().getScreenSize();
 		int screenWidth = dim.width;
