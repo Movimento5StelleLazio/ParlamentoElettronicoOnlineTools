@@ -108,7 +108,7 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
  */
 
 //VS4E -- DO NOT REMOVE THIS LINE!
-public class MainWindow extends JFrame {
+public class MainWindow extends JFrame implements ErrorCodes{
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger("trace");
@@ -199,6 +199,9 @@ public class MainWindow extends JFrame {
 	private JButton buttonExecute;
 	private JLabel labelWait;
 	private JLabel labelProgress;
+	
+	private String errorMsg="";
+	private int totalSeed=0;
 
 	public MainWindow() {
 		initComponents();
@@ -1305,26 +1308,37 @@ public class MainWindow extends JFrame {
 	}
 
 	private void appendToPane(JTextPane tp, String msg, Color c) {
-		if (tp != null) {
-			StyleContext sc = StyleContext.getDefaultStyleContext();
-			AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY,
+		String msgLog=msg.replaceAll("\n","");
+
+		if(test){
+			if (tp != null) {
+				StyleContext sc = StyleContext.getDefaultStyleContext();
+				AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY,
 					StyleConstants.Foreground, c);
 
-			aset = sc.addAttribute(aset, StyleConstants.FontFamily,
+				aset = sc.addAttribute(aset, StyleConstants.FontFamily,
 					"Lucida Console");
-			aset = sc.addAttribute(aset, StyleConstants.Alignment,
+				aset = sc.addAttribute(aset, StyleConstants.Alignment,
 					StyleConstants.ALIGN_JUSTIFIED);
 
-			int len = tp.getDocument().getLength();
-			tp.setCaretPosition(len);
-			tp.setCharacterAttributes(aset, false);
-			tp.replaceSelection(msg);
-			try {
-				tp.getStyledDocument().insertString(len, msg, aset);
-			} catch (BadLocationException e) {
-				e.printStackTrace();
+				int len = tp.getDocument().getLength();
+				tp.setCaretPosition(len);
+				tp.setCharacterAttributes(aset, false);
+				tp.replaceSelection(msg);
+				try {
+					tp.getStyledDocument().insertString(len, msg, aset);
+				} catch (BadLocationException e) {
+					e.printStackTrace();
+				}
 			}
 		}
+		if(c.equals(Color.RED)){
+			logger.error(msgLog);
+		}
+		else{
+			logger.debug(msgLog);
+		}
+
 	}
 
 	private void clearPane(JTextPane tp) {
@@ -1498,6 +1512,8 @@ public class MainWindow extends JFrame {
 				encryptMode=false;
 				return;
 			} else {
+				appendToPane(jTextResults, rb.getString("msg.totalseeds") +" : "+totalSeed+ "\n",
+						Color.BLUE);
 				appendToPane(jTextResults, rb.getString("msg.cipherok") + "\n",
 						Color.BLUE);
 			}
@@ -1567,7 +1583,7 @@ public class MainWindow extends JFrame {
 		String dateFormatted = sdf.format(new java.util.Date(System
 				.currentTimeMillis()));
 		String srcFileName = textFileIn.getText();
-		String outFolder = textFileOutT.getText();
+		String outFolder = textFileOut.getText();
 		if(!outFolder.endsWith(File.separator)){
 			outFolder=outFolder+File.separator;
 		}
@@ -1584,8 +1600,11 @@ public class MainWindow extends JFrame {
 		}
 
 		if (encrypt(srcFileName,fileXml,fileBin)) {
-			JOptionPane.showMessageDialog(parent, rb.getString("msg.cipherok"),
+			JOptionPane.showMessageDialog(parent, rb.getString("msg.cipherok")+"\n"+rb.getString("msg.totalseeds") +" : "+totalSeed,
 					rb.getString("title.ok"), JOptionPane.INFORMATION_MESSAGE);
+			
+			appendToPane(jTextResults, rb.getString("msg.totalseeds") +" : "+totalSeed+ "\n",
+					Color.BLUE);
 			appendToPane(jTextResults, rb.getString("msg.cipherok") + "\n",
 					Color.BLUE);
 		} else {
@@ -1595,7 +1614,7 @@ public class MainWindow extends JFrame {
 			appendToPane(jTextResults, rb.getString("msg.ciphererror") + "\n",
 					Color.RED);
 		}
-
+		mapSerialSeed.clear();
 	}
 
 	private synchronized boolean encrypt(String srcFileName,String fileXml,String fileBin) {
@@ -1650,55 +1669,45 @@ public class MainWindow extends JFrame {
 
 				try {
 					if(!"".equals(string.trim())){
-					String[] serialkey = getSerialKey(string.trim());
-					String lineserial = serialkey[0];
-					String linekey = serialkey[1];
+						String[] serialkey = getSerialKey(string.trim());
+						String lineserial = serialkey[0];
+						String linekey = serialkey[1];
 
-					if (!listSerial.contains(lineserial)) {
-						if (test) {
+						if (!listSerial.contains(lineserial)) {
 							mapSerialSeed.put(lineserial, linekey);
-						}
-						DeviceInfo di = new DeviceInfo("xyzw", lineserial);
-						byte[] byteSeed = keyGetByteCiphered(linekey);
+							
+							DeviceInfo di = new DeviceInfo("xyzw", lineserial);
+							byte[] byteSeed = keyGetByteCiphered(linekey);
 
-						String data = Base64.encode(byteSeed);
-						Data d = new Data(new Secret(data), "60", "0");
-						// Data d = new Data(new Secret(linekey), "60", "0");
-						org.jdamico.pskcbuilder.dataobjects.Key k = new org.jdamico.pskcbuilder.dataobjects.Key(
+							String data = Base64.encode(byteSeed);
+							Data d = new Data(new Secret(data), "60", "0");
+							// Data d = new Data(new Secret(linekey), "60", "0");
+							org.jdamico.pskcbuilder.dataobjects.Key k = new org.jdamico.pskcbuilder.dataobjects.Key(
 								"1", "urn:ietf:params:xml:ns:keyprov:pskc:"
 										+ Constants.ALGO_TYPE_TOTP, "xyzw", d,
 								ap);
-						KeyPackage kp = new KeyPackage(di, k);
+							KeyPackage kp = new KeyPackage(di, k);
 
-						outputWriter.write(getObj2XmlStr(kp, i)
+							outputWriter.write(getObj2XmlStr(kp, i)
 								.getBytes("UTF8"));
-						outputWriter.flush();
-						listSerial.add(lineserial);
-					} else {
-						logger.error("Error: element(" + (i + 1) + ") file("
-								+ srcFileName + ") serial(" + lineserial
-								+ ") duplicate");
-						appendToPane(
-								jTextResults,
-								"(" + (i + 1) + ")[" + lineserial + "] "
-										+ rb.getString("msg.doublederror")
-										+ "\n", Color.RED);
-						// jTextResults.append("("+(i +
-						// 1)+")["+lineserial+"] "+rb.getString("msg.doublederror")+"\n");
-						serialDuplicated = true;
+							outputWriter.flush();
+							listSerial.add(lineserial);
+						} else {
+							errorMsg=rb.getString("title.error")+" - " +rb.getString("title.file")+" : "+srcFileName+" - "+rb.getString("title.line")+ " "+(i+1)+" - "+rb.getString("title.serial")+ " "+lineserial+" - "+ rb.getString("title.errorcode")+" "+DUPLICATE_SERIAL_ERROR+" : "+rb.getString("msg.doublederror");
+							appendToPane(jTextResults,errorMsg+ "\n", Color.RED);
+							serialDuplicated = true;
+						}
 					}
+					else{
+						errorMsg=rb.getString("title.error")+" - " +rb.getString("title.file")+" : "+srcFileName+" - "+rb.getString("title.line")+ " "+(i+1)+" - "+ rb.getString("title.errorcode")+" "+EMPTY_LINE_ERROR+" : "+rb.getString("msg.lineerror");
+						appendToPane(jTextResults, errorMsg+ "\n",Color.RED);
+
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
-					logger.error("Error: element(" + (i + 1) + ") file("
-							+ srcFileName + ")", e);
+					errorMsg=rb.getString("title.error")+" - " +rb.getString("title.file")+" : "+srcFileName+" - "+rb.getString("title.line")+ " "+(i+1)+" - "+ rb.getString("title.errorcode")+" "+UNKNOWN_ERROR+" : "+e.getLocalizedMessage();
 					appendToPane(
-							jTextResults,
-							"(" + (i + 1) + ") "
-									+ rb.getString("msg.lineerror") + "\n",
+							jTextResults,errorMsg+ "\n",
 							Color.RED);
-					// jTextResults.append("("+(i +
-					// 1)+") "+rb.getString("msg.lineerror")+"\n");
 					errorReadingLine = true;
 				}
 
@@ -1715,6 +1724,7 @@ public class MainWindow extends JFrame {
 				}
 				i++;
 			}
+			totalSeed=mapSerialSeed.size();
 			outputWriter.write(getXmlFooter().getBytes("UTF8"));
 			outputWriter.flush();
 			outputWriter.close();
@@ -1814,9 +1824,10 @@ public class MainWindow extends JFrame {
 
 			retval = true;
 		} catch (Exception e) {
-			e.printStackTrace();
-			logger.debug("Error: file(" + srcFileName + ")", e);
-			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
+			errorMsg=rb.getString("title.error")+" - " + rb.getString("title.errorcode")+" "+UNKNOWN_ERROR+" : "+e.getLocalizedMessage();
+			appendToPane(
+					jTextResults,errorMsg+ "\n",
+					Color.RED);
 
 			menuFile.setEnabled(true);
 			menuAbout.setEnabled(true);
@@ -1831,12 +1842,28 @@ public class MainWindow extends JFrame {
 			try {
 				if (cos != null)
 					cos.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
 				if (in != null)
 					in.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
 				if (fr != null)
 					fr.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
 				if (outputWriter != null)
 					outputWriter.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
 				if (inputReader != null)
 					inputReader.close();
 
@@ -1951,14 +1978,20 @@ public class MainWindow extends JFrame {
 
 			retval = true;
 		} catch (Exception e) {
-			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
-			e.printStackTrace();
+			errorMsg=rb.getString("title.error")+ rb.getString("title.errorcode")+" "+UNKNOWN_ERROR+" : "+e.getLocalizedMessage();
+			appendToPane(
+					jTextResults,errorMsg+ "\n",
+					Color.RED);
 		} finally {
 			try {
 				// if (bos != null)
 				// bos.close();
 				if (outputWriter != null)
 					outputWriter.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			try {
 				if (inputReader != null)
 					inputReader.close();
 			} catch (Exception e) {
@@ -2035,21 +2068,13 @@ public class MainWindow extends JFrame {
 					String seedOrigin = mapSerialSeed.remove(serial);
 					if (seedOrigin == null) {
 						retval = false;
-						appendToPane(
-								jTextResults,
-								"(1)[" + serial + "] "
-										+ rb.getString("msg.testNotFound")
-										+ "\n", Color.RED);
+						errorMsg=rb.getString("title.error")+" - "+ rb.getString("title.serial")+" : "+serial+" - " +rb.getString("title.errorcode")+" "+SERIAL_NOTFOUND1_ERROR+" : "+rb.getString("msg.testNotFound");
+						appendToPane(jTextResults,errorMsg+ "\n", Color.RED);
 					} else {
 						if (!seedOrigin.equals(decodedseed)) {
 							retval = false;
-							appendToPane(
-									jTextResults,
-									"["
-											+ serial
-											+ "] "
-											+ rb.getString("msg.testSeedNotMatch")
-											+ "\n", Color.RED);
+							errorMsg=rb.getString("title.error")+" - " + rb.getString("title.serial")+" : "+serial+" - " +rb.getString("title.errorcode")+" "+SID_NOTMATCH_ERROR+" : "+rb.getString("msg.testSeedNotMatch");
+							appendToPane(jTextResults,errorMsg+ "\n", Color.RED);
 						}
 					}
 					progressValue = (int) ((i * 100) / listPackages.size());
@@ -2069,20 +2094,16 @@ public class MainWindow extends JFrame {
 				retval = false;
 				Object[] object = mapSerialSeed.keySet().toArray();
 				for (int i = 0; i < object.length; i++) {
-					appendToPane(
-							jTextResults,
-							"(2)[" + object[i] + "] "
-									+ rb.getString("msg.testNotFound") + "\n",
-							Color.RED);
+					errorMsg=rb.getString("title.error")+" - "+ rb.getString("title.serial")+" : "+object[i]+" - " +rb.getString("title.errorcode")+" "+SERIAL_NOTFOUND2_ERROR+" : "+rb.getString("msg.testNotFound");
+					appendToPane(jTextResults,errorMsg+ "\n",Color.RED);
 				}
 
 			}
 			// System.out.println("OK");
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
-
+			errorMsg=rb.getString("title.error")+" - "+rb.getString("title.errorcode")+" "+UNKNOWN_ERROR+" : "+e.getLocalizedMessage();
+			appendToPane(jTextResults, errorMsg+ "\n",	Color.RED);
 			retval = false;
 		} finally {
 			try {
@@ -2152,15 +2173,13 @@ public class MainWindow extends JFrame {
 						String seedOrigin = mapSerialSeed.remove(serial);
 						if (seedOrigin == null) {
 							retval = false;
-							appendToPane(jTextResults, "(1)[" + serial + "] "
-									+ rb.getString("msg.testNotFound") + "\n",
-									Color.RED);
+							errorMsg=rb.getString("title.error")+" - "+ rb.getString("title.serial")+" : "+serial+" - " +rb.getString("title.errorcode")+" "+SERIAL_NOTFOUND1_ERROR+" : "+rb.getString("msg.testNotFound");
+							appendToPane(jTextResults,errorMsg+ "\n", Color.RED);
 						} else {
 							if (!seedOrigin.equals(decodedseed)) {
 								retval = false;
-								appendToPane(jTextResults, "[" + serial + "] "
-										+ rb.getString("msg.testSeedNotMatch")
-										+ "\n", Color.RED);
+								errorMsg=rb.getString("title.error")+" - " + rb.getString("title.serial")+" : "+serial+" - " +rb.getString("title.errorcode")+" "+SID_NOTMATCH_ERROR+" : "+rb.getString("msg.testSeedNotMatch");
+								appendToPane(jTextResults,errorMsg+ "\n", Color.RED);
 							}
 						}
 						progressValue = (int) ((counter * 100) / len);
@@ -2184,11 +2203,8 @@ public class MainWindow extends JFrame {
 				retval = false;
 				Object[] object = mapSerialSeed.keySet().toArray();
 				for (int i = 0; i < object.length; i++) {
-					appendToPane(
-							jTextResults,
-							"(2)[" + object[i] + "] "
-									+ rb.getString("msg.testNotFound") + "\n",
-							Color.RED);
+					errorMsg=rb.getString("title.error")+" - "+ rb.getString("title.serial")+" : "+object[i]+" - " +rb.getString("title.errorcode")+" "+SERIAL_NOTFOUND2_ERROR+" : "+rb.getString("msg.testNotFound");
+					appendToPane(jTextResults,errorMsg+ "\n",Color.RED);
 				}
 
 			}
@@ -2196,8 +2212,8 @@ public class MainWindow extends JFrame {
 			labelProgress.setText(rb.getString("msg.verification")	+ " 100%");
 			repaint();
 		} catch (Exception e) {
-			e.printStackTrace();
-			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
+			errorMsg=rb.getString("title.error")+" - "+rb.getString("title.errorcode")+" "+UNKNOWN_ERROR+" : "+e.getLocalizedMessage();
+			appendToPane(jTextResults, errorMsg+ "\n",	Color.RED);
 			retval = false;
 		} finally {
 			try {
