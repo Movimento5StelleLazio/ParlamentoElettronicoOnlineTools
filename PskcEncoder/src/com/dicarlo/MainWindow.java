@@ -953,18 +953,18 @@ public class MainWindow extends JFrame implements ErrorCodes{
 		labelFileOutT.setText(rb.getString("title.folderout"));
 
 		if (testMode) {
-			parent.setTitle(rb.getString("title") + " - ["
+			parent.setTitle(rb.getString("version") + " - ["
 					+ rb.getString("title.test") + "]");
 			buttonExecute.setText(rb.getString("title.test"));
 			buttonExecute.setMnemonic('T');
 		} else {
 			if (encryptMode) {
-				parent.setTitle(rb.getString("title") + " - ["
+				parent.setTitle(rb.getString("version") + " - ["
 						+ rb.getString("title.encrypt") + "]");
 				buttonExecute.setText(rb.getString("title.encrypt"));
 				buttonExecute.setMnemonic('C');
 			} else {
-				parent.setTitle(rb.getString("title") + " - ["
+				parent.setTitle(rb.getString("version") + " - ["
 						+ rb.getString("title.decrypt") + "]");
 				buttonExecute.setText(rb.getString("title.decrypt"));
 				buttonExecute.setMnemonic('D');
@@ -983,7 +983,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 					clearPane(jTextResults);
 					encryptMode = true;
 					testMode = false;
-					parent.setTitle(rb.getString("title") + " - ["
+					parent.setTitle(rb.getString("version") + " - ["
 							+ rb.getString("title.encrypt") + "]");
 					panelEncrypt.setVisible(true);
 					panelTest.setVisible(false);
@@ -1022,7 +1022,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 					clearPane(jTextResults);
 					testMode = true;
 					encryptMode = false;
-					parent.setTitle(rb.getString("title") + " - ["
+					parent.setTitle(rb.getString("version") + " - ["
 							+ rb.getString("title.test") + "]");
 					panelEncrypt.setVisible(false);
 					panelTest.setVisible(true);
@@ -1278,7 +1278,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 	}
 
 	public void setIcon() {
-		setTitle(rb.getString("title") + " - [" + rb.getString("title.encrypt")
+		setTitle(rb.getString("version") + " - [" + rb.getString("title.encrypt")
 				+ "]");
 		Dimension dim = this.getToolkit().getScreenSize();
 		int screenWidth = dim.width;
