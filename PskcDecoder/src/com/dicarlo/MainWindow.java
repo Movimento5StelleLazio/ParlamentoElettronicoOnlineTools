@@ -125,6 +125,8 @@ public class MainWindow extends JFrame implements ErrorCodes{
 	String iconOk = "/ok.png";
 	String iconKo = "/ko.png";
 
+	String pathDefault="";
+
 	private byte[] publicKeyBytes = null;
 	private byte[] privateKeyBytes = null;
 	private byte[] halfkey1 = null;
@@ -247,6 +249,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
+							if(!pathDefault.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathDefault));
+							}
+
 							fileChooser.setFileFilter(new FileFilter() {
 								@Override
 								public String getDescription() {
@@ -273,6 +279,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 													.toLowerCase()
 													.endsWith(".key")
 											&& file.isFile()) {
+										pathDefault=file.getParent();
 										textPrivateKey2.setText(file
 												.getAbsolutePath());
 										String filePK1 = textPrivateKey1
@@ -443,6 +450,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
+							if(!pathDefault.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathDefault));
+							}
+
 							fileChooser.setFileFilter(new FileFilter() {
 								@Override
 								public String getDescription() {
@@ -469,6 +480,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 													.toLowerCase()
 													.endsWith(".key")
 											&& file.isFile()) {
+										pathDefault=file.getParent();
 										textPrivateKey1.setText(file
 												.getAbsolutePath());
 										String filePK1 = textPrivateKey1
@@ -640,6 +652,9 @@ public class MainWindow extends JFrame implements ErrorCodes{
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
+							if(!pathDefault.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathDefault));
+							}
 							fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
@@ -664,6 +679,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 									if (file.isDirectory()
 											&& !"".equals(file
 													.getAbsolutePath())) {
+										pathDefault=file.getAbsolutePath();
 										labelStatusFileOutD
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -732,6 +748,9 @@ public class MainWindow extends JFrame implements ErrorCodes{
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
+							if(!pathDefault.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathDefault));
+							}
 
 							fileChooser
 									.addChoosableFileFilter(new FileNameExtensionFilter(
@@ -741,6 +760,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
 									if (file.exists()) {
+										pathDefault=file.getParent();
 										labelStatusFileInD
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
@@ -835,6 +855,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 						public void actionPerformed(
 								java.awt.event.ActionEvent evt) {
 							JFileChooser fileChooser = new JFileChooser();
+							if(!pathDefault.equals("")){
+								  fileChooser.setCurrentDirectory(new File(pathDefault));
+							}
+
 							fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 							fileChooser
 									.addChoosableFileFilter(new FileFilter() {
@@ -857,6 +881,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
 									if (file.exists()) {
+										pathDefault=file.getAbsolutePath();
 										labelStatusFileOutT
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
