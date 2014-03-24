@@ -349,6 +349,11 @@ public class MainWindow extends JFrame implements ErrorCodes{
 														getClass().getResource(
 																iconKo)));
 										textPublicKey.setText("");
+										String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_publickey");
+										JOptionPane.showMessageDialog(parent,
+												msg,
+												rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+
 										statusPublicKey = false;
 										buttonExecute.setEnabled(false);
 									}
@@ -446,6 +451,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 														getClass().getResource(
 																iconKo)));
 										textFileIn.setText("");
+										String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_txt");
+										JOptionPane.showMessageDialog(parent,
+												msg,
+												rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 										statusFileIn = false;
 										buttonExecute.setEnabled(false);
 									}
@@ -694,6 +703,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 														getClass().getResource(
 																iconKo)));
 										textFileIn.setText("");
+										String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_txt");
+										JOptionPane.showMessageDialog(parent,
+												msg,
+												rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 										buttonExecute.setEnabled(false);
 									}
 								}
@@ -1624,7 +1637,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 		}
 
 		if (encrypt(srcFileName,fileXml,fileBin)) {
-			JOptionPane.showMessageDialog(parent, rb.getString("msg.cipherok")+"\n"+rb.getString("msg.totalseeds") +" : "+totalSeed,
+			JOptionPane.showMessageDialog(parent, rb.getString("msg.cipherok")+"\n"+rb.getString("msg.totalseeds") +" : "+totalSeed+"\n"+rb.getString("msg.filesavedas")+" : "+fileBin,
 					rb.getString("title.ok"), JOptionPane.INFORMATION_MESSAGE);
 			
 			appendToPane(jTextResults, rb.getString("msg.totalseeds") +" : "+totalSeed+ "\n",

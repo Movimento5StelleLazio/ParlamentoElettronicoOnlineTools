@@ -478,6 +478,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 												getClass().getResource(
 														iconKo)));
 								textPrivateKey1.setText("");
+								String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_privatekey");
+								JOptionPane.showMessageDialog(parent,
+										msg,
+										rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 								statusPrivateKey1 = false;
 							}
 						}
@@ -672,6 +676,11 @@ public class MainWindow extends JFrame implements ErrorCodes{
 												getClass().getResource(
 														iconKo)));
 								textPrivateKey1.setText("");
+								String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_privatekey");
+								JOptionPane.showMessageDialog(parent,
+										msg,
+										rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+
 								statusPrivateKey1 = false;
 
 							}
@@ -789,6 +798,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 														getClass().getResource(
 																iconKo)));
 										textFileCsv.setText("");
+										String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_txt");
+										JOptionPane.showMessageDialog(parent,
+												msg,
+												rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 										statusFileCsv=false;
 									}
 								}
@@ -894,6 +907,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 														getClass().getResource(
 																iconKo)));
 										textFileBin.setText("");
+										String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_bin");
+										JOptionPane.showMessageDialog(parent,
+												msg,
+												rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 										statusFileBin=false;
 									}
 								}
@@ -1003,11 +1020,16 @@ public class MainWindow extends JFrame implements ErrorCodes{
 										statusFileCsv1=true;
 
 									} else {
+
 										labelStatusFileCsv1
 												.setIcon(new javax.swing.ImageIcon(
 														getClass().getResource(
 																iconKo)));
 										textFileCsv1.setText("");
+										String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_txt");
+										JOptionPane.showMessageDialog(parent,
+												msg,
+												rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 										statusFileCsv1=false;
 									}
 								}
@@ -1102,6 +1124,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 														getClass().getResource(
 																iconKo)));
 										textFileXml.setText("");
+										String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_xml");
+										JOptionPane.showMessageDialog(parent,
+												msg,
+												rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 										statusFileXml=false;
 									}
 								}
@@ -1239,6 +1265,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 														getClass().getResource(
 																iconKo)));
 										textFileXml1.setText("");
+										String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_xml");
+										JOptionPane.showMessageDialog(parent,
+												msg,
+												rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 										statusFileXml1=false;
 									}
 								}
@@ -1333,6 +1363,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 														getClass().getResource(
 																iconKo)));
 										textFileBin1.setText("");
+										String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_bin");
+										JOptionPane.showMessageDialog(parent,
+												msg,
+												rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 										statusFileBin1=false;
 									}
 								}

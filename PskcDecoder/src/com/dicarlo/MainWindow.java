@@ -403,6 +403,11 @@ public class MainWindow extends JFrame implements ErrorCodes{
 														getClass().getResource(
 																iconKo)));
 										textPrivateKey1.setText("");
+										String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_privatekey");
+										JOptionPane.showMessageDialog(parent,
+												msg,
+												rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+
 										statusPrivateKey1 = false;
 										buttonExecute.setEnabled(false);
 									}
@@ -603,6 +608,11 @@ public class MainWindow extends JFrame implements ErrorCodes{
 														getClass().getResource(
 																iconKo)));
 										textPrivateKey1.setText("");
+										String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_privatekey");
+										JOptionPane.showMessageDialog(parent,
+												msg,
+												rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+
 										statusPrivateKey1 = false;
 										buttonExecute.setEnabled(false);
 									}
@@ -754,12 +764,12 @@ public class MainWindow extends JFrame implements ErrorCodes{
 
 							fileChooser
 									.addChoosableFileFilter(new FileNameExtensionFilter(
-											"XML Ciphered files", "xml",
+											".bin pskc Ciphered files", "bin",
 											"ciphered"));
 							if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
 								File file = fileChooser.getSelectedFile();
 								if (file != null) {
-									if (file.exists()) {
+									if (file.exists()&&file.getName().toLowerCase().endsWith(".bin")) {
 										pathDefault=file.getParent();
 										labelStatusFileInD
 												.setIcon(new javax.swing.ImageIcon(
@@ -780,6 +790,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 														getClass().getResource(
 																iconKo)));
 										textFileInD.setText("");
+										String msg = rb.getString("title.error")+" "+FILES_LOADING_ERROR+" : "+rb.getString("msg.cannoloadfile")+" : "+rb.getString("msg.wrongformat_bin");
+										JOptionPane.showMessageDialog(parent,
+												msg,
+												rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
 										statusFileInD = false;
 										buttonExecute.setEnabled(false);
 									}
