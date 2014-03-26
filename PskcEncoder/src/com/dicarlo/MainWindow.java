@@ -88,6 +88,7 @@ import org.dyno.visual.swing.layouts.Bilateral;
 import org.dyno.visual.swing.layouts.Constraints;
 import org.dyno.visual.swing.layouts.GroupLayout;
 import org.dyno.visual.swing.layouts.Leading;
+import org.dyno.visual.swing.layouts.Trailing;
 import org.jdamico.pskcbuilder.dataobjects.AlgorithmParameters;
 import org.jdamico.pskcbuilder.dataobjects.Data;
 import org.jdamico.pskcbuilder.dataobjects.DeviceInfo;
@@ -212,23 +213,18 @@ public class MainWindow extends JFrame implements ErrorCodes{
 	private void initComponents() {
 		setResizable(false);
 		setLayout(new GroupLayout());
-		add(getPanelTitle(), new Constraints(new Bilateral(12, 12, 0),
-				new Leading(7, 57, 10, 10)));
-		add(getPanelButtons(), new Constraints(new Leading(12, 584, 12, 12),
-				new Leading(230, 65, 10, 10)));
-		add(getProgressBar(), new Constraints(new Bilateral(12, 12, 10),
-				new Leading(214, 12, 12)));
-		add(getPanelAction(), new Constraints(new Bilateral(12, 12, 0),
-				new Leading(70, 140, 10, 10)));
+		add(getPanelTitle(), new Constraints(new Bilateral(12, 12, 0), new Leading(7, 57, 10, 10)));
+		add(getPanelAction(), new Constraints(new Bilateral(12, 12, 0), new Leading(70, 224, 10, 10)));
+		add(getProgressBar(), new Constraints(new Bilateral(12, 12, 10), new Leading(294, 10, 10)));
+		add(getPanelButtons(), new Constraints(new Leading(12, 584, 12, 12), new Trailing(12, 71, 10, 10)));
 		setJMenuBar(getJMenuBar());
-		setSize(608, 324);
+		setSize(608, 416);
 	}
 
 	private JCheckBox getCheckBoxTest() {
 		if (checkBoxTest == null) {
 			checkBoxTest = new JCheckBox();
-			checkBoxTest.setSelected(true);
-			checkBoxTest.setText("Test prima di codificare");
+			checkBoxTest.setText(rb.getString("title.testBefore"));
 		}
 		return checkBoxTest;
 	}
@@ -586,6 +582,37 @@ public class MainWindow extends JFrame implements ErrorCodes{
 		return labelStatusFileOut;
 	}
 	
+	private JTextField getTextIssuer() {
+		if (textIssuer == null) {
+			textIssuer = new JTextField();
+			textIssuer.setText("");
+		}
+		return textIssuer;
+	}
+
+	private JLabel getLabelIssuer() {
+		if (labelIssuer == null) {
+			labelIssuer = new JLabel();
+			labelIssuer.setText(rb.getString("title.issuer"));
+		}
+		return labelIssuer;
+	}
+
+	private JTextField getTextManufacturer() {
+		if (textManufacturer == null) {
+			textManufacturer = new JTextField();
+			textManufacturer.setText("");
+		}
+		return textManufacturer;
+	}
+
+	private JLabel getLabelManufacturer() {
+		if (labelManufacturer == null) {
+			labelManufacturer = new JLabel();
+			labelManufacturer.setText(rb.getString("title.manufacturer"));
+		}
+		return labelManufacturer;
+	}
 	
 	
 	
@@ -606,7 +633,6 @@ public class MainWindow extends JFrame implements ErrorCodes{
 			panelEncrypt.add(getButtonFileIn(), new Constraints(new Leading(413, 12, 12), new Leading(3, 12, 12)));
 			panelEncrypt.add(getTextFileOut(), new Constraints(new Leading(91, 319, 12, 12), new Leading(30, 24, 12, 12)));
 			panelEncrypt.add(getButtonFileOut(), new Constraints(new Leading(413, 12, 12), new Leading(30, 12, 12)));
-			panelEncrypt.add(getCheckBoxTest(), new Constraints(new Leading(4, 12, 12), new Leading(92, 10, 10)));
 			panelEncrypt.add(getTextPublicKey(), new Constraints(new Leading(90, 319, 48, 48), new Leading(62, 24, 12, 12)));
 			panelEncrypt.add(getButtonPublicKey(), new Constraints(new Leading(413, 48, 48), new Leading(62, 12, 12)));
 			panelEncrypt.add(getLabelPublicKey(), new Constraints(new Leading(4, 80, 12, 12), new Leading(66, 12, 12)));
@@ -615,6 +641,11 @@ public class MainWindow extends JFrame implements ErrorCodes{
 			panelEncrypt.add(getLabelStatusFileIn(), new Constraints(new Leading(473, 10, 10), new Leading(5, 12, 12)));
 			panelEncrypt.add(getLabelStatusFileOut(), new Constraints(new Leading(473, 10, 10), new Leading(30, 12, 12)));
 			panelEncrypt.add(getLabelStatusPublicKey(), new Constraints(new Leading(473, 10, 10), new Leading(62, 12, 12)));
+			panelEncrypt.add(getCheckBoxTest(), new Constraints(new Leading(4, 12, 12), new Leading(170, 10, 10)));
+			panelEncrypt.add(getTextManufacturer(), new Constraints(new Leading(4, 455, 12, 12), new Leading(108, 10, 10)));
+			panelEncrypt.add(getLabelIssuer(), new Constraints(new Leading(4, 304, 10, 10), new Leading(130, 10, 10)));
+			panelEncrypt.add(getLabelManufacturer(), new Constraints(new Leading(4, 372, 10, 10), new Leading(90, 10, 10)));
+			panelEncrypt.add(getTextIssuer(), new Constraints(new Leading(4, 454, 12, 12), new Leading(148, 10, 10)));
 		}
 		return panelEncrypt;
 	}
@@ -868,23 +899,24 @@ public class MainWindow extends JFrame implements ErrorCodes{
 		if (panelTest == null) {
 			panelTest = new JPanel();
 			panelTest.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+			panelTest.setVisible(false);
 			panelTest.setLayout(new GroupLayout());
 			panelTest.add(getTextFileInT(), new Constraints(new Leading(91, 319, 10, 10), new Leading(5, 24, 10, 10)));
 			panelTest.add(getButtonFileInT(), new Constraints(new Leading(413, 10, 10), new Leading(4, 12, 12)));
 			panelTest.add(getTextFileOutT(), new Constraints(new Leading(91, 319, 12, 12), new Leading(30, 24, 12, 12)));
 			panelTest.add(getButtonFileOutT(), new Constraints(new Leading(413, 12, 12), new Leading(30, 12, 12)));
-			panelTest.add(getJScrollPane0(), new Constraints(new Leading(5, 484, 12, 12), new Leading(59, 61, 10, 10)));
 			panelTest.add(getLabelFileOutT(), new Constraints(new Leading(4, 85, 10, 10), new Leading(38, 12, 12)));
 			panelTest.add(getLabelFileInT(), new Constraints(new Leading(4, 84, 12, 12), new Leading(12, 12, 12)));
 			panelTest.add(getLabelStatusFileInT(), new Constraints(new Leading(473, 10, 10), new Leading(5, 12, 12)));
 			panelTest.add(getLabelStatusFileOutT(), new Constraints(new Leading(473, 10, 10), new Leading(30, 12, 12)));
+			panelTest.add(getJScrollPane0(), new Constraints(new Leading(5, 484, 12, 12), new Leading(59, 131, 10, 10)));
 		}
 		return panelTest;
 	}
 
 	private JProgressBar getProgressBar() {
 		if (progressBar == null) {
-			progressBar = new JProgressBar(0, 100);
+			progressBar = new JProgressBar();
 			progressBar.setVisible(false);
 		}
 		return progressBar;
@@ -984,6 +1016,8 @@ public class MainWindow extends JFrame implements ErrorCodes{
 		// labelFileOut.setText(rb.getString("title.fileout"));
 		labelFileIn.setText(rb.getString("title.filein"));
 		checkBoxTest.setText(rb.getString("title.testBefore"));
+		labelManufacturer.setText(rb.getString("title.manufacturer"));
+		labelIssuer.setText(rb.getString("title.issuer"));
 
 		labelFileInT.setText(rb.getString("title.filein"));
 		labelFileOut.setText(rb.getString("title.folderout"));
@@ -1112,17 +1146,12 @@ public class MainWindow extends JFrame implements ErrorCodes{
 	private JPanel getPanelButtons() {
 		if (panelButtons == null) {
 			panelButtons = new JPanel();
-			panelButtons.setBorder(BorderFactory.createBevelBorder(
-					BevelBorder.LOWERED, null, null, null, null));
+			panelButtons.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 			panelButtons.setLayout(new GroupLayout());
-			panelButtons.add(getButtonExecute(), new Constraints(new Leading(
-					67, 115, 10, 10), new Leading(5, 53, 12, 12)));
-			panelButtons.add(getButtonClose(), new Constraints(new Leading(389,
-					115, 10, 10), new Leading(5, 53, 12, 12)));
-			panelButtons.add(getLabelWait(), new Constraints(new Leading(266,
-					10, 10), new Leading(26, 12, 12)));
-			panelButtons.add(getLabelProgress(), new Constraints(new Leading(
-					218, 10, 10), new Leading(3, 10, 10)));
+			panelButtons.add(getLabelWait(), new Constraints(new Leading(266, 10, 10), new Leading(26, 12, 12)));
+			panelButtons.add(getLabelProgress(), new Constraints(new Leading(218, 10, 10), new Leading(3, 10, 10)));
+			panelButtons.add(getButtonClose(), new Constraints(new Leading(422, 115, 10, 10), new Leading(5, 53, 12, 12)));
+			panelButtons.add(getButtonExecute(), new Constraints(new Leading(46, 115, 10, 10), new Leading(5, 53, 12, 12)));
 		}
 		return panelButtons;
 	}
@@ -1259,16 +1288,9 @@ public class MainWindow extends JFrame implements ErrorCodes{
 			panelAction = new JPanel();
 			panelAction.setBorder(new LineBorder(Color.black, 1, false));
 			panelAction.setLayout(new GroupLayout());
-			panelAction.add(getLabelIcon(), new Constraints(new Leading(8, 53,
-					18, 18), new Leading(30, 54, 12, 12)));
-			
-			
-			panelAction.add(getPanelEncrypt(), new Constraints(new Bilateral(
-					67, 12, 0), new Leading(5, 126, 10, 10)));
-			
-			panelAction.add(getPanelTest(), new Constraints(new Bilateral(67,
-					12, 0), new Leading(5, 126, 10, 10)));
-
+			panelAction.add(getLabelIcon(), new Constraints(new Leading(8, 53, 18, 18), new Leading(30, 54, 12, 12)));
+			panelAction.add(getPanelTest(), new Constraints(new Bilateral(67, 12, 0), new Leading(5, 208, 10, 10)));
+			panelAction.add(getPanelEncrypt(), new Constraints(new Bilateral(67, 12, 0), new Leading(5, 208, 12, 12)));
 		}
 		return panelAction;
 	}
@@ -1712,8 +1734,13 @@ public class MainWindow extends JFrame implements ErrorCodes{
 
 						if (!listSerial.contains(lineserial)) {
 							mapSerialSeed.put(lineserial, linekey);
-							
-							DeviceInfo di = new DeviceInfo("xyzw", lineserial);
+							String manufacturer = textManufacturer.getText();
+							manufacturer=(manufacturer!=null&&!"".equals(manufacturer.trim()))?manufacturer.trim():"xyzw";
+
+							String issuer = textIssuer.getText();
+							issuer=(issuer!=null&&!"".equals(issuer.trim()))?issuer.trim():"xyzw";
+
+							DeviceInfo di = new DeviceInfo(manufacturer, lineserial);
 							byte[] byteSeed = keyGetByteCiphered(linekey);
 
 							String data = Base64.encode(byteSeed);
@@ -1721,7 +1748,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 							// Data d = new Data(new Secret(linekey), "60", "0");
 							org.jdamico.pskcbuilder.dataobjects.Key k = new org.jdamico.pskcbuilder.dataobjects.Key(
 								"1", "urn:ietf:params:xml:ns:keyprov:pskc:"
-										+ Constants.ALGO_TYPE_TOTP, "xyzw", d,
+										+ Constants.ALGO_TYPE_TOTP, issuer, d,
 								ap);
 							KeyPackage kp = new KeyPackage(di, k);
 
@@ -2461,12 +2488,11 @@ public class MainWindow extends JFrame implements ErrorCodes{
 		sb.append("<DeviceInfo>\n");
 		sb.append("<Manufacturer>" + kp.getDeviceInfo().getManufacturer()
 				+ "</Manufacturer>\n");
-		sb.append("<SerialNo>" + kp.getDeviceInfo().getSerialNo()
-				+ "</SerialNo>\n");
+		sb.append("<SerialNo><![CDATA[" + kp.getDeviceInfo().getSerialNo() + "]]></SerialNo>\n");
 		sb.append("</DeviceInfo>\n");
 		sb.append("<Key Id=\"" + (i + 1) + "\" Algorithm=\""
 				+ kp.getKey().getAlgorithm() + "\">\n");
-		sb.append("<Issuer>" + kp.getKey().getIssuer() + "</Issuer>\n");
+		sb.append("<Issuer><![CDATA[" + kp.getKey().getIssuer() + "]]></Issuer>\n");
 		sb.append("<AlgorithmParameters>\n");
 		sb.append("<ResponseFormat Length=\""
 				+ kp.getKey().getAlgorithmParameters().getResponseFormat()
@@ -2536,6 +2562,10 @@ public class MainWindow extends JFrame implements ErrorCodes{
 
 	public static String END_OF_KEY = "=,uytnnnnnnnnnneereee,c------";
 	public static byte[] seq = null;
+	private JLabel labelManufacturer;
+	private JTextField textManufacturer;
+	private JLabel labelIssuer;
+	private JTextField textIssuer;
 	private static final String PREFERRED_LOOK_AND_FEEL = "javax.swing.plaf.metal.MetalLookAndFeel";
 	public byte[] appendByteArray(byte[] array, byte b) {
 		byte[] c = new byte[array.length + 1];
