@@ -224,7 +224,8 @@ public class MainWindow extends JFrame implements ErrorCodes{
 	private JCheckBox getCheckBoxTest() {
 		if (checkBoxTest == null) {
 			checkBoxTest = new JCheckBox();
-			checkBoxTest.setText(rb.getString("title.testBefore"));
+			checkBoxTest.setSelected(true);
+			checkBoxTest.setText("Test prima di codificare");
 		}
 		return checkBoxTest;
 	}
@@ -629,23 +630,23 @@ public class MainWindow extends JFrame implements ErrorCodes{
 			panelEncrypt = new JPanel();
 			panelEncrypt.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 			panelEncrypt.setLayout(new GroupLayout());
-			panelEncrypt.add(getTextFileIn(), new Constraints(new Leading(91, 319, 10, 10), new Leading(5, 24, 10, 10)));
-			panelEncrypt.add(getButtonFileIn(), new Constraints(new Leading(413, 12, 12), new Leading(3, 12, 12)));
-			panelEncrypt.add(getTextFileOut(), new Constraints(new Leading(91, 319, 12, 12), new Leading(30, 24, 12, 12)));
-			panelEncrypt.add(getButtonFileOut(), new Constraints(new Leading(413, 12, 12), new Leading(30, 12, 12)));
-			panelEncrypt.add(getTextPublicKey(), new Constraints(new Leading(90, 319, 48, 48), new Leading(62, 24, 12, 12)));
-			panelEncrypt.add(getButtonPublicKey(), new Constraints(new Leading(413, 48, 48), new Leading(62, 12, 12)));
-			panelEncrypt.add(getLabelPublicKey(), new Constraints(new Leading(4, 80, 12, 12), new Leading(66, 12, 12)));
-			panelEncrypt.add(getLabelFileOut(), new Constraints(new Leading(4, 85, 10, 10), new Leading(38, 12, 12)));
-			panelEncrypt.add(getLabelFileIn(), new Constraints(new Leading(4, 84, 12, 12), new Leading(12, 12, 12)));
-			panelEncrypt.add(getLabelStatusFileIn(), new Constraints(new Leading(473, 10, 10), new Leading(5, 12, 12)));
-			panelEncrypt.add(getLabelStatusFileOut(), new Constraints(new Leading(473, 10, 10), new Leading(30, 12, 12)));
-			panelEncrypt.add(getLabelStatusPublicKey(), new Constraints(new Leading(473, 10, 10), new Leading(62, 12, 12)));
-			panelEncrypt.add(getCheckBoxTest(), new Constraints(new Leading(4, 12, 12), new Leading(170, 10, 10)));
-			panelEncrypt.add(getTextManufacturer(), new Constraints(new Leading(4, 455, 12, 12), new Leading(108, 10, 10)));
-			panelEncrypt.add(getLabelIssuer(), new Constraints(new Leading(4, 304, 10, 10), new Leading(130, 10, 10)));
-			panelEncrypt.add(getLabelManufacturer(), new Constraints(new Leading(4, 372, 10, 10), new Leading(90, 10, 10)));
-			panelEncrypt.add(getTextIssuer(), new Constraints(new Leading(4, 454, 12, 12), new Leading(148, 10, 10)));
+			panelEncrypt.add(getTextManufacturer(), new Constraints(new Leading(4, 455, 12, 12), new Leading(19, 10, 10)));
+			panelEncrypt.add(getLabelManufacturer(), new Constraints(new Leading(4, 372, 12, 12), new Leading(2, 12, 12)));
+			panelEncrypt.add(getLabelIssuer(), new Constraints(new Leading(4, 304, 12, 12), new Leading(40, 12, 12)));
+			panelEncrypt.add(getTextIssuer(), new Constraints(new Leading(4, 454, 12, 12), new Leading(57, 12, 12)));
+			panelEncrypt.add(getLabelFileIn(), new Constraints(new Leading(4, 84, 12, 12), new Leading(85, 10, 10)));
+			panelEncrypt.add(getTextFileIn(), new Constraints(new Leading(91, 319, 12, 12), new Leading(83, 24, 12, 12)));
+			panelEncrypt.add(getButtonFileIn(), new Constraints(new Leading(413, 12, 12), new Leading(80, 12, 12)));
+			panelEncrypt.add(getLabelStatusFileIn(), new Constraints(new Leading(470, 12, 12), new Leading(81, 12, 12)));
+			panelEncrypt.add(getButtonFileOut(), new Constraints(new Leading(413, 12, 12), new Leading(112, 12, 12)));
+			panelEncrypt.add(getLabelStatusFileOut(), new Constraints(new Leading(470, 12, 12), new Leading(113, 12, 12)));
+			panelEncrypt.add(getTextFileOut(), new Constraints(new Leading(91, 319, 12, 12), new Leading(114, 24, 12, 12)));
+			panelEncrypt.add(getLabelFileOut(), new Constraints(new Leading(3, 85, 12, 12), new Leading(114, 12, 12)));
+			panelEncrypt.add(getTextPublicKey(), new Constraints(new Leading(91, 319, 12, 12), new Leading(142, 24, 12, 12)));
+			panelEncrypt.add(getButtonPublicKey(), new Constraints(new Leading(413, 12, 12), new Leading(142, 12, 12)));
+			panelEncrypt.add(getLabelPublicKey(), new Constraints(new Leading(4, 80, 12, 12), new Leading(142, 12, 12)));
+			panelEncrypt.add(getLabelStatusPublicKey(), new Constraints(new Leading(470, 12, 12), new Leading(146, 10, 10)));
+			panelEncrypt.add(getCheckBoxTest(), new Constraints(new Leading(4, 268, 10, 10), new Leading(174, 12, 12)));
 		}
 		return panelEncrypt;
 	}
