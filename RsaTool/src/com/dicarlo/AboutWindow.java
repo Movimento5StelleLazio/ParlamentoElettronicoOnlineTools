@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -19,12 +22,9 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.JPanel;
+import java.awt.FlowLayout;
 
-import org.dyno.visual.swing.layouts.Constraints;
-import org.dyno.visual.swing.layouts.GroupLayout;
-import org.dyno.visual.swing.layouts.Leading;
-
-//VS4E -- DO NOT REMOVE THIS LINE!
 public class AboutWindow extends javax.swing.JDialog {
 
 	private static final long serialVersionUID = 1L;
@@ -46,6 +46,7 @@ public class AboutWindow extends javax.swing.JDialog {
 	private JLabel jLabel5;
 	private JLabel jLabel6;
 	private static final String PREFERRED_LOOK_AND_FEEL = "javax.swing.plaf.metal.MetalLookAndFeel";
+	private JPanel panel;
 	public AboutWindow() {
 		initComponents();
 	}
@@ -59,16 +60,40 @@ public class AboutWindow extends javax.swing.JDialog {
 		setResizable(false);
 		setForeground(Color.black);
 		setAlwaysOnTop(true);
-		setLayout(new GroupLayout());
-		add(getJLabel0(), new Constraints(new Leading(19, 10, 10), new Leading(12, 12, 12)));
-		add(getJLabel1(), new Constraints(new Leading(19, 12, 12), new Leading(40, 12, 12)));
-		add(getJLabel2(), new Constraints(new Leading(19, 10, 10), new Leading(74, 10, 10)));
-		add(getJLabel3(), new Constraints(new Leading(121, 50, 10, 10), new Leading(104, 43, 10, 10)));
-		add(getJLabel4(), new Constraints(new Leading(180, 10, 10), new Leading(104, 47, 10, 10)));
-		add(getJLabel5(), new Constraints(new Leading(242, 10, 10), new Leading(104, 12, 12)));
-		add(getJLabel6(), new Constraints(new Leading(302, 12, 12), new Leading(104, 12, 12)));
-		add(getJButton0(), new Constraints(new Leading(166, 89, 10, 10), new Leading(176, 40, 12, 12)));
-		setSize(411, 248);
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0};
+		getContentPane().setLayout(gridBagLayout);
+		//setLayout(new GroupLayout(this));
+		GridBagConstraints gbc_jLabel0 = new GridBagConstraints();
+		gbc_jLabel0.insets = new Insets(10, 0, 10, 0);
+		gbc_jLabel0.anchor = GridBagConstraints.WEST;
+		gbc_jLabel0.gridwidth = 2;
+		gbc_jLabel0.gridx = 0;
+		gbc_jLabel0.gridy = 0;
+		getContentPane().add(getJLabel0(), gbc_jLabel0);
+		GridBagConstraints gbc_jLabel1 = new GridBagConstraints();
+		gbc_jLabel1.insets = new Insets(10, 0, 10, 0);
+		gbc_jLabel1.anchor = GridBagConstraints.WEST;
+		gbc_jLabel1.gridwidth = 2;
+		gbc_jLabel1.gridx = 0;
+		gbc_jLabel1.gridy = 1;
+		getContentPane().add(getJLabel1(), gbc_jLabel1);
+		GridBagConstraints gbc_jLabel2 = new GridBagConstraints();
+		gbc_jLabel2.insets = new Insets(10, 0, 10, 5);
+		gbc_jLabel2.gridx = 0;
+		gbc_jLabel2.gridy = 2;
+		getContentPane().add(getJLabel2(), gbc_jLabel2);
+		GridBagConstraints gbc_panel = new GridBagConstraints();
+		gbc_panel.fill = GridBagConstraints.HORIZONTAL;
+		gbc_panel.gridx = 1;
+		gbc_panel.gridy = 2;
+		getContentPane().add(getPanel(), gbc_panel);
+		GridBagConstraints gbc_jButton0 = new GridBagConstraints();
+		gbc_jButton0.insets = new Insets(10, 1, 10, 0);
+		gbc_jButton0.gridwidth = 2;
+		gbc_jButton0.gridx = 0;
+		gbc_jButton0.gridy = 3;
+		getContentPane().add(getJButton0(), gbc_jButton0);
 	}
 	private JLabel getJLabel6() {
 		if (jLabel6 == null) {
@@ -175,6 +200,7 @@ public class AboutWindow extends javax.swing.JDialog {
 	private JLabel getJLabel1() {
 		if (jLabel1 == null) {
 			jLabel1 = new JLabel();
+			jLabel1.setFont(new Font("Tahoma", Font.BOLD, 11));
 			jLabel1.setForeground(new Color(0, 0, 255));
 			jLabel1.setText(rb.getString("credit")+" Marco Di Carlo");
 		}
@@ -184,6 +210,7 @@ public class AboutWindow extends javax.swing.JDialog {
 	private JLabel getJLabel0() {
 		if (jLabel0 == null) {
 			jLabel0 = new JLabel();
+			jLabel0.setFont(new Font("Tahoma", Font.BOLD, 11));
 			jLabel0.setForeground(new Color(0, 0, 255));
 			jLabel0.setText(rb.getString("version"));
 		}
@@ -250,4 +277,15 @@ public class AboutWindow extends javax.swing.JDialog {
 		});
 	}
 
+	private JPanel getPanel() {
+		if (panel == null) {
+			panel = new JPanel();
+			panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+			panel.add(getJLabel3());
+			panel.add(getJLabel4());
+			panel.add(getJLabel5());
+			panel.add(getJLabel6());
+		}
+		return panel;
+	}
 }

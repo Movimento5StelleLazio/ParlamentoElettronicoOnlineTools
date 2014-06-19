@@ -7,9 +7,14 @@ import ietf.params.xml.ns.keyprov.pskc.KeyDataType;
 import ietf.params.xml.ns.keyprov.pskc.KeyPackageType;
 import ietf.params.xml.ns.keyprov.pskc.KeyType;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -47,7 +52,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -66,7 +71,7 @@ import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.border.BevelBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -78,17 +83,11 @@ import javax.swing.text.StyleContext;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
-import org.dyno.visual.swing.layouts.Bilateral;
-import org.dyno.visual.swing.layouts.Constraints;
-import org.dyno.visual.swing.layouts.GroupLayout;
-import org.dyno.visual.swing.layouts.Leading;
 import org.jdamico.pskcbuilder.dataobjects.AlgorithmParameters;
 import org.jdamico.pskcbuilder.dataobjects.Data;
 import org.jdamico.pskcbuilder.dataobjects.DeviceInfo;
@@ -226,15 +225,14 @@ public class MainWindow extends JFrame {
 
 	private void initComponents() {
 		setResizable(false);
-		setLayout(new GroupLayout());
-		add(getPanelTitle(), new Constraints(new Bilateral(12, 12, 0),
-				new Leading(7, 57, 10, 10)));
-		add(getPanelButtons(), new Constraints(new Leading(12, 584, 12, 12),
-				new Leading(230, 65, 10, 10)));
-		add(getProgressBar(), new Constraints(new Bilateral(12, 12, 10),
-				new Leading(214, 12, 12)));
-		add(getPanelAction(), new Constraints(new Bilateral(12, 12, 0),
-				new Leading(70, 140, 10, 10)));
+		BorderLayout borderLayout = new BorderLayout();
+		borderLayout.setVgap(10);
+		borderLayout.setHgap(10);
+		getContentPane().setLayout(borderLayout);
+		getContentPane().add(getPanelTitle(), BorderLayout.NORTH);
+		getContentPane().add(getPanelButtons(), BorderLayout.SOUTH);
+		getContentPane().add(getProgressBar());
+		getContentPane().add(getPanelAction());
 		setJMenuBar(getJMenuBar());
 		setSize(608, 324);
 	}
@@ -477,28 +475,66 @@ public class MainWindow extends JFrame {
 	private JPanel getPanelEncrypt() {
 		if (panelEncrypt == null) {
 			panelEncrypt = new JPanel();
-			panelEncrypt.setBorder(BorderFactory.createBevelBorder(
-					BevelBorder.LOWERED, null, null, null, null));
-			panelEncrypt.setLayout(new GroupLayout());
-			panelEncrypt.add(getTextFileIn(), new Constraints(new Leading(91,
-					319, 10, 10), new Leading(5, 24, 10, 10)));
-			panelEncrypt.add(getButtonFileIn(), new Constraints(new Leading(
-					413, 12, 12), new Leading(3, 12, 12)));
-
-			panelEncrypt.add(getLabelStatusFileIn(), new Constraints(
-					new Leading(465, 12, 12), new Leading(5, 12, 12)));
-			panelEncrypt.add(getLabelFileIn(), new Constraints(new Leading(4,
-					73, 10, 10), new Leading(12, 12, 12)));
-			panelEncrypt.add(getTextPublicKey(), new Constraints(new Leading(
-					91, 319, 12, 12), new Leading(44, 24, 10, 10)));
-			panelEncrypt.add(getButtonPublicKey(), new Constraints(new Leading(
-					414, 10, 10), new Leading(44, 10, 10)));
-			panelEncrypt.add(getLabelStatusPublicKey(), new Constraints(
-					new Leading(465, 12, 12), new Leading(44, 10, 10)));
-			panelEncrypt.add(getLabelPublicKey(), new Constraints(new Leading(
-					4, 80, 12, 12), new Leading(47, 12, 12)));
-			panelEncrypt.add(getCheckBoxTest(), new Constraints(new Leading(4,
-					12, 12), new Leading(81, 12, 12)));
+			panelEncrypt.setBorder(new EmptyBorder(5, 5, 5, 5));
+			GridBagLayout gbl_panelEncrypt = new GridBagLayout();
+			gbl_panelEncrypt.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0};
+			gbl_panelEncrypt.rowWeights = new double[]{0.0, 0.0, 0.0};
+			panelEncrypt.setLayout(gbl_panelEncrypt);
+			GridBagConstraints gbc_labelFileIn = new GridBagConstraints();
+			gbc_labelFileIn.anchor = GridBagConstraints.WEST;
+			gbc_labelFileIn.insets = new Insets(5, 5, 5, 5);
+			gbc_labelFileIn.gridx = 0;
+			gbc_labelFileIn.gridy = 0;
+			panelEncrypt.add(getLabelFileIn(), gbc_labelFileIn);
+			GridBagConstraints gbc_textFileIn = new GridBagConstraints();
+			gbc_textFileIn.fill = GridBagConstraints.BOTH;
+			gbc_textFileIn.insets = new Insets(0, 0, 5, 5);
+			gbc_textFileIn.gridx = 1;
+			gbc_textFileIn.gridy = 0;
+			panelEncrypt.add(getTextFileIn(), gbc_textFileIn);
+			GridBagConstraints gbc_buttonFileIn = new GridBagConstraints();
+			gbc_buttonFileIn.anchor = GridBagConstraints.WEST;
+			gbc_buttonFileIn.insets = new Insets(0, 0, 5, 5);
+			gbc_buttonFileIn.gridx = 2;
+			gbc_buttonFileIn.gridy = 0;
+			panelEncrypt.add(getButtonFileIn(), gbc_buttonFileIn);
+			GridBagConstraints gbc_labelStatusFileIn = new GridBagConstraints();
+			gbc_labelStatusFileIn.anchor = GridBagConstraints.WEST;
+			gbc_labelStatusFileIn.insets = new Insets(0, 0, 5, 0);
+			gbc_labelStatusFileIn.gridx = 3;
+			gbc_labelStatusFileIn.gridy = 0;
+			panelEncrypt.add(getLabelStatusFileIn(), gbc_labelStatusFileIn);
+			GridBagConstraints gbc_labelPublicKey = new GridBagConstraints();
+			gbc_labelPublicKey.anchor = GridBagConstraints.WEST;
+			gbc_labelPublicKey.insets = new Insets(5, 5, 5, 5);
+			gbc_labelPublicKey.gridx = 0;
+			gbc_labelPublicKey.gridy = 1;
+			panelEncrypt.add(getLabelPublicKey(), gbc_labelPublicKey);
+			GridBagConstraints gbc_textPublicKey = new GridBagConstraints();
+			gbc_textPublicKey.fill = GridBagConstraints.BOTH;
+			gbc_textPublicKey.insets = new Insets(0, 0, 5, 5);
+			gbc_textPublicKey.gridx = 1;
+			gbc_textPublicKey.gridy = 1;
+			panelEncrypt.add(getTextPublicKey(), gbc_textPublicKey);
+			GridBagConstraints gbc_buttonPublicKey = new GridBagConstraints();
+			gbc_buttonPublicKey.anchor = GridBagConstraints.WEST;
+			gbc_buttonPublicKey.insets = new Insets(0, 0, 5, 5);
+			gbc_buttonPublicKey.gridx = 2;
+			gbc_buttonPublicKey.gridy = 1;
+			panelEncrypt.add(getButtonPublicKey(), gbc_buttonPublicKey);
+			GridBagConstraints gbc_labelStatusPublicKey = new GridBagConstraints();
+			gbc_labelStatusPublicKey.anchor = GridBagConstraints.WEST;
+			gbc_labelStatusPublicKey.insets = new Insets(0, 0, 5, 0);
+			gbc_labelStatusPublicKey.gridx = 3;
+			gbc_labelStatusPublicKey.gridy = 1;
+			panelEncrypt.add(getLabelStatusPublicKey(), gbc_labelStatusPublicKey);
+			GridBagConstraints gbc_checkBoxTest = new GridBagConstraints();
+			gbc_checkBoxTest.gridwidth = 4;
+			gbc_checkBoxTest.insets = new Insets(0, 0, 0, 5);
+			gbc_checkBoxTest.anchor = GridBagConstraints.WEST;
+			gbc_checkBoxTest.gridx = 0;
+			gbc_checkBoxTest.gridy = 2;
+			panelEncrypt.add(getCheckBoxTest(), gbc_checkBoxTest);
 		}
 		return panelEncrypt;
 	}
@@ -1085,41 +1121,106 @@ public class MainWindow extends JFrame {
 	private JPanel getPanelDecrypt() {
 		if (panelDecrypt == null) {
 			panelDecrypt = new JPanel();
-			panelDecrypt.setBorder(BorderFactory.createBevelBorder(
-					BevelBorder.LOWERED, null, null, null, null));
-			panelDecrypt.setLayout(new GroupLayout());
-			panelDecrypt.add(getTextFileInD(), new Constraints(new Leading(91,
-					319, 12, 12), new Leading(4, 24, 12, 12)));
-			panelDecrypt.add(getButtonFileInD(), new Constraints(new Leading(
-					413, 12, 12), new Leading(3, 12, 12)));
-			panelDecrypt.add(getLabelStatusFileInD(), new Constraints(
-					new Leading(465, 12, 12), new Leading(4, 12, 12)));
-			panelDecrypt.add(getLabelFileInD(), new Constraints(new Leading(12,
-					47, 12, 12), new Leading(8, 12, 12)));
-			panelDecrypt.add(getTextFileOutD(), new Constraints(new Leading(91,
-					319, 12, 12), new Leading(30, 24, 12, 12)));
-			panelDecrypt.add(getLabelFileOutD(), new Constraints(new Leading(
-					12, 50, 12, 12), new Leading(36, 12, 12)));
-			panelDecrypt.add(getButtonFileOutD(), new Constraints(new Leading(
-					413, 12, 12), new Leading(30, 12, 12)));
-			panelDecrypt.add(getLabelStatusFileOutD(), new Constraints(
-					new Leading(465, 12, 12), new Leading(30, 12, 12)));
-			panelDecrypt.add(getLabelPrivateKey2(), new Constraints(
-					new Leading(12, 76, 12, 12), new Leading(94, 12, 12)));
-			panelDecrypt.add(getTextPrivateKey1(), new Constraints(new Leading(
-					91, 319, 12, 12), new Leading(62, 24, 44, 48)));
-			panelDecrypt.add(getTextPrivateKey2(), new Constraints(new Leading(
-					91, 319, 12, 12), new Leading(88, 24, 12, 12)));
-			panelDecrypt.add(getButtonPrivateKey1(), new Constraints(
-					new Leading(413, 12, 12), new Leading(62, 12, 12)));
-			panelDecrypt.add(getLabelStatusPrivateKey1(), new Constraints(
-					new Leading(465, 12, 12), new Leading(62, 12, 12)));
-			panelDecrypt.add(getLabelPrivateKey1(), new Constraints(
-					new Leading(12, 76, 12, 12), new Leading(67, 12, 12)));
-			panelDecrypt.add(getButtonPrivateKey2(), new Constraints(
-					new Leading(413, 12, 12), new Leading(89, 12, 12)));
-			panelDecrypt.add(getLabelStatusPrivateKey2(), new Constraints(
-					new Leading(465, 24, 12, 12), new Leading(90, 12, 12)));
+			panelDecrypt.setBorder(new EmptyBorder(5, 5, 0, 5));
+			GridBagLayout gbl_panelDecrypt = new GridBagLayout();
+			gbl_panelDecrypt.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0};
+			gbl_panelDecrypt.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0};
+			panelDecrypt.setLayout(gbl_panelDecrypt);
+			GridBagConstraints gbc_labelFileInD = new GridBagConstraints();
+			gbc_labelFileInD.anchor = GridBagConstraints.WEST;
+			gbc_labelFileInD.insets = new Insets(5, 5, 5, 5);
+			gbc_labelFileInD.gridx = 0;
+			gbc_labelFileInD.gridy = 0;
+			panelDecrypt.add(getLabelFileInD(), gbc_labelFileInD);
+			GridBagConstraints gbc_textFileInD = new GridBagConstraints();
+			gbc_textFileInD.fill = GridBagConstraints.BOTH;
+			gbc_textFileInD.insets = new Insets(0, 0, 5, 5);
+			gbc_textFileInD.gridx = 1;
+			gbc_textFileInD.gridy = 0;
+			panelDecrypt.add(getTextFileInD(), gbc_textFileInD);
+			GridBagConstraints gbc_buttonFileInD = new GridBagConstraints();
+			gbc_buttonFileInD.anchor = GridBagConstraints.WEST;
+			gbc_buttonFileInD.insets = new Insets(0, 0, 5, 5);
+			gbc_buttonFileInD.gridx = 2;
+			gbc_buttonFileInD.gridy = 0;
+			panelDecrypt.add(getButtonFileInD(), gbc_buttonFileInD);
+			GridBagConstraints gbc_labelStatusFileInD = new GridBagConstraints();
+			gbc_labelStatusFileInD.anchor = GridBagConstraints.WEST;
+			gbc_labelStatusFileInD.insets = new Insets(0, 0, 5, 0);
+			gbc_labelStatusFileInD.gridx = 3;
+			gbc_labelStatusFileInD.gridy = 0;
+			panelDecrypt.add(getLabelStatusFileInD(), gbc_labelStatusFileInD);
+			GridBagConstraints gbc_textPrivateKey2 = new GridBagConstraints();
+			gbc_textPrivateKey2.fill = GridBagConstraints.BOTH;
+			gbc_textPrivateKey2.insets = new Insets(0, 0, 0, 5);
+			gbc_textPrivateKey2.gridx = 1;
+			gbc_textPrivateKey2.gridy = 3;
+			panelDecrypt.add(getTextPrivateKey2(), gbc_textPrivateKey2);
+			GridBagConstraints gbc_labelFileOutD = new GridBagConstraints();
+			gbc_labelFileOutD.anchor = GridBagConstraints.WEST;
+			gbc_labelFileOutD.insets = new Insets(5, 5, 5, 5);
+			gbc_labelFileOutD.gridx = 0;
+			gbc_labelFileOutD.gridy = 1;
+			panelDecrypt.add(getLabelFileOutD(), gbc_labelFileOutD);
+			GridBagConstraints gbc_textFileOutD = new GridBagConstraints();
+			gbc_textFileOutD.fill = GridBagConstraints.BOTH;
+			gbc_textFileOutD.insets = new Insets(0, 0, 5, 5);
+			gbc_textFileOutD.gridx = 1;
+			gbc_textFileOutD.gridy = 1;
+			panelDecrypt.add(getTextFileOutD(), gbc_textFileOutD);
+			GridBagConstraints gbc_buttonFileOutD = new GridBagConstraints();
+			gbc_buttonFileOutD.anchor = GridBagConstraints.WEST;
+			gbc_buttonFileOutD.insets = new Insets(0, 0, 5, 5);
+			gbc_buttonFileOutD.gridx = 2;
+			gbc_buttonFileOutD.gridy = 1;
+			panelDecrypt.add(getButtonFileOutD(), gbc_buttonFileOutD);
+			GridBagConstraints gbc_labelStatusFileOutD = new GridBagConstraints();
+			gbc_labelStatusFileOutD.anchor = GridBagConstraints.WEST;
+			gbc_labelStatusFileOutD.insets = new Insets(0, 0, 5, 0);
+			gbc_labelStatusFileOutD.gridx = 3;
+			gbc_labelStatusFileOutD.gridy = 1;
+			panelDecrypt.add(getLabelStatusFileOutD(), gbc_labelStatusFileOutD);
+			GridBagConstraints gbc_labelPrivateKey1 = new GridBagConstraints();
+			gbc_labelPrivateKey1.anchor = GridBagConstraints.WEST;
+			gbc_labelPrivateKey1.insets = new Insets(5, 5, 5, 5);
+			gbc_labelPrivateKey1.gridx = 0;
+			gbc_labelPrivateKey1.gridy = 2;
+			panelDecrypt.add(getLabelPrivateKey1(), gbc_labelPrivateKey1);
+			GridBagConstraints gbc_textPrivateKey1 = new GridBagConstraints();
+			gbc_textPrivateKey1.fill = GridBagConstraints.BOTH;
+			gbc_textPrivateKey1.insets = new Insets(0, 0, 5, 5);
+			gbc_textPrivateKey1.gridx = 1;
+			gbc_textPrivateKey1.gridy = 2;
+			panelDecrypt.add(getTextPrivateKey1(), gbc_textPrivateKey1);
+			GridBagConstraints gbc_buttonPrivateKey1 = new GridBagConstraints();
+			gbc_buttonPrivateKey1.anchor = GridBagConstraints.WEST;
+			gbc_buttonPrivateKey1.insets = new Insets(0, 0, 5, 5);
+			gbc_buttonPrivateKey1.gridx = 2;
+			gbc_buttonPrivateKey1.gridy = 2;
+			panelDecrypt.add(getButtonPrivateKey1(), gbc_buttonPrivateKey1);
+			GridBagConstraints gbc_labelStatusPrivateKey1 = new GridBagConstraints();
+			gbc_labelStatusPrivateKey1.anchor = GridBagConstraints.WEST;
+			gbc_labelStatusPrivateKey1.insets = new Insets(0, 0, 5, 0);
+			gbc_labelStatusPrivateKey1.gridx = 3;
+			gbc_labelStatusPrivateKey1.gridy = 2;
+			panelDecrypt.add(getLabelStatusPrivateKey1(), gbc_labelStatusPrivateKey1);
+			GridBagConstraints gbc_labelPrivateKey2 = new GridBagConstraints();
+			gbc_labelPrivateKey2.anchor = GridBagConstraints.WEST;
+			gbc_labelPrivateKey2.insets = new Insets(5, 5, 5, 5);
+			gbc_labelPrivateKey2.gridx = 0;
+			gbc_labelPrivateKey2.gridy = 3;
+			panelDecrypt.add(getLabelPrivateKey2(), gbc_labelPrivateKey2);
+			GridBagConstraints gbc_buttonPrivateKey2 = new GridBagConstraints();
+			gbc_buttonPrivateKey2.anchor = GridBagConstraints.WEST;
+			gbc_buttonPrivateKey2.insets = new Insets(0, 0, 0, 5);
+			gbc_buttonPrivateKey2.gridx = 2;
+			gbc_buttonPrivateKey2.gridy = 3;
+			panelDecrypt.add(getButtonPrivateKey2(), gbc_buttonPrivateKey2);
+			GridBagConstraints gbc_labelStatusPrivateKey2 = new GridBagConstraints();
+			gbc_labelStatusPrivateKey2.anchor = GridBagConstraints.WEST;
+			gbc_labelStatusPrivateKey2.gridx = 3;
+			gbc_labelStatusPrivateKey2.gridy = 3;
+			panelDecrypt.add(getLabelStatusPrivateKey2(), gbc_labelStatusPrivateKey2);
 			panelDecrypt.setVisible(false);
 		}
 		return panelDecrypt;
@@ -1242,19 +1343,42 @@ public class MainWindow extends JFrame {
 	private JPanel getPanelTest() {
 		if (panelTest == null) {
 			panelTest = new JPanel();
-			panelTest.setBorder(BorderFactory.createBevelBorder(
-					BevelBorder.LOWERED, null, null, null, null));
-			panelTest.setLayout(new GroupLayout());
-			panelTest.add(getTextFileInT(), new Constraints(new Leading(91,
-					319, 10, 10), new Leading(5, 24, 10, 10)));
-			panelTest.add(getButtonFileInT(), new Constraints(new Leading(413,
-					10, 10), new Leading(4, 12, 12)));
-			panelTest.add(getLabelStatusFileInT(), new Constraints(new Leading(
-					465, 12, 12), new Leading(5, 12, 12)));
-			panelTest.add(getLabelFileInT(), new Constraints(new Leading(4, 73,
-					10, 10), new Leading(12, 12, 12)));
-			panelTest.add(getJScrollPane0(), new Constraints(new Leading(5,
-					484, 12, 12), new Leading(36, 80, 10, 10)));
+			panelTest.setBorder(new EmptyBorder(5, 5, 5, 5));
+			GridBagLayout gbl_panelTest = new GridBagLayout();
+			gbl_panelTest.rowWeights = new double[]{0.0, 1.0};
+			gbl_panelTest.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0};
+			panelTest.setLayout(gbl_panelTest);
+			GridBagConstraints gbc_labelFileInT = new GridBagConstraints();
+			gbc_labelFileInT.anchor = GridBagConstraints.WEST;
+			gbc_labelFileInT.insets = new Insets(5, 5, 5, 5);
+			gbc_labelFileInT.gridx = 0;
+			gbc_labelFileInT.gridy = 0;
+			panelTest.add(getLabelFileInT(), gbc_labelFileInT);
+			GridBagConstraints gbc_textFileInT = new GridBagConstraints();
+			gbc_textFileInT.fill = GridBagConstraints.BOTH;
+			gbc_textFileInT.insets = new Insets(5, 0, 5, 5);
+			gbc_textFileInT.gridx = 1;
+			gbc_textFileInT.gridy = 0;
+			panelTest.add(getTextFileInT(), gbc_textFileInT);
+			GridBagConstraints gbc_buttonFileInT = new GridBagConstraints();
+			gbc_buttonFileInT.anchor = GridBagConstraints.WEST;
+			gbc_buttonFileInT.insets = new Insets(5, 5, 5, 5);
+			gbc_buttonFileInT.gridx = 2;
+			gbc_buttonFileInT.gridy = 0;
+			panelTest.add(getButtonFileInT(), gbc_buttonFileInT);
+			GridBagConstraints gbc_labelStatusFileInT = new GridBagConstraints();
+			gbc_labelStatusFileInT.anchor = GridBagConstraints.WEST;
+			gbc_labelStatusFileInT.insets = new Insets(5, 5, 5, 5);
+			gbc_labelStatusFileInT.gridx = 3;
+			gbc_labelStatusFileInT.gridy = 0;
+			panelTest.add(getLabelStatusFileInT(), gbc_labelStatusFileInT);
+			GridBagConstraints gbc_jScrollPane0 = new GridBagConstraints();
+			gbc_jScrollPane0.fill = GridBagConstraints.BOTH;
+			gbc_jScrollPane0.gridwidth = 4;
+			gbc_jScrollPane0.gridx = 0;
+			gbc_jScrollPane0.gridy = 1;
+			panelTest.add(getJScrollPane0(), gbc_jScrollPane0);
+			panelTest.setVisible(false);
 
 		}
 		return panelTest;
@@ -1538,17 +1662,12 @@ public class MainWindow extends JFrame {
 	private JPanel getPanelButtons() {
 		if (panelButtons == null) {
 			panelButtons = new JPanel();
-			panelButtons.setBorder(BorderFactory.createBevelBorder(
-					BevelBorder.LOWERED, null, null, null, null));
-			panelButtons.setLayout(new GroupLayout());
-			panelButtons.add(getButtonExecute(), new Constraints(new Leading(
-					67, 115, 10, 10), new Leading(5, 53, 12, 12)));
-			panelButtons.add(getButtonClose(), new Constraints(new Leading(389,
-					115, 10, 10), new Leading(5, 53, 12, 12)));
-			panelButtons.add(getLabelWait(), new Constraints(new Leading(266,
-					10, 10), new Leading(26, 12, 12)));
-			panelButtons.add(getLabelProgress(), new Constraints(new Leading(
-					218, 10, 10), new Leading(3, 10, 10)));
+			panelButtons.setBorder(null);
+			panelButtons.setLayout(new FlowLayout());
+			panelButtons.add(getButtonExecute());
+			panelButtons.add(getButtonClose());
+			panelButtons.add(getLabelWait());
+			panelButtons.add(getLabelProgress());
 		}
 		return panelButtons;
 	}
@@ -1556,6 +1675,7 @@ public class MainWindow extends JFrame {
 	private JButton getButtonExecute() {
 		if (buttonExecute == null) {
 			buttonExecute = new JButton();
+			buttonExecute.setPreferredSize(new Dimension(110, 50));
 			buttonExecute.setFont(new Font("Serif", Font.BOLD, 16));
 			buttonExecute.setText(rb.getString("title.encrypt"));
 			buttonExecute.setMnemonic('C');
@@ -1633,6 +1753,7 @@ public class MainWindow extends JFrame {
 	private JButton getButtonClose() {
 		if (buttonClose == null) {
 			buttonClose = new JButton();
+			buttonClose.setPreferredSize(new Dimension(110, 50));
 			buttonClose.setText(rb.getString("button.close"));
 			buttonClose.setMnemonic('C');
 			buttonClose.setFont(new Font("Serif", Font.BOLD, 16));
@@ -1681,16 +1802,12 @@ public class MainWindow extends JFrame {
 	private JPanel getPanelAction() {
 		if (panelAction == null) {
 			panelAction = new JPanel();
-			panelAction.setBorder(new LineBorder(Color.black, 1, false));
-			panelAction.setLayout(new GroupLayout());
-			panelAction.add(getLabelIcon(), new Constraints(new Leading(8, 53,
-					18, 18), new Leading(30, 54, 12, 12)));
-			panelAction.add(getPanelEncrypt(), new Constraints(new Bilateral(
-					67, 12, 0), new Leading(5, 126, 10, 10)));
-			panelAction.add(getPanelDecrypt(), new Constraints(new Bilateral(
-					67, 12, 0), new Leading(5, 126, 10, 10)));
-			panelAction.add(getPanelTest(), new Constraints(new Bilateral(67,
-					12, 0), new Leading(5, 126, 10, 10)));
+			panelAction.setBorder(new EmptyBorder(5, 5, 5, 5));
+			panelAction.setLayout(new BoxLayout(panelAction, BoxLayout.X_AXIS));
+			panelAction.add(getLabelIcon());
+			panelAction.add(getPanelEncrypt());
+			panelAction.add(getPanelDecrypt());
+			panelAction.add(getPanelTest());
 
 		}
 		return panelAction;
@@ -1702,7 +1819,7 @@ public class MainWindow extends JFrame {
 			labelTitle.setText(rb.getString("title"));
 			labelTitle.setBackground(Color.white);
 			labelTitle.setFont(new Font("Serif", Font.BOLD, 30));
-			labelTitle.setLayout(new GroupLayout());
+			labelTitle.setLayout(new FlowLayout());
 			labelTitle.setHorizontalAlignment(SwingConstants.CENTER);
 			labelTitle.setVerticalAlignment(SwingConstants.CENTER);
 		}
@@ -1714,9 +1831,8 @@ public class MainWindow extends JFrame {
 			panelTitle = new JPanel();
 			panelTitle.setBackground(Color.white);
 			panelTitle.setBorder(new LineBorder(Color.black, 1, false));
-			panelTitle.setLayout(new GroupLayout());
-			panelTitle.add(getLabelTitle(), new Constraints(new Bilateral(12,
-					12, 0), new Leading(7, 44, 10, 10)));
+			panelTitle.setLayout(new FlowLayout());
+			panelTitle.add(getLabelTitle());
 		}
 		return panelTitle;
 	}
