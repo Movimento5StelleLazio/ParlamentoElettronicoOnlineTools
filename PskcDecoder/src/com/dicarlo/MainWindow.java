@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -37,12 +38,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -153,6 +156,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 
 	javax.swing.JMenuItem menuVersion = null;
 	javax.swing.JMenuItem menuDecrypt = null;
+	javax.swing.JMenuItem menuLinOtp = null;
 	javax.swing.JMenuItem menuTest = null;
 
 	javax.swing.JMenuItem menuItalian = null;
@@ -162,6 +166,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 
 	//private boolean encryptMode = true;
 	private boolean testMode = false;
+	private boolean linOtpMode = false;
 
 	private boolean statusPrivateKey1 = false;
 	private boolean statusPrivateKey2 = false;
@@ -169,7 +174,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 	private boolean statusFileOutD = false;
 
 
-	// START COMPONENT FOR DECRYPTION
+	// START COMPONENT FOR DECRYPTION / EXPORT LINOTP
 	private JPanel panelDecrypt;
 	private JTextField textFileInD;
 	private JTextField textFileOutD;
@@ -184,6 +189,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 	private JLabel labelStatusFileOutD;
 	private JLabel labelStatusPrivateKey1;
 	// END COMPONENT FOR DECRYPTION
+
 
 	// START COMPONENT FOR TEST
 	private JPanel panelTest;
@@ -200,6 +206,9 @@ public class MainWindow extends JFrame implements ErrorCodes{
 	private JLabel labelStatusPrivateKey2;
 	private JLabel labelWait;
 	private JLabel labelProgress;
+	
+	
+	String encriptionLinOtpKey="";
 
 	public MainWindow() {
 		initComponents();
@@ -988,6 +997,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 			menuFile.setText(rb.getString("title.file"));
 			menuFile.setMnemonic('F');
 			menuFile.add(getMenuDecrypt());
+			menuFile.add(getMenuLinOtp());
 			menuFile.add(getMenuTest());
 		}
 		return menuFile;
@@ -1056,6 +1066,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 		menuFile.setText(rb.getString("title.file"));
 		menuLanguage.setText(rb.getString("title.language"));
 		menuDecrypt.setText(rb.getString("title.decrypt"));
+		menuLinOtp.setText(rb.getString("title.decryptLinotp"));
 		menuTest.setText(rb.getString("title.test"));
 		menuAbout.setText(rb.getString("title.about"));
 		menuVersion.setText(rb.getString("title.version"));
@@ -1096,8 +1107,56 @@ public class MainWindow extends JFrame implements ErrorCodes{
 					clearPane(jTextResults);
 					//encryptMode = false;
 					testMode = false;
+					linOtpMode = false;
 					parent.setTitle(rb.getString("version") + " - ["
 							+ rb.getString("title.decrypt") + "]");
+					panelDecrypt.setVisible(true);
+					panelTest.setVisible(false);
+					buttonExecute.setText(rb.getString("title.decrypt"));
+					buttonExecute.setMnemonic('D');
+					buttonExecute.setEnabled(false);
+					textPrivateKey1.setText("");
+					statusPrivateKey1 = false;
+					labelStatusPrivateKey1.setIcon(new javax.swing.ImageIcon(
+							getClass().getResource(iconKo)));
+					textPrivateKey2.setText("");
+					statusPrivateKey2 = false;
+					labelStatusPrivateKey2.setIcon(new javax.swing.ImageIcon(
+							getClass().getResource(iconKo)));
+					textFileInD.setText("");
+					statusFileInD = false;
+					labelStatusFileInD.setIcon(new javax.swing.ImageIcon(
+							getClass().getResource(iconKo)));
+					textFileOutD.setText("");
+					statusFileOutD = false;
+					labelStatusFileOutD.setIcon(new javax.swing.ImageIcon(
+							getClass().getResource(iconKo)));
+					privateKey = null;
+					privateKeyBytes = null;
+					halfkey1 = null;
+					halfkey2 = null;
+					test = false;
+					
+				}
+			}));
+		}
+		return menuDecrypt;
+	}
+
+
+	private JMenuItem getMenuLinOtp() {
+		if (menuLinOtp == null) {
+			menuLinOtp = new javax.swing.JMenuItem(
+					rb.getString("title.decryptLinotp"));
+			menuLinOtp.setMnemonic('L');
+			menuLinOtp.addActionListener((new java.awt.event.ActionListener() {
+				public void actionPerformed(java.awt.event.ActionEvent evt) {
+					clearPane(jTextResults);
+					//encryptMode = false;
+					testMode = false;
+					linOtpMode = true;
+					parent.setTitle(rb.getString("version") + " - ["
+							+ rb.getString("title.decryptLinotp") + "]");
 					panelDecrypt.setVisible(true);
 					panelTest.setVisible(false);
 					buttonExecute.setText(rb.getString("title.decrypt"));
@@ -1127,7 +1186,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 				}
 			}));
 		}
-		return menuDecrypt;
+		return menuLinOtp;
 	}
 
 	private JMenuItem getMenuTest() {
@@ -1138,6 +1197,7 @@ public class MainWindow extends JFrame implements ErrorCodes{
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
 					clearPane(jTextResults);
 					testMode = true;
+					linOtpMode = false;
 					//encryptMode = false;
 					parent.setTitle(rb.getString("version") + " - ["
 							+ rb.getString("title.test") + "]");
@@ -1225,7 +1285,19 @@ public class MainWindow extends JFrame implements ErrorCodes{
 										clearPane(jTextResults);
 										// jTextResults.setText("");
 										testFile();
-									} else {
+									} 
+									else if(linOtpMode){
+										mapSerialSeed.clear();
+										clearPane(jTextResults);
+										if (statusFileInD && statusFileOutD
+												&& statusPrivateKey1
+												&& statusPrivateKey2) {
+											decryptFileLinOtp();
+										} else {
+
+										}
+									}
+									else {
 										mapSerialSeed.clear();
 										clearPane(jTextResults);
 										if (statusFileInD && statusFileOutD
@@ -1913,6 +1985,65 @@ public class MainWindow extends JFrame implements ErrorCodes{
 
 	}
 
+	private void decryptFileLinOtp() {
+		String srcFileName = textFileInD.getText();
+		String outFolder = textFileOutD.getText();
+		if(!outFolder.endsWith(File.separator)){
+			outFolder=outFolder+File.separator;
+		}
+        String destFileName = outFolder;
+        String destLinOptFileName = outFolder;
+		// String destFile = textFileOutD.getText()+".bin";
+		test = false;
+		if(srcFileName.endsWith("_xml_ciphered.bin")){
+			String cipheredName= new File(srcFileName).getName();
+			destFileName = destFileName + cipheredName.substring(0,cipheredName.indexOf("_xml_ciphered.bin"))+".xml";	
+			destLinOptFileName = destLinOptFileName + cipheredName.substring(0,cipheredName.indexOf("_xml_ciphered.bin"))+".linotp.xml";
+		}
+		else{
+			String cipheredName= new File(srcFileName).getName();
+			destFileName = destFileName + cipheredName+".xml";
+			destLinOptFileName = destLinOptFileName + cipheredName+".linotp.xml";
+		}
+		if(!new File(outFolder).exists()||!new File(outFolder).canWrite()){
+			JOptionPane.showMessageDialog(parent,
+					rb.getString("msg.foldererror"),
+					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		if (decrypt(srcFileName, destFileName)) {
+			
+			srcFileName=destFileName;
+			if(generateLinOtpResults(srcFileName,destLinOptFileName)){
+				new File(srcFileName).delete();
+				appendToPane(jTextResults, rb.getString("msg.decipherlinotpok") +" KEY ("+encriptionLinOtpKey+") \n",
+						Color.BLUE);
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.decipherlinotpok"), rb.getString("title.ok"),
+						JOptionPane.INFORMATION_MESSAGE);
+			}
+			else{
+				new File(destLinOptFileName).delete();
+				new File(srcFileName).delete();
+				appendToPane(jTextResults,
+						rb.getString("msg.deciphererror") + "\n", Color.RED);
+				JOptionPane.showMessageDialog(parent,
+						rb.getString("msg.deciphererror"),
+						rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+			}
+			
+		} else {
+			new File(srcFileName).delete();
+			appendToPane(jTextResults,
+					rb.getString("msg.deciphererror") + "\n", Color.RED);
+			JOptionPane.showMessageDialog(parent,
+					rb.getString("msg.deciphererror"),
+					rb.getString("title.error"), JOptionPane.ERROR_MESSAGE);
+		}
+
+	}
+
 	private synchronized boolean decrypt(String srcFileName, String destFileName) {
 		boolean retval = false;
 		progressBar.setVisible(true);
@@ -2284,6 +2415,312 @@ public class MainWindow extends JFrame implements ErrorCodes{
 		return retval;
 	}
 
+	
+	private synchronized boolean generateLinOtpResults(String fileXmlIn,String fileXmlOut) {
+		boolean retval = false;
+		encriptionLinOtpKey="";
+		// 50 MB
+		if (new File(fileXmlIn).length() < 52428800L) {
+			retval=generateLinOtpSmallXML(fileXmlIn,fileXmlOut);
+		} else {
+			retval=generateLinOtpLargeXML(fileXmlIn,fileXmlOut);
+		}
+		return retval;
+	}
+
+	private synchronized boolean generateLinOtpSmallXML(String fileXmlIn,String fileXmlOut) {
+		boolean retval = true;
+		JAXBContext jc;
+		java.io.InputStream is = null;
+		FileOutputStream out = null;
+
+		try {
+
+			// LINOTP Variable start
+			//String macKeyString=   "1122334455667788990011223344556677889900";
+			String macKeyString=   getRandomHexString(40);
+			//String encriptionLinOtpKey=  "12345678901234567890123456789012";
+			encriptionLinOtpKey=  getRandomHexString(32);
+			//String ivMacString=    "11223344556677889900112233445566";
+			String ivMacString=    getRandomHexString(32);
+			//String ivOtpString=    "000102030405060708090a0b0c0d0e0f";
+			String ivOtpString=    getRandomHexString(32);
+	        byte [] secret = null;
+	        byte [] macKey = null;
+	        byte [] macValue = null;
+			
+			
+	        byte[] secretBytes = null;
+	        byte[] secretMackey = hexStr2Bytes(macKeyString); 
+	        byte[] ivMac = hexStr2Bytes(ivMacString); 
+	        byte[] ivHotp = hexStr2Bytes(ivOtpString);
+	        byte[] sharedKey = hexStr2Bytes(encriptionLinOtpKey); 
+			Cipher cipherRSA = Cipher.getInstance("RSA");
+			Cipher cipherAes = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+	        IvParameterSpec cipherParamSpec = new IvParameterSpec(ivMac);
+	        cipherAes.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(sharedKey, "AES"),cipherParamSpec);
+	        byte[] encryptedMacKey = cipherAes.doFinal(secretMackey);
+	        macKey = concatByteArrays(ivMac, encryptedMacKey);
+	        Mac mac;
+	        mac = Mac.getInstance("HmacSHA1");
+	        // LINOTP Variable end
+
+			
+			
+			int progressValue=0;
+			int prevProgressValue=0;
+			progressBar.setVisible(true);
+			progressBar.setMaximum(0);
+			progressBar.setMaximum(100);
+			progressBar.setValue(0);
+			labelProgress.setVisible(true);
+			appendToPane(jTextResults, rb.getString("msg.linOtpGeneration") + "\n",	Color.BLUE);
+
+			labelProgress.setText(rb.getString("msg.linOtpGeneration") + " 0%");
+            repaint();
+			jc = JAXBContext.newInstance("ietf.params.xml.ns.keyprov.pskc");
+			Unmarshaller u = jc.createUnmarshaller();
+			is = new java.io.FileInputStream(fileXmlIn);
+			out = new FileOutputStream(fileXmlOut);
+
+			Object o = u.unmarshal(is);
+			javax.xml.bind.JAXBElement<KeyContainerType> f = (javax.xml.bind.JAXBElement<KeyContainerType>) o;
+			KeyContainerType keyContainer = (KeyContainerType) f.getValue();
+
+			List<KeyPackageType> listPackages = keyContainer.getKeyPackage();
+			
+	        
+	        
+			out.write(getLinOtpXmlHeader(encriptionLinOtpKey,Base64.encode(macKey)).getBytes("UTF8"));
+			out.flush();
+			
+			if (listPackages != null && listPackages.size() > 0) {
+				for (int i = 0; i < listPackages.size(); i++) {
+					KeyPackageType KeyPackage = listPackages.get(i);
+					DeviceInfoType deviceInfo = KeyPackage.getDeviceInfo();
+					KeyType key = KeyPackage.getKey();
+					KeyDataType KeyData = key.getData();
+					BinaryDataType binaryDataType = KeyData.getSecret();
+					EncryptedDataType encryptedDataType = binaryDataType
+							.getEncryptedValue();
+
+					String seed = encryptedDataType.getCipherData()
+							.getCipherValue();
+
+					cipherRSA.init(Cipher.DECRYPT_MODE, privateKey);
+					byte[] cipherData = cipherRSA.doFinal(Base64.decode(seed));
+					String decodedseed = new String(cipherData);
+
+			        secretBytes = hexStr2Bytes(decodedseed);
+			        String issuer = key.getIssuer();
+	    	        cipherParamSpec = new IvParameterSpec(ivHotp);
+	    	        cipherAes.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(sharedKey, "AES"),cipherParamSpec);
+	    	        byte[] encryptedSecret = cipherAes.doFinal(secretBytes);
+	    	        secret = concatByteArrays(ivHotp, encryptedSecret);		
+	    	        // Finally, compute the MAC over the encrypted value
+	    	        mac.init(new SecretKeySpec(secretMackey, "HmacSHA1"));
+	    	        macValue = mac.doFinal(secret);
+			        
+			        out.write(getObj2XmlStrLinOtp(deviceInfo,issuer,Base64.encode(secret),Base64.encode(macValue), i).getBytes("UTF8"));
+					out.flush();
+					
+					
+					progressValue = (int) ((i * 100) / listPackages.size());
+					if (progressValue != prevProgressValue) {
+						progressBar.setValue(progressValue);
+						labelProgress.setText(rb.getString("msg.linOtpGeneration")
+								+ " " + progressValue + "%");
+						prevProgressValue = progressValue;
+						// System.out.println(prevProgressValue+"%");
+						repaint();
+					}
+
+					// System.out.println(serial+"\n"+decodedseed+"\n\n\n");
+				}
+			}
+			out.write(getXmlFooter().getBytes("UTF8"));
+			out.flush();
+			out.close();
+
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
+
+			retval = false;
+		} finally {
+			try {
+				if (is != null)
+					is.close();
+			} catch (Exception e) {
+
+			}
+			try {
+				if (out != null)
+					out.close();
+			} catch (Exception e) {
+
+			}
+		}
+		progressBar.setVisible(false);
+		labelProgress.setVisible(false);
+		repaint();
+		return retval;
+	}
+	
+	private synchronized boolean generateLinOtpLargeXML(String fileXmlIn,String fileXmlOut) {
+		boolean retval = true;
+		JAXBContext jc;
+		XMLStreamReader xsr = null;
+		FileOutputStream out = null;
+
+		try {
+			
+			// LINOTP Variable start
+			//String macKeyString=   "1122334455667788990011223344556677889900";
+			String macKeyString=   getRandomHexString(40);
+			//String encriptionLinOtpKey=  "12345678901234567890123456789012";
+			encriptionLinOtpKey=  getRandomHexString(32);
+			//String ivMacString=    "11223344556677889900112233445566";
+			String ivMacString=    getRandomHexString(32);
+			//String ivOtpString=    "000102030405060708090a0b0c0d0e0f";
+			String ivOtpString=    getRandomHexString(32);
+	        byte [] secret = null;
+	        byte [] macKey = null;
+	        byte [] macValue = null;
+			
+			
+	        byte[] secretBytes = null;
+	        byte[] secretMackey = hexStr2Bytes(macKeyString); 
+	        byte[] ivMac = hexStr2Bytes(ivMacString); 
+	        byte[] ivHotp = hexStr2Bytes(ivOtpString);
+	        byte[] sharedKey = hexStr2Bytes(encriptionLinOtpKey); 
+
+			Cipher cipherRSA = Cipher.getInstance("RSA");
+			Cipher cipherAes = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+	        IvParameterSpec cipherParamSpec = new IvParameterSpec(ivMac);
+	        cipherAes.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(sharedKey, "AES"),cipherParamSpec);
+	        byte[] encryptedMacKey = cipherAes.doFinal(secretMackey);
+	        macKey = concatByteArrays(ivMac, encryptedMacKey);
+	        Mac mac;
+	        mac = Mac.getInstance("HmacSHA1");
+	        // LINOTP Variable end
+
+	        XMLInputFactory xif = XMLInputFactory.newFactory();
+			StreamSource xml = new StreamSource(fileXmlIn);
+			out = new FileOutputStream(fileXmlOut);
+
+			xsr = xif.createXMLStreamReader(xml);
+			xsr.nextTag();
+
+			int progressValue=0;
+			int prevProgressValue=0;
+			progressBar.setVisible(true);
+			progressBar.setMaximum(0);
+			progressBar.setMaximum(100);
+			progressBar.setValue(0);
+			labelProgress.setVisible(true);
+			appendToPane(jTextResults, rb.getString("msg.linOtpGeneration") + "\n",	Color.BLUE);
+
+			labelProgress.setText(rb.getString("msg.linOtpGeneration") + " 0%");
+            repaint();
+            int counter=0;
+            int len=mapSerialSeed.size();
+            
+			out.write(getLinOtpXmlHeader(encriptionLinOtpKey,Base64.encode(macKey)).getBytes("UTF8"));
+			out.flush();
+			
+
+            
+            
+			while (xsr.hasNext()) {
+				if (xsr.isStartElement()) {
+					if (xsr.getLocalName().equals("KeyPackage")) {
+
+						jc = JAXBContext.newInstance(KeyPackageType.class);
+						Unmarshaller unmarshaller = jc.createUnmarshaller();
+						JAXBElement<KeyPackageType> jb = unmarshaller
+								.unmarshal(xsr, KeyPackageType.class);
+						xsr.close();
+						KeyPackageType KeyPackage = jb.getValue();
+
+						KeyType key = KeyPackage.getKey();
+						KeyDataType KeyData = key.getData();
+						BinaryDataType binaryDataType = KeyData.getSecret();
+						EncryptedDataType encryptedDataType = binaryDataType
+								.getEncryptedValue();
+						String seed = encryptedDataType.getCipherData()
+								.getCipherValue();
+
+						DeviceInfoType deviceInfo = KeyPackage.getDeviceInfo();
+
+
+						cipherRSA.init(Cipher.DECRYPT_MODE, privateKey);
+						byte[] cipherData = cipherRSA.doFinal(Base64.decode(seed));
+						String decodedseed = new String(cipherData);
+
+				        secretBytes = hexStr2Bytes(decodedseed);
+				        String issuer = key.getIssuer();
+		    	        cipherParamSpec = new IvParameterSpec(ivHotp);
+		    	        cipherAes.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(sharedKey, "AES"),cipherParamSpec);
+		    	        byte[] encryptedSecret = cipherAes.doFinal(secretBytes);
+		    	        secret = concatByteArrays(ivHotp, encryptedSecret);		
+		    	        // Finally, compute the MAC over the encrypted value
+		    	        mac.init(new SecretKeySpec(secretMackey, "HmacSHA1"));
+		    	        macValue = mac.doFinal(secret);
+				        
+				        out.write(getObj2XmlStrLinOtp(deviceInfo,issuer,Base64.encode(secret),Base64.encode(macValue),counter).getBytes("UTF8"));
+						out.flush();
+						
+						progressValue = (int) ((counter * 100) / len);
+						if (progressValue != prevProgressValue) {
+							progressBar.setValue(progressValue);
+							labelProgress.setText(rb.getString("msg.linOtpGeneration")
+									+ " " + progressValue + "%");
+							prevProgressValue = progressValue;
+							// System.out.println(prevProgressValue+"%");
+							repaint();
+						}
+
+						counter++;
+
+					}
+				}
+				
+				xsr.next();
+			}
+			out.write(getXmlFooter().getBytes("UTF8"));
+			out.flush();
+			out.close();
+
+			progressBar.setValue(100);
+			labelProgress.setText(rb.getString("msg.linOtpGeneration")	+ " 100%");
+			repaint();
+		} catch (Exception e) {
+			e.printStackTrace();
+			appendToPane(jTextResults, e.getLocalizedMessage() + "\n",	Color.RED);
+
+			retval = false;
+		} finally {
+			try {
+				if (xsr != null)
+					xsr.close();
+			} catch (Exception e) {
+
+			}
+			try {
+				if (out != null)
+					out.close();
+			} catch (Exception e) {
+
+			}
+		}
+		progressBar.setVisible(false);
+		labelProgress.setVisible(false);
+		repaint();
+		return retval;
+	}
+	
 
 	private synchronized void encryptAES(SecretKey key,
 			AlgorithmParameterSpec paramSpec, InputStream in, OutputStream out,
@@ -2436,7 +2873,35 @@ public class MainWindow extends JFrame implements ErrorCodes{
 		}
 		return serialKey;
 	}
+	
+	private synchronized String getRandomHexString(int numchars){
+        Random r = new Random();
+        StringBuffer sb = new StringBuffer();
+        while(sb.length() < numchars){
+            sb.append(Integer.toHexString(r.nextInt()));
+        }
 
+        return sb.toString().substring(0, numchars);
+    }
+
+	
+	private synchronized String getLinOtpXmlHeader(String sharedKey,String macValue) {
+		StringBuffer sb = new StringBuffer();
+		
+		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		sb.append("<KeyContainer Version=\"1.0\" xmlns=\"urn:ietf:params:xml:ns:keyprov:pskc\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:xenc=\"http://www.w3.org/2001/04/xmlenc#\">\n");
+		sb.append("<EncryptionKey><ds:KeyName>"+sharedKey+"</ds:KeyName></EncryptionKey>\n");
+		sb.append("<MACMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#hmac-sha1\">\n");
+		sb.append("<MACKey>\n");
+		sb.append("<xenc:EncryptionMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#aes128-cbc\"/>\n");
+		sb.append("<xenc:CipherData><xenc:CipherValue>"+macValue+"</xenc:CipherValue></xenc:CipherData>\n");
+		sb.append("</MACKey>\n");
+		sb.append("</MACMethod>\n");
+		
+		return sb.toString();
+	}
+
+	
 	private synchronized String getXmlHeader() {
 		StringBuffer sb = new StringBuffer();
 		/*
@@ -2501,6 +2966,67 @@ public class MainWindow extends JFrame implements ErrorCodes{
 		sb.append("</KeyPackage>\n");
 
 		return sb.toString();
+	}
+	
+	private synchronized String getObj2XmlStrLinOtp(DeviceInfoType deviceInfo,String issuer,String cipheredSecret,String valueMac, long i) {
+		StringBuffer sb = new StringBuffer();
+
+		sb.append("<KeyPackage>\n");
+		
+		sb.append("<DeviceInfo>\n");
+		sb.append("<Manufacturer>" + deviceInfo.getManufacturer()
+				+ "</Manufacturer>\n");
+		sb.append("<SerialNo>" + deviceInfo.getSerialNo()
+				+ "</SerialNo>\n");
+		sb.append("</DeviceInfo>\n");
+		
+		sb.append("<CryptoModuleInfo>\n");
+		sb.append("<Id>CM_ID_001</Id>\n");
+		sb.append("</CryptoModuleInfo>\n");
+
+		
+		sb.append("<Key Id=\"" + (i + 1) + "\" Algorithm=\"urn:ietf:params:xml:ns:keyprov:pskc:totp\">\n");
+		
+		
+		sb.append("<Issuer>" + issuer + "</Issuer>\n");
+		sb.append("<AlgorithmParameters>\n");
+		sb.append("<ResponseFormat Length=\"6\" Encoding=\"DECIMAL\"/>\n");
+		sb.append("</AlgorithmParameters>\n");
+		sb.append("<Data>\n");
+		
+		sb.append("<Secret>\n");
+		sb.append("<EncryptedValue>\n");
+		sb.append("<xenc:EncryptionMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#aes128-cbc\"/>\n");
+		sb.append("<xenc:CipherData><xenc:CipherValue>"+cipheredSecret+"</xenc:CipherValue></xenc:CipherData>\n");
+		sb.append("</EncryptedValue>\n");
+		sb.append("<ValueMAC>"+valueMac+"</ValueMAC>\n");
+		sb.append("</Secret>\n");
+		sb.append("<Counter><PlainValue>0</PlainValue></Counter>\n");
+		
+		sb.append("</Data>\n");
+		sb.append("</Key>\n");
+		sb.append("</KeyPackage>\n");
+		
+		return sb.toString();
+	}
+	
+    public byte[] hexStr2Bytes(String hex) {
+        // Adding one byte to get the right conversion
+        // Values starting with "0" can be converted
+        byte[] bArray = new BigInteger("10" + hex,16).toByteArray();
+
+        // Copy all the REAL bytes, not the "first"
+        byte[] ret = new byte[bArray.length - 1];
+        for (int i = 0; i < ret.length; i++)
+            ret[i] = bArray[i+1];
+        return ret;
+    }
+
+    private byte [] concatByteArrays(byte []a, byte [] b ) {
+	    byte [] result = new byte[a.length + b.length];
+	    System.arraycopy(a, 0, result, 0, a.length);
+	    System.arraycopy(b, 0, result, a.length, b.length);
+	    return result;
 	}
 
 	private static final int AES_KEY_LENGTH = 128;
